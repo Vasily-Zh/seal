@@ -234,6 +234,28 @@ export const Controls = () => {
                 step={0.5}
                 onChange={(value) => updateElement(selectedElement.id, { letterSpacing: value })}
               />
+
+              <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={(selectedElement as TextElementType).bold || false}
+                    onChange={(e) => updateElement(selectedElement.id, { bold: e.target.checked })}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '14px', fontWeight: '500' }}>Жирный</span>
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={(selectedElement as TextElementType).italic || false}
+                    onChange={(e) => updateElement(selectedElement.id, { italic: e.target.checked })}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '14px', fontWeight: '500' }}>Курсив</span>
+                </label>
+              </div>
             </>
           )}
         </div>

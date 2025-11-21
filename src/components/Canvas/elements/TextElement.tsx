@@ -8,6 +8,9 @@ interface TextElementProps {
 export const TextElement = ({ element, scale }: TextElementProps) => {
   if (!element.visible) return null;
 
+  const fontWeight = element.bold ? 'bold' : 'normal';
+  const fontStyle = element.italic ? 'italic' : 'normal';
+
   if (element.curved && element.curveRadius) {
     // Текст по кругу
     const pathId = `text-path-${element.id}`;
@@ -33,6 +36,8 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
           fill={element.color}
           fontSize={element.fontSize * scale}
           fontFamily={element.fontFamily}
+          fontWeight={fontWeight}
+          fontStyle={fontStyle}
           letterSpacing={element.letterSpacing || 0}
         >
           <textPath href={`#${pathId}`} startOffset="50%" textAnchor="middle">
@@ -51,6 +56,8 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
       fill={element.color}
       fontSize={element.fontSize * scale}
       fontFamily={element.fontFamily}
+      fontWeight={fontWeight}
+      fontStyle={fontStyle}
       letterSpacing={element.letterSpacing || 0}
       textAnchor="middle"
       dominantBaseline="middle"

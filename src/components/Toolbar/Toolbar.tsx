@@ -30,8 +30,10 @@ export const Toolbar = () => {
       fontFamily: 'Roboto',
       curved: true,
       curveRadius: DEFAULT_CONFIG.circleRadius,
-      startAngle: 90,
+      startAngle: 180,
       color: DEFAULT_CONFIG.textColor,
+      bold: false,
+      italic: false,
       visible: true,
     });
   };

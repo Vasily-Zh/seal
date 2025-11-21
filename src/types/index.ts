@@ -29,6 +29,8 @@ export interface TextElement extends BaseElement {
   startAngle?: number; // начальный угол для текста по кругу
   color: string;
   letterSpacing?: number;
+  bold?: boolean;
+  italic?: boolean;
 }
 
 export interface RectangleElement extends BaseElement {
