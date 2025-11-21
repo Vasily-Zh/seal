@@ -1,0 +1,115 @@
+// Типы элементов печати
+
+export type ElementType = 'circle' | 'text' | 'triangle' | 'rectangle' | 'line' | 'image';
+
+export interface BaseElement {
+  id: string;
+  type: ElementType;
+  x: number;
+  y: number;
+  visible: boolean;
+}
+
+export interface CircleElement extends BaseElement {
+  type: 'circle';
+  radius: number;
+  strokeWidth: number;
+  strokeDashArray?: number; // прерывистая обводка
+  fill?: string;
+  stroke: string;
+}
+
+export interface TextElement extends BaseElement {
+  type: 'text';
+  text: string;
+  fontSize: number;
+  fontFamily: string;
+  curved: boolean; // текст по кругу
+  curveRadius?: number; // радиус для текста по кругу
+  startAngle?: number; // начальный угол для текста по кругу
+  color: string;
+  letterSpacing?: number;
+}
+
+export interface RectangleElement extends BaseElement {
+  type: 'rectangle';
+  width: number;
+  height: number;
+  fill?: string;
+  stroke: string;
+  strokeWidth: number;
+}
+
+export interface TriangleElement extends BaseElement {
+  type: 'triangle';
+  size: number;
+  fill?: string;
+  stroke: string;
+  strokeWidth: number;
+}
+
+export interface LineElement extends BaseElement {
+  type: 'line';
+  x2: number;
+  y2: number;
+  stroke: string;
+  strokeWidth: number;
+}
+
+export interface ImageElement extends BaseElement {
+  type: 'image';
+  src: string;
+  width: number;
+  height: number;
+}
+
+export type StampElement =
+  | CircleElement
+  | TextElement
+  | RectangleElement
+  | TriangleElement
+  | LineElement
+  | ImageElement;
+
+// Интерфейс Store
+export interface StampStore {
+  // Состояние
+  elements: StampElement[];
+  selectedElementId: string | null;
+  canvasSize: number; // размер поля в мм
+  history: StampElement[][];
+  historyIndex: number;
+
+  // Методы
+  addElement: (element: StampElement) => void;
+  removeElement: (id: string) => void;
+  updateElement: (id: string, updates: Partial<StampElement>) => void;
+  selectElement: (id: string | null) => void;
+  getSelectedElement: () => StampElement | null;
+
+  // Undo/Redo
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+
+  // История
+  saveToHistory: () => void;
+}
+
+// Конфигурация шрифтов
+export interface FontConfig {
+  name: string;
+  family: string;
+  category: 'serif' | 'sans-serif';
+}
+
+// Параметры по умолчанию
+export const DEFAULT_CONFIG = {
+  canvasSize: 100, // мм
+  circleRadius: 39, // мм
+  fontSize: 6, // мм
+  strokeWidth: 3, // мм
+  strokeColor: '#0000ff',
+  textColor: '#0000ff',
+};
