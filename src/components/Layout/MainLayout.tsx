@@ -11,13 +11,13 @@ export const MainLayout = () => {
 
       {/* Основной контент - горизонтальный layout */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Блок 1: Добавить (Toolbar) - 80px */}
+        {/* Блок 1: Добавить (Toolbar) - 120px */}
         <div
           style={{
-            width: '80px',
+            width: '120px',
             borderRight: '1px solid #e5e7eb',
             backgroundColor: '#fff',
-            padding: '16px 8px',
+            padding: '16px 12px',
             overflow: 'visible',
             display: 'flex',
             flexDirection: 'column',
