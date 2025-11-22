@@ -797,6 +797,7 @@ function ElementSettings({ element }: { element: any }) {
         <IconGalleryModal
           isOpen={isIconGalleryOpen}
           onClose={() => setIsIconGalleryOpen(false)}
+          selectedElementId={element.id}
         />
       </>
     );

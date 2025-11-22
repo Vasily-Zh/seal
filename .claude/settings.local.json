@@ -8,7 +8,8 @@
       "Bash(node:*)",
       "Bash(del:*)",
       "Bash(dir:*)",
-      "WebSearch"
+      "WebSearch",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

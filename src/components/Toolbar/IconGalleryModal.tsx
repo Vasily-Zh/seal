@@ -8,17 +8,19 @@ import { useStampStore } from '../../store/useStampStore';
 interface IconGalleryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  selectedElementId?: string;
 }
 
 const ICONS_PER_PAGE = 25;
 
-export const IconGalleryModal = ({ isOpen, onClose }: IconGalleryModalProps) => {
+export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGalleryModalProps) => {
   const [selectedCategory, setSelectedCategory] = useState<IconCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [displayCount, setDisplayCount] = useState(ICONS_PER_PAGE);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const addElement = useStampStore((state) => state.addElement);
+  const updateElement = useStampStore((state) => state.updateElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
   // Получаем картинки текущей категории
@@ -54,20 +56,32 @@ export const IconGalleryModal = ({ isOpen, onClose }: IconGalleryModalProps) => 
 
   // Обработчик выбора картинки
   const handleIconSelect = (icon: IconInfo) => {
-    addElement({
-      id: `icon-${Date.now()}`,
-      type: 'icon',
-      iconName: icon.name,
-      iconSource: icon.source,
-      x: canvasSize / 2,
-      y: canvasSize / 2,
-      width: 15,
-      height: 15,
-      visible: true,
-      svgContent: undefined,
-      // Lucide иконки используют stroke, Heroicons используют fill
-      ...(icon.source === 'lucide' ? { stroke: '#0000ff', strokeWidth: 2 } : { fill: '#0000ff' }),
-    });
+    // Если редактируем существующий элемент, обновляем его вместо создания нового
+    if (selectedElementId) {
+      updateElement(selectedElementId, {
+        iconName: icon.name,
+        iconSource: icon.source,
+        svgContent: undefined,
+        // Lucide иконки используют stroke, Heroicons используют fill
+        ...(icon.source === 'lucide' ? { stroke: '#0000ff', strokeWidth: 2 } : { fill: '#0000ff' }),
+      });
+    } else {
+      // Создаем новый элемент
+      addElement({
+        id: `icon-${Date.now()}`,
+        type: 'icon',
+        iconName: icon.name,
+        iconSource: icon.source,
+        x: canvasSize / 2,
+        y: canvasSize / 2,
+        width: 15,
+        height: 15,
+        visible: true,
+        svgContent: undefined,
+        // Lucide иконки используют stroke, Heroicons используют fill
+        ...(icon.source === 'lucide' ? { stroke: '#0000ff', strokeWidth: 2 } : { fill: '#0000ff' }),
+      });
+    }
     onClose();
   };
 
