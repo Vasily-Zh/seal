@@ -724,6 +724,7 @@ function ElementSettings({ element }: { element: any }) {
 
   if (element.type === 'icon') {
     const iconElement = element as IconElementType;
+    const hasFill = iconElement.fill && iconElement.fill !== 'none';
 
     return (
       <>
@@ -754,10 +755,18 @@ function ElementSettings({ element }: { element: any }) {
           onChange={(value) => updateElement(element.id, { y: value })}
         />
 
-        {/* Кнопка заливки */}
+        {/* Кнопка переключения заливки/обводки */}
         <div style={{ marginTop: '16px' }}>
           <button
-            onClick={() => updateElement(element.id, { fill: '#0000ff', stroke: undefined, strokeWidth: undefined })}
+            onClick={() => {
+              if (hasFill) {
+                // Переключить на обводку
+                updateElement(element.id, { fill: undefined, stroke: '#0000ff', strokeWidth: 1.5 });
+              } else {
+                // Переключить на заливку
+                updateElement(element.id, { fill: '#0000ff', stroke: undefined, strokeWidth: undefined });
+              }
+            }}
             style={{
               width: '100%',
               padding: '10px',
@@ -770,7 +779,7 @@ function ElementSettings({ element }: { element: any }) {
               fontWeight: '500',
             }}
           >
-            Заливка
+            {hasFill ? 'Обводка' : 'Заливка'}
           </button>
         </div>
 
