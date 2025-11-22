@@ -6,11 +6,16 @@ export type IconCategory =
   | 'shapes'
   | 'stars'
   | 'arrows'
+  | 'lines'
   | 'nature'
   | 'symbols'
   | 'business'
   | 'decorative'
-  | 'badges';
+  | 'badges'
+  | 'medicine'
+  | 'transport'
+  | 'law'
+  | 'heraldry';
 
 export interface IconInfo {
   name: string;
@@ -60,6 +65,7 @@ const shapesIcons: IconInfo[] = [
 
   // Треугольники
   { name: 'TriangleAlert', source: 'lucide', displayName: 'Треугольник предупреждения' },
+  { name: 'TriangleRight', source: 'lucide', displayName: 'Треугольник вправо' },
 
   // Кресты и плюсы
   { name: 'Plus', source: 'lucide', displayName: 'Плюс' },
@@ -75,11 +81,21 @@ const shapesIcons: IconInfo[] = [
   { name: 'Shield', source: 'lucide', displayName: 'Щит' },
   { name: 'ShieldCheck', source: 'lucide', displayName: 'Щит с галочкой' },
   { name: 'ShieldAlert', source: 'lucide', displayName: 'Щит с предупреждением' },
+  { name: 'ShieldOff', source: 'lucide', displayName: 'Щит выкл' },
 
   // Декоративные рамки
   { name: 'Frame', source: 'lucide', displayName: 'Рамка' },
   { name: 'Box', source: 'lucide', displayName: 'Коробка' },
   { name: 'Package', source: 'lucide', displayName: 'Пакет' },
+
+  // Дополнительные фигуры
+  { name: 'Ellipse', source: 'lucide', displayName: 'Эллипс' },
+  { name: 'Shapes', source: 'lucide', displayName: 'Фигуры' },
+  { name: 'Atom', source: 'lucide', displayName: 'Атом' },
+  { name: 'Infinity', source: 'lucide', displayName: 'Бесконечность' },
+  { name: 'SquareDot', source: 'lucide', displayName: 'Квадрат с точкой' },
+  { name: 'SquarePlus', source: 'lucide', displayName: 'Квадрат с плюсом' },
+  { name: 'SquareMinus', source: 'lucide', displayName: 'Квадрат с минусом' },
 ];
 
 // Кураторская коллекция: Звезды и снежинки
@@ -102,13 +118,34 @@ const starsIcons: IconInfo[] = [
 
   // Солнце и луна
   { name: 'Sun', source: 'lucide', displayName: 'Солнце' },
+  { name: 'SunMedium', source: 'lucide', displayName: 'Среднее солнце' },
   { name: 'SunMoon', source: 'lucide', displayName: 'Солнце и луна' },
+  { name: 'SunSnow', source: 'lucide', displayName: 'Солнце и снег' },
   { name: 'Moon', source: 'lucide', displayName: 'Луна' },
   { name: 'MoonStar', source: 'lucide', displayName: 'Луна со звездой' },
+  { name: 'CloudSun', source: 'lucide', displayName: 'Облако с солнцем' },
+  { name: 'CloudMoon', source: 'lucide', displayName: 'Облако с луной' },
+  { name: 'Cloud', source: 'lucide', displayName: 'Облако' },
+  { name: 'Sunrise', source: 'lucide', displayName: 'Восход' },
+  { name: 'Sunset', source: 'lucide', displayName: 'Закат' },
 
   // Вспышки и сияния
   { name: 'Zap', source: 'lucide', displayName: 'Молния' },
+  { name: 'ZapOff', source: 'lucide', displayName: 'Молния выкл' },
+  { name: 'Bolt', source: 'lucide', displayName: 'Болт молнии' },
   { name: 'Flame', source: 'lucide', displayName: 'Пламя' },
+  { name: 'Orbit', source: 'lucide', displayName: 'Орбита' },
+  { name: 'Asterisk', source: 'lucide', displayName: 'Звездочка' },
+
+  // Значки и бейджи со звездами
+  { name: 'BadgeStar', source: 'lucide', displayName: 'Значок со звездой' },
+
+  // Магия и волшебство
+  { name: 'Wand', source: 'lucide', displayName: 'Волшебная палочка' },
+  { name: 'Wand2', source: 'lucide', displayName: 'Волшебная палочка 2' },
+
+  // Дополнительные элементы
+  { name: 'Candle', source: 'lucide', displayName: 'Свеча' },
 ];
 
 // Кураторская коллекция: Стрелки
@@ -180,6 +217,43 @@ const arrowsIcons: IconInfo[] = [
   { name: 'MoveDown', source: 'lucide', displayName: 'Переместить вниз' },
   { name: 'MoveLeft', source: 'lucide', displayName: 'Переместить влево' },
   { name: 'MoveRight', source: 'lucide', displayName: 'Переместить вправо' },
+];
+
+// Кураторская коллекция: Линии и разделители
+const linesIcons: IconInfo[] = [
+  // Линии и разделители
+  { name: 'Minus', source: 'lucide', displayName: 'Минус' },
+  { name: 'MinusCircle', source: 'lucide', displayName: 'Минус в круге' },
+  { name: 'MinusSquare', source: 'lucide', displayName: 'Минус в квадрате' },
+  { name: 'SeparatorHorizontal', source: 'lucide', displayName: 'Горизонтальный разделитель' },
+  { name: 'SeparatorVertical', source: 'lucide', displayName: 'Вертикальный разделитель' },
+
+  // Хваты
+  { name: 'GripHorizontal', source: 'lucide', displayName: 'Горизонтальный хват' },
+  { name: 'GripVertical', source: 'lucide', displayName: 'Вертикальный хват' },
+
+  // Многоточия
+  { name: 'Ellipsis', source: 'lucide', displayName: 'Многоточие' },
+  { name: 'EllipsisVertical', source: 'lucide', displayName: 'Вертикальное многоточие' },
+
+  // Движение и перемещение
+  { name: 'Move', source: 'lucide', displayName: 'Переместить' },
+  { name: 'MoveHorizontal', source: 'lucide', displayName: 'Переместить горизонтально' },
+  { name: 'MoveVertical', source: 'lucide', displayName: 'Переместить вертикально' },
+
+  // Графики
+  { name: 'LineChart', source: 'lucide', displayName: 'Линейный график' },
+  { name: 'Activity', source: 'lucide', displayName: 'Активность' },
+  { name: 'BarChartHorizontal', source: 'lucide', displayName: 'Горизонтальная гистограмма' },
+
+  // Стрелки (дубли для контекста линий)
+  { name: 'ArrowLeftRight', source: 'lucide', displayName: 'Стрелки влево-вправо' },
+  { name: 'ArrowUpDown', source: 'lucide', displayName: 'Стрелки вверх-вниз' },
+
+  // Обмен
+  { name: 'Repeat', source: 'lucide', displayName: 'Повтор' },
+  { name: 'Undo', source: 'lucide', displayName: 'Отменить' },
+  { name: 'Redo', source: 'lucide', displayName: 'Повторить' },
 ];
 
 // Кураторская коллекция: Природа и животные
@@ -348,12 +422,15 @@ const decorativeIcons: IconInfo[] = [
   // Книги и образование
   { name: 'Book', source: 'lucide', displayName: 'Книга' },
   { name: 'BookOpen', source: 'lucide', displayName: 'Открытая книга' },
+  { name: 'BookText', source: 'lucide', displayName: 'Книга с текстом' },
   { name: 'GraduationCap', source: 'lucide', displayName: 'Академическая шапочка' },
+  { name: 'Library', source: 'lucide', displayName: 'Библиотека' },
 
   // Флаги
   { name: 'Flag', source: 'lucide', displayName: 'Флаг' },
   { name: 'FlagTriangleRight', source: 'lucide', displayName: 'Треугольный флаг справа' },
   { name: 'FlagTriangleLeft', source: 'lucide', displayName: 'Треугольный флаг слева' },
+  { name: 'FlagOff', source: 'lucide', displayName: 'Флаг выкл' },
 
   // Подарки
   { name: 'Gift', source: 'lucide', displayName: 'Подарок' },
@@ -385,6 +462,14 @@ const decorativeIcons: IconInfo[] = [
 
   // Воздушные шары
   { name: 'PartyPopper', source: 'lucide', displayName: 'Хлопушка' },
+
+  // Дополнительные декоративные элементы
+  { name: 'Feather', source: 'lucide', displayName: 'Перо' },
+  { name: 'Scroll', source: 'lucide', displayName: 'Свиток' },
+  { name: 'ScrollText', source: 'lucide', displayName: 'Свиток с текстом' },
+  { name: 'Palm', source: 'lucide', displayName: 'Пальма' },
+  { name: 'Lamp', source: 'lucide', displayName: 'Лампа' },
+  { name: 'Palette', source: 'lucide', displayName: 'Палитра' },
 ];
 
 // Кураторская коллекция: Значки и бейджи
@@ -428,27 +513,246 @@ const badgesIcons: IconInfo[] = [
   { name: 'Scan', source: 'lucide', displayName: 'Сканировать' },
 ];
 
+// Кураторская коллекция: Медицина
+const medicineIcons: IconInfo[] = [
+  // Здоровье и сердце
+  { name: 'Heart', source: 'lucide', displayName: 'Сердце' },
+  { name: 'HeartPulse', source: 'lucide', displayName: 'Пульс' },
+  { name: 'FileHeart', source: 'lucide', displayName: 'Файл с сердцем' },
+  { name: 'HeartHandshake', source: 'lucide', displayName: 'Сердце с рукопожатием' },
+
+  // Медицинское оборудование
+  { name: 'Stethoscope', source: 'lucide', displayName: 'Стетоскоп' },
+  { name: 'Thermometer', source: 'lucide', displayName: 'Термометр' },
+  { name: 'Syringe', source: 'lucide', displayName: 'Шприц' },
+  { name: 'Pill', source: 'lucide', displayName: 'Таблетка' },
+  { name: 'Bandage', source: 'lucide', displayName: 'Бинт' },
+
+  // Больницы и медицинские учреждения
+  { name: 'Hospital', source: 'lucide', displayName: 'Больница' },
+  { name: 'Ambulance', source: 'lucide', displayName: 'Скорая помощь' },
+  { name: 'Cross', source: 'lucide', displayName: 'Крест' },
+  { name: 'Plus', source: 'lucide', displayName: 'Плюс' },
+  { name: 'Crosshair', source: 'lucide', displayName: 'Прицел' },
+
+  // Лабораторное оборудование
+  { name: 'TestTube', source: 'lucide', displayName: 'Пробирка' },
+  { name: 'Flask', source: 'lucide', displayName: 'Колба' },
+  { name: 'FlaskRound', source: 'lucide', displayName: 'Круглая колба' },
+  { name: 'FlaskConical', source: 'lucide', displayName: 'Коническая колба' },
+
+  // Безопасность
+  { name: 'ShieldCheck', source: 'lucide', displayName: 'Щит с галочкой' },
+  { name: 'ShieldAlert', source: 'lucide', displayName: 'Щит с предупреждением' },
+  { name: 'AlertTriangle', source: 'lucide', displayName: 'Предупреждение' },
+  { name: 'Biohazard', source: 'lucide', displayName: 'Биологическая опасность' },
+];
+
+// Кураторская коллекция: Транспорт
+const transportIcons: IconInfo[] = [
+  // Автомобили
+  { name: 'Car', source: 'lucide', displayName: 'Автомобиль' },
+  { name: 'Truck', source: 'lucide', displayName: 'Грузовик' },
+  { name: 'Bus', source: 'lucide', displayName: 'Автобус' },
+  { name: 'Ambulance', source: 'lucide', displayName: 'Скорая помощь' },
+
+  // Велосипеды
+  { name: 'Bike', source: 'lucide', displayName: 'Велосипед' },
+
+  // Поезда
+  { name: 'Train', source: 'lucide', displayName: 'Поезд' },
+
+  // Корабли
+  { name: 'Ship', source: 'lucide', displayName: 'Корабль' },
+  { name: 'Boat', source: 'lucide', displayName: 'Лодка' },
+  { name: 'ShipWheel', source: 'lucide', displayName: 'Штурвал' },
+
+  // Самолеты
+  { name: 'Plane', source: 'lucide', displayName: 'Самолет' },
+  { name: 'Rocket', source: 'lucide', displayName: 'Ракета' },
+
+  // Навигация и карты
+  { name: 'Map', source: 'lucide', displayName: 'Карта' },
+  { name: 'MapPin', source: 'lucide', displayName: 'Метка на карте' },
+  { name: 'MapPinOff', source: 'lucide', displayName: 'Метка выкл' },
+  { name: 'MapPinned', source: 'lucide', displayName: 'Закрепленная метка' },
+  { name: 'Navigation', source: 'lucide', displayName: 'Навигация' },
+  { name: 'Navigation2', source: 'lucide', displayName: 'Навигация 2' },
+  { name: 'Compass', source: 'lucide', displayName: 'Компас' },
+  { name: 'Globe', source: 'lucide', displayName: 'Глобус' },
+  { name: 'Globe2', source: 'lucide', displayName: 'Глобус 2' },
+
+  // Парковка
+  { name: 'ParkingCircle', source: 'lucide', displayName: 'Парковка в круге' },
+  { name: 'ParkingSquare', source: 'lucide', displayName: 'Парковка в квадрате' },
+
+  // Дополнительно
+  { name: 'Locate', source: 'lucide', displayName: 'Определить местоположение' },
+  { name: 'LocateFixed', source: 'lucide', displayName: 'Фиксированное местоположение' },
+  { name: 'Target', source: 'lucide', displayName: 'Цель' },
+  { name: 'Footprints', source: 'lucide', displayName: 'Следы' },
+  { name: 'Satellite', source: 'lucide', displayName: 'Спутник' },
+  { name: 'Radar', source: 'lucide', displayName: 'Радар' },
+];
+
+// Кураторская коллекция: Государство и право
+const lawIcons: IconInfo[] = [
+  // Юстиция
+  { name: 'Scale', source: 'lucide', displayName: 'Весы' },
+  { name: 'Gavel', source: 'lucide', displayName: 'Молоток судьи' },
+
+  // Защита и безопасность
+  { name: 'Shield', source: 'lucide', displayName: 'Щит' },
+  { name: 'ShieldCheck', source: 'lucide', displayName: 'Щит с галочкой' },
+  { name: 'ShieldAlert', source: 'lucide', displayName: 'Щит с предупреждением' },
+  { name: 'ShieldOff', source: 'lucide', displayName: 'Щит выкл' },
+
+  // Значки
+  { name: 'Badge', source: 'lucide', displayName: 'Значок' },
+  { name: 'BadgeCheck', source: 'lucide', displayName: 'Значок с галочкой' },
+
+  // Документы
+  { name: 'Stamp', source: 'lucide', displayName: 'Штамп' },
+  { name: 'Scroll', source: 'lucide', displayName: 'Свиток' },
+  { name: 'ScrollText', source: 'lucide', displayName: 'Свиток с текстом' },
+  { name: 'BookText', source: 'lucide', displayName: 'Книга с текстом' },
+  { name: 'BookOpen', source: 'lucide', displayName: 'Открытая книга' },
+  { name: 'Library', source: 'lucide', displayName: 'Библиотека' },
+  { name: 'FileText', source: 'lucide', displayName: 'Текстовый файл' },
+  { name: 'FileCheck', source: 'lucide', displayName: 'Проверенный файл' },
+  { name: 'ClipboardCheck', source: 'lucide', displayName: 'Проверенный буфер обмена' },
+
+  // Здания
+  { name: 'Building', source: 'lucide', displayName: 'Здание' },
+  { name: 'Building2', source: 'lucide', displayName: 'Здание 2' },
+  { name: 'Landmark', source: 'lucide', displayName: 'Ориентир' },
+
+  // Деньги
+  { name: 'Banknote', source: 'lucide', displayName: 'Банкнота' },
+
+  // Безопасность
+  { name: 'Key', source: 'lucide', displayName: 'Ключ' },
+  { name: 'KeyRound', source: 'lucide', displayName: 'Круглый ключ' },
+  { name: 'Lock', source: 'lucide', displayName: 'Замок' },
+  { name: 'LockOpen', source: 'lucide', displayName: 'Открытый замок' },
+  { name: 'Fingerprint', source: 'lucide', displayName: 'Отпечаток пальца' },
+
+  // Люди
+  { name: 'UserCheck', source: 'lucide', displayName: 'Проверенный пользователь' },
+  { name: 'Users', source: 'lucide', displayName: 'Пользователи' },
+
+  // Бизнес
+  { name: 'Briefcase', source: 'lucide', displayName: 'Портфель' },
+  { name: 'Hammer', source: 'lucide', displayName: 'Молоток' },
+
+  // Архив
+  { name: 'Folder', source: 'lucide', displayName: 'Папка' },
+  { name: 'FolderArchive', source: 'lucide', displayName: 'Архивная папка' },
+  { name: 'Archive', source: 'lucide', displayName: 'Архив' },
+
+  // Награды
+  { name: 'Award', source: 'lucide', displayName: 'Награда' },
+  { name: 'Medal', source: 'lucide', displayName: 'Медаль' },
+  { name: 'Crown', source: 'lucide', displayName: 'Корона' },
+
+  // Флаги
+  { name: 'Flag', source: 'lucide', displayName: 'Флаг' },
+  { name: 'FlagTriangleRight', source: 'lucide', displayName: 'Треугольный флаг справа' },
+  { name: 'FlagTriangleLeft', source: 'lucide', displayName: 'Треугольный флаг слева' },
+  { name: 'FlagOff', source: 'lucide', displayName: 'Флаг выкл' },
+];
+
+// Кураторская коллекция: Гербы (геральдика)
+const heraldryIcons: IconInfo[] = [
+  // Щиты
+  { name: 'Shield', source: 'lucide', displayName: 'Щит' },
+  { name: 'ShieldCheck', source: 'lucide', displayName: 'Щит с галочкой' },
+  { name: 'ShieldAlert', source: 'lucide', displayName: 'Щит с предупреждением' },
+  { name: 'ShieldOff', source: 'lucide', displayName: 'Щит выкл' },
+
+  // Значки и бейджи
+  { name: 'Badge', source: 'lucide', displayName: 'Значок' },
+  { name: 'BadgeCheck', source: 'lucide', displayName: 'Значок с галочкой' },
+  { name: 'BadgeAlert', source: 'lucide', displayName: 'Значок с предупреждением' },
+  { name: 'BadgeInfo', source: 'lucide', displayName: 'Информационный значок' },
+  { name: 'BadgeHelp', source: 'lucide', displayName: 'Значок помощи' },
+  { name: 'BadgePlus', source: 'lucide', displayName: 'Значок с плюсом' },
+  { name: 'BadgeMinus', source: 'lucide', displayName: 'Значок с минусом' },
+  { name: 'BadgeStar', source: 'lucide', displayName: 'Значок со звездой' },
+
+  // Награды
+  { name: 'Trophy', source: 'lucide', displayName: 'Кубок' },
+  { name: 'Crown', source: 'lucide', displayName: 'Корона' },
+  { name: 'Medal', source: 'lucide', displayName: 'Медаль' },
+  { name: 'Award', source: 'lucide', displayName: 'Награда' },
+
+  // Драгоценности
+  { name: 'Gem', source: 'lucide', displayName: 'Драгоценный камень' },
+  { name: 'Diamond', source: 'lucide', displayName: 'Бриллиант' },
+
+  // Документы
+  { name: 'Scroll', source: 'lucide', displayName: 'Свиток' },
+  { name: 'Stamp', source: 'lucide', displayName: 'Штамп' },
+
+  // Звезды
+  { name: 'Star', source: 'lucide', displayName: 'Звезда' },
+  { name: 'StarHalf', source: 'lucide', displayName: 'Половина звезды' },
+  { name: 'Sparkles', source: 'lucide', displayName: 'Искры' },
+
+  // Флаги
+  { name: 'Flag', source: 'lucide', displayName: 'Флаг' },
+  { name: 'FlagTriangleRight', source: 'lucide', displayName: 'Треугольный флаг справа' },
+  { name: 'FlagTriangleLeft', source: 'lucide', displayName: 'Треугольный флаг слева' },
+
+  // Здания
+  { name: 'Building', source: 'lucide', displayName: 'Здание' },
+  { name: 'Landmark', source: 'lucide', displayName: 'Ориентир' },
+  { name: 'Library', source: 'lucide', displayName: 'Библиотека' },
+
+  // Юстиция
+  { name: 'Scale', source: 'lucide', displayName: 'Весы' },
+  { name: 'Gavel', source: 'lucide', displayName: 'Молоток судьи' },
+
+  // Безопасность
+  { name: 'Key', source: 'lucide', displayName: 'Ключ' },
+  { name: 'Lock', source: 'lucide', displayName: 'Замок' },
+
+  // Дополнительно
+  { name: 'Clover', source: 'lucide', displayName: 'Клевер' },
+  { name: 'Bookmark', source: 'lucide', displayName: 'Закладка' },
+];
+
 // Группируем все категории
 const iconsByCategory: Record<IconCategory, IconInfo[]> = {
   shapes: shapesIcons,
   stars: starsIcons,
   arrows: arrowsIcons,
+  lines: linesIcons,
   nature: natureIcons,
   symbols: symbolsIcons,
   business: businessIcons,
   decorative: decorativeIcons,
   badges: badgesIcons,
+  medicine: medicineIcons,
+  transport: transportIcons,
+  law: lawIcons,
+  heraldry: heraldryIcons,
 };
 
 // Экспортируем категории
 export const categories: { id: IconCategory; name: string; icons: IconInfo[] }[] = [
   { id: 'shapes', name: 'Фигуры', icons: shapesIcons },
-  { id: 'stars', name: 'Звезды и снежинки', icons: starsIcons },
+  { id: 'stars', name: 'Звезды', icons: starsIcons },
   { id: 'arrows', name: 'Стрелки', icons: arrowsIcons },
+  { id: 'lines', name: 'Линии', icons: linesIcons },
+  { id: 'decorative', name: 'Украшения', icons: decorativeIcons },
+  { id: 'medicine', name: 'Медицина', icons: medicineIcons },
+  { id: 'transport', name: 'Транспорт', icons: transportIcons },
+  { id: 'law', name: 'Государство и право', icons: lawIcons },
+  { id: 'heraldry', name: 'Гербы', icons: heraldryIcons },
   { id: 'nature', name: 'Природа', icons: natureIcons },
   { id: 'symbols', name: 'Символы', icons: symbolsIcons },
   { id: 'business', name: 'Бизнес', icons: businessIcons },
-  { id: 'decorative', name: 'Декоративные', icons: decorativeIcons },
   { id: 'badges', name: 'Значки', icons: badgesIcons },
 ];
 
