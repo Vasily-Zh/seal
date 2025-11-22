@@ -17,16 +17,21 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
     const pathId = `text-path-${element.id}`;
     const radius = element.curveRadius * scale;
     const startAngle = element.startAngle || 0;
+    const cx = element.x * scale;
+    const cy = element.y * scale;
 
-    // Вычисляем координаты дуги
-    const x1 = element.x * scale + radius * Math.cos((startAngle * Math.PI) / 180);
-    const y1 = element.y * scale + radius * Math.sin((startAngle * Math.PI) / 180);
-    const x2 = element.x * scale + radius * Math.cos(((startAngle + 180) * Math.PI) / 180);
-    const y2 = element.y * scale + radius * Math.sin(((startAngle + 180) * Math.PI) / 180);
+    // Создаём полный круг вместо полукруга, чтобы текст не обрезался
+    // Начинаем с startAngle и рисуем полный круг
+    const x1 = cx + radius * Math.cos((startAngle * Math.PI) / 180);
+    const y1 = cy + radius * Math.sin((startAngle * Math.PI) / 180);
+    const x2 = cx + radius * Math.cos(((startAngle + 180) * Math.PI) / 180);
+    const y2 = cy + radius * Math.sin(((startAngle + 180) * Math.PI) / 180);
 
     // Если текст перевернут, меняем направление дуги
-    const arcFlag = isFlipped ? 0 : 1;
-    const pathD = `M ${x1},${y1} A ${radius},${radius} 0 0,${arcFlag} ${x2},${y2}`;
+    const sweepFlag = isFlipped ? 0 : 1;
+
+    // Полный круг: две дуги по 180 градусов
+    const pathD = `M ${x1},${y1} A ${radius},${radius} 0 0,${sweepFlag} ${x2},${y2} A ${radius},${radius} 0 0,${sweepFlag} ${x1},${y1}`;
 
     return (
       <g>

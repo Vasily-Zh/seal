@@ -123,6 +123,7 @@ export interface FontConfig {
 export const DEFAULT_CONFIG = {
   canvasSize: 100, // мм
   circleRadius: 39, // мм
+  curvedTextRadius: 30.5, // мм - радиус для кривого текста
   fontSize: 6, // мм
   strokeWidth: 1.5, // мм
   strokeColor: '#0000ff',
