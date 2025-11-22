@@ -1,14 +1,16 @@
-import { Circle, Type, Square, Image, Orbit, Star } from 'lucide-react';
+import { Circle, Type, Square, Image, Orbit, Star, Search } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
 import { IconGalleryModal } from './IconGalleryModal';
+import { IconSearchModal } from './IconSearchModal';
 
 export const Toolbar = () => {
   const addElement = useStampStore((state) => state.addElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
+  const [isIconSearchOpen, setIsIconSearchOpen] = useState(false);
 
   const handleAddCircle = () => {
     addElement({
@@ -106,6 +108,7 @@ export const Toolbar = () => {
     { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
     { icon: Image, label: 'Добавить картинку', onClick: handleAddImage, id: 'image' },
     { icon: Star, label: 'Добавить иконку', onClick: () => setIsIconGalleryOpen(true), id: 'icon' },
+    { icon: Search, label: 'Поиск картинок для печати', onClick: () => setIsIconSearchOpen(true), id: 'iconSearch' },
   ];
 
   return (
@@ -185,6 +188,9 @@ export const Toolbar = () => {
 
       {/* Icon Gallery Modal */}
       <IconGalleryModal isOpen={isIconGalleryOpen} onClose={() => setIsIconGalleryOpen(false)} />
+
+      {/* Icon Search Modal */}
+      <IconSearchModal isOpen={isIconSearchOpen} onClose={() => setIsIconSearchOpen(false)} />
     </div>
   );
 };
