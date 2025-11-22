@@ -143,6 +143,7 @@ export const Toolbar = () => {
         <div key={tool.id} style={{ position: 'relative' }}>
           <button
             onClick={tool.onClick}
+            disabled={isProcessing && tool.id === 'image'}
             onMouseEnter={(e) => {
               setHoveredTool(tool.id);
               e.currentTarget.style.backgroundColor = '#bae6fd';
@@ -160,10 +161,11 @@ export const Toolbar = () => {
               padding: '12px 16px',
               border: '1px solid #d1d5db',
               borderRadius: '6px',
-              backgroundColor: '#e0f2fe',
-              cursor: 'pointer',
+              backgroundColor: (isProcessing && tool.id === 'image') ? '#c7d2e0' : '#e0f2fe',
+              cursor: (isProcessing && tool.id === 'image') ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s',
               width: '100%',
+              opacity: (isProcessing && tool.id === 'image') ? 0.6 : 1,
             }}
           >
             <tool.icon size={28} color="#0369a1" />

@@ -113,6 +113,25 @@ export function loadImageAsBase64(file: File): Promise<string> {
 }
 
 /**
+ * Получает размеры изображения (ширину и высоту в пикселях)
+ */
+export function getImageDimensions(imageSrc: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onload = () => {
+      resolve({ width: img.width, height: img.height });
+    };
+
+    img.onerror = () => {
+      reject(new Error('Failed to load image'));
+    };
+
+    img.src = imageSrc;
+  });
+}
+
+/**
  * Полный процесс: загрузка файла → векторизация → возврат SVG
  */
 export async function vectorizeImageFile(
@@ -137,4 +156,168 @@ export function getSvgComplexity(svgString: string): number {
  */
 export function getSvgSize(svgString: string): number {
   return new Blob([svgString]).size / 1024;
+}
+
+/**
+ * Вычисляет bounding box SVG содержимого
+ */
+function calculateSvgBoundingBox(svgElement: Element): { x: number; y: number; width: number; height: number } | null {
+  try {
+    const elements = svgElement.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, line, text, image');
+
+    if (elements.length === 0) {
+      return null;
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    elements.forEach((el) => {
+      try {
+        // Используем getBBox если доступен (работает с SVGElement)
+        if ('getBBox' in el && typeof (el as any).getBBox === 'function') {
+          try {
+            const bbox = (el as any).getBBox();
+            minX = Math.min(minX, bbox.x);
+            minY = Math.min(minY, bbox.y);
+            maxX = Math.max(maxX, bbox.x + bbox.width);
+            maxY = Math.max(maxY, bbox.y + bbox.height);
+          } catch (e) {
+            // getBBox может не работать в некоторых случаях
+          }
+        }
+
+        // Для path элементов пытаемся парсить координаты
+        if (el.tagName === 'path') {
+          const d = el.getAttribute('d');
+          if (d) {
+            const coords = d.match(/[\d.]+/g);
+            if (coords) {
+              for (let i = 0; i < coords.length; i += 2) {
+                const x = parseFloat(coords[i]);
+                const y = parseFloat(coords[i + 1]);
+                if (!isNaN(x)) minX = Math.min(minX, x);
+                if (!isNaN(y)) minY = Math.min(minY, y);
+                if (!isNaN(x)) maxX = Math.max(maxX, x);
+                if (!isNaN(y)) maxY = Math.max(maxY, y);
+              }
+            }
+          }
+        }
+
+        // Для rect элементов
+        if (el.tagName === 'rect') {
+          const x = parseFloat(el.getAttribute('x') || '0');
+          const y = parseFloat(el.getAttribute('y') || '0');
+          const w = parseFloat(el.getAttribute('width') || '0');
+          const h = parseFloat(el.getAttribute('height') || '0');
+          if (!isNaN(x)) minX = Math.min(minX, x);
+          if (!isNaN(y)) minY = Math.min(minY, y);
+          if (!isNaN(x) && !isNaN(w)) maxX = Math.max(maxX, x + w);
+          if (!isNaN(y) && !isNaN(h)) maxY = Math.max(maxY, y + h);
+        }
+
+        // Для circle элементов
+        if (el.tagName === 'circle') {
+          const cx = parseFloat(el.getAttribute('cx') || '0');
+          const cy = parseFloat(el.getAttribute('cy') || '0');
+          const r = parseFloat(el.getAttribute('r') || '0');
+          if (!isNaN(cx) && !isNaN(r)) {
+            minX = Math.min(minX, cx - r);
+            maxX = Math.max(maxX, cx + r);
+          }
+          if (!isNaN(cy) && !isNaN(r)) {
+            minY = Math.min(minY, cy - r);
+            maxY = Math.max(maxY, cy + r);
+          }
+        }
+      } catch (e) {
+        // Игнорируем ошибки при расчете для отдельных элементов
+      }
+    });
+
+    if (isFinite(minX) && isFinite(minY) && isFinite(maxX) && isFinite(maxY)) {
+      const width = maxX - minX;
+      const height = maxY - minY;
+
+      // Добавляем небольшой padding для уверенности
+      const padding = Math.max(width, height) * 0.05;
+
+      return {
+        x: minX - padding,
+        y: minY - padding,
+        width: width + padding * 2,
+        height: height + padding * 2,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error calculating bounding box:', error);
+    return null;
+  }
+}
+
+/**
+ * Нормализует SVG из imagetracer:
+ * - Добавляет правильный viewBox на основе bounding box содержимого
+ * - Убирает лишние атрибуты
+ * - Гарантирует правильное масштабирование
+ */
+export function normalizeSvgFromImageTracer(svgString: string | any): string {
+  try {
+    // Убеждаемся что это строка
+    const svgStr = typeof svgString === 'string' ? svgString : String(svgString);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgStr, 'image/svg+xml');
+    const svgElement = doc.querySelector('svg');
+
+    if (!svgElement) {
+      return svgString;
+    }
+
+    // Получаем текущие размеры
+    let width = svgElement.getAttribute('width');
+    let height = svgElement.getAttribute('height');
+    const viewBox = svgElement.getAttribute('viewBox');
+
+    // Сначала пытаемся вычислить правильный bounding box на основе содержимого
+    const bbox = calculateSvgBoundingBox(svgElement);
+
+    if (bbox && bbox.width > 0 && bbox.height > 0) {
+      // Используем bounding box для установки viewBox
+      svgElement.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+    } else if (viewBox) {
+      // Если bounding box не получилось, используем существующий viewBox
+      // Убеждаемся что он правильный
+      const parts = viewBox.split(' ');
+      if (parts.length === 4) {
+        width = parts[2];
+        height = parts[3];
+      }
+    } else if (width && height) {
+      // Если нет viewBox но есть width/height, используем их
+      const w = parseFloat(width);
+      const h = parseFloat(height);
+      if (w > 0 && h > 0) {
+        svgElement.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      }
+    }
+
+    // Устанавливаем width и height в 100% для правильного масштабирования
+    svgElement.removeAttribute('width');
+    svgElement.removeAttribute('height');
+    svgElement.setAttribute('width', '100%');
+    svgElement.setAttribute('height', '100%');
+
+    // Убираем лишние атрибуты которые могут интерферировать
+    svgElement.removeAttribute('xmlns:xlink');
+
+    return new XMLSerializer().serializeToString(svgElement);
+  } catch (error) {
+    console.error('Error normalizing SVG:', error);
+    return svgString;
+  }
 }

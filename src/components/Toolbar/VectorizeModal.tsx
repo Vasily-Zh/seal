@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { X, Loader, Image as ImageIcon } from 'lucide-react';
-import { vectorizeImage, type VectorizeQuality, getSvgComplexity, getSvgSize } from '../../utils/vectorize';
+import { vectorizeImage, type VectorizeQuality, getSvgComplexity, getSvgSize, normalizeSvgFromImageTracer, getImageDimensions } from '../../utils/vectorize';
 import { useStampStore } from '../../store/useStampStore';
 
 interface VectorizeModalProps {
@@ -16,20 +16,31 @@ export const VectorizeModal = ({ isOpen, onClose, imageData, imageElementId }: V
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewSvg, setPreviewSvg] = useState<string | null>(null);
   const [svgStats, setSvgStats] = useState<{ complexity: number; size: number } | null>(null);
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
 
   const updateElement = useStampStore((state) => state.updateElement);
   const addElement = useStampStore((state) => state.addElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
+
+  // Получаем размеры исходного изображения
+  useEffect(() => {
+    if (isOpen && imageData) {
+      getImageDimensions(imageData)
+        .then((dims) => setImageDimensions(dims))
+        .catch((error) => console.error('Error getting image dimensions:', error));
+    }
+  }, [isOpen, imageData]);
 
   // Генерация превью
   const handleGeneratePreview = useCallback(async () => {
     setIsProcessing(true);
     try {
       const svg = await vectorizeImage(imageData, { quality, colorCount });
-      setPreviewSvg(svg);
+      const normalizedSvg = normalizeSvgFromImageTracer(svg);
+      setPreviewSvg(normalizedSvg);
       setSvgStats({
-        complexity: getSvgComplexity(svg),
-        size: getSvgSize(svg),
+        complexity: getSvgComplexity(normalizedSvg),
+        size: getSvgSize(normalizedSvg),
       });
     } catch (error) {
       console.error('Error vectorizing image:', error);
@@ -43,12 +54,37 @@ export const VectorizeModal = ({ isOpen, onClose, imageData, imageElementId }: V
   const handleApply = useCallback(() => {
     if (!previewSvg) return;
 
+    // Вычисляем размер элемента на основе исходного изображения
+    let elementWidth = 20;
+    let elementHeight = 20;
+
+    if (imageDimensions) {
+      const maxSize = canvasSize * 0.6; // Максимум 60% от размера холста
+      const imgRatio = imageDimensions.width / imageDimensions.height;
+
+      if (imgRatio >= 1) {
+        // Ширина больше или равна высоте
+        elementWidth = Math.min(imageDimensions.width / 20, maxSize); // Масштабируем из пиксели в мм
+        elementHeight = elementWidth / imgRatio;
+      } else {
+        // Высота больше ширины
+        elementHeight = Math.min(imageDimensions.height / 20, maxSize);
+        elementWidth = elementHeight * imgRatio;
+      }
+
+      // Убеждаемся что размеры разумные
+      elementWidth = Math.max(5, Math.min(elementWidth, maxSize));
+      elementHeight = Math.max(5, Math.min(elementHeight, maxSize));
+    }
+
     if (imageElementId) {
       // Заменяем существующий ImageElement на IconElement
       updateElement(imageElementId, {
         type: 'icon',
         iconSource: 'custom',
         svgContent: previewSvg,
+        width: elementWidth,
+        height: elementHeight,
       });
     } else {
       // Создаем новый IconElement
@@ -60,14 +96,14 @@ export const VectorizeModal = ({ isOpen, onClose, imageData, imageElementId }: V
         svgContent: previewSvg,
         x: canvasSize / 2,
         y: canvasSize / 2,
-        width: 20,
-        height: 20,
+        width: elementWidth,
+        height: elementHeight,
         visible: true,
       });
     }
 
     onClose();
-  }, [previewSvg, imageElementId, updateElement, addElement, canvasSize, onClose]);
+  }, [previewSvg, imageElementId, imageDimensions, updateElement, addElement, canvasSize, onClose]);
 
   if (!isOpen) return null;
 
