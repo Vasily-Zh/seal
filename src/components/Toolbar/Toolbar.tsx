@@ -116,7 +116,7 @@ export const Toolbar = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px',
+        gap: '8px',
         width: '100%',
       }}
     >
@@ -138,15 +138,16 @@ export const Toolbar = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '20px 24px',
+              padding: '12px 16px',
               border: '1px solid #d1d5db',
               borderRadius: '6px',
               backgroundColor: '#e0f2fe',
               cursor: 'pointer',
               transition: 'all 0.2s',
+              width: '100%',
             }}
           >
-            <tool.icon size={40} color="#0369a1" />
+            <tool.icon size={28} color="#0369a1" />
           </button>
 
           {/* Tooltip */}
