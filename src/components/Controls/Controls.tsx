@@ -5,6 +5,7 @@ import { SliderInput } from './SliderInput';
 import { ALL_FONTS } from '../../utils/fonts';
 import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, ImageElement as ImageElementType, IconElement as IconElementType } from '../../types';
 import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
+import { VectorizeModal } from '../Toolbar/VectorizeModal';
 
 interface ControlsProps {
   showOnlyElements?: boolean;
@@ -205,6 +206,8 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
 function ElementSettings({ element }: { element: any }) {
   const updateElement = useStampStore((state) => state.updateElement);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
+  const [isVectorizeModalOpen, setIsVectorizeModalOpen] = useState(false);
+  const [imageToVectorize, setImageToVectorize] = useState<{ data: string; elementId: string } | null>(null);
 
   if (element.type === 'circle') {
     return (
@@ -531,11 +534,13 @@ function ElementSettings({ element }: { element: any }) {
   }
 
   if (element.type === 'image') {
+    const imageElement = element as ImageElementType;
+
     return (
       <>
         <SliderInput
           label="Ширина"
-          value={(element as ImageElementType).width}
+          value={imageElement.width}
           min={5}
           max={50}
           step={0.5}
@@ -544,7 +549,7 @@ function ElementSettings({ element }: { element: any }) {
 
         <SliderInput
           label="Высота"
-          value={(element as ImageElementType).height}
+          value={imageElement.height}
           min={5}
           max={50}
           step={0.5}
@@ -568,6 +573,32 @@ function ElementSettings({ element }: { element: any }) {
           step={1}
           onChange={(value) => updateElement(element.id, { y: value })}
         />
+
+        {/* Кнопка конвертации в SVG */}
+        <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px' }}>
+          <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#1e40af' }}>
+            <strong>Совет:</strong> Конвертируйте в SVG для возможности изменения цвета
+          </p>
+          <button
+            onClick={() => {
+              setImageToVectorize({ data: imageElement.src, elementId: element.id });
+              setIsVectorizeModalOpen(true);
+            }}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+            }}
+          >
+            Конвертировать в SVG
+          </button>
+        </div>
 
         <div style={{ marginTop: '16px' }}>
           <button
@@ -608,11 +639,13 @@ function ElementSettings({ element }: { element: any }) {
   }
 
   if (element.type === 'icon') {
+    const iconElement = element as IconElementType;
+
     return (
       <>
         <SliderInput
           label="Размер"
-          value={(element as IconElementType).width}
+          value={iconElement.width}
           min={5}
           max={50}
           step={0.5}
@@ -636,6 +669,115 @@ function ElementSettings({ element }: { element: any }) {
           step={1}
           onChange={(value) => updateElement(element.id, { y: value })}
         />
+
+        {/* Управление цветом */}
+        <div style={{ marginTop: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
+            Цвет заливки
+          </label>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <input
+              type="color"
+              value={iconElement.fill || '#000000'}
+              onChange={(e) => updateElement(element.id, { fill: e.target.value })}
+              style={{
+                width: '50px',
+                height: '40px',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            />
+            <button
+              onClick={() => updateElement(element.id, { fill: undefined })}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: '#f3f4f6',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '13px',
+              }}
+            >
+              Сбросить
+            </button>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
+            Цвет обводки
+          </label>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <input
+              type="color"
+              value={iconElement.stroke || '#000000'}
+              onChange={(e) => updateElement(element.id, { stroke: e.target.value })}
+              style={{
+                width: '50px',
+                height: '40px',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            />
+            <button
+              onClick={() => updateElement(element.id, { stroke: undefined })}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: '#f3f4f6',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '13px',
+              }}
+            >
+              Сбросить
+            </button>
+          </div>
+        </div>
+
+        {iconElement.stroke && (
+          <SliderInput
+            label="Толщина обводки"
+            value={iconElement.strokeWidth || 1}
+            min={0.5}
+            max={10}
+            step={0.5}
+            onChange={(value) => updateElement(element.id, { strokeWidth: value })}
+          />
+        )}
+
+        <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => updateElement(element.id, { fill: '#000000', stroke: undefined, strokeWidth: undefined })}
+            style={{
+              flex: 1,
+              padding: '8px',
+              backgroundColor: '#f3f4f6',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '13px',
+            }}
+          >
+            Только заливка
+          </button>
+          <button
+            onClick={() => updateElement(element.id, { fill: 'none', stroke: '#000000', strokeWidth: 2 })}
+            style={{
+              flex: 1,
+              padding: '8px',
+              backgroundColor: '#f3f4f6',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '13px',
+            }}
+          >
+            Только контур
+          </button>
+        </div>
 
         <div style={{ marginTop: '16px' }}>
           <button
@@ -661,6 +803,19 @@ function ElementSettings({ element }: { element: any }) {
           isOpen={isIconGalleryOpen}
           onClose={() => setIsIconGalleryOpen(false)}
         />
+
+        {/* Vectorize Modal */}
+        {imageToVectorize && (
+          <VectorizeModal
+            isOpen={isVectorizeModalOpen}
+            onClose={() => {
+              setIsVectorizeModalOpen(false);
+              setImageToVectorize(null);
+            }}
+            imageData={imageToVectorize.data}
+            imageElementId={imageToVectorize.elementId}
+          />
+        )}
       </>
     );
   }

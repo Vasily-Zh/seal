@@ -4,6 +4,7 @@ import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
 import { IconGalleryModal } from './IconGalleryModal';
 import { IconSearchModal } from './IconSearchModal';
+import { VectorizeModal } from './VectorizeModal';
 
 export const Toolbar = () => {
   const addElement = useStampStore((state) => state.addElement);
@@ -11,6 +12,8 @@ export const Toolbar = () => {
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
   const [isIconSearchOpen, setIsIconSearchOpen] = useState(false);
+  const [isVectorizeModalOpen, setIsVectorizeModalOpen] = useState(false);
+  const [pendingImageData, setPendingImageData] = useState<string | null>(null);
 
   const handleAddCircle = () => {
     addElement({
@@ -84,16 +87,9 @@ export const Toolbar = () => {
         const reader = new FileReader();
         reader.onload = (event) => {
           const src = event.target?.result as string;
-          addElement({
-            id: `image-${Date.now()}`,
-            type: 'image',
-            x: canvasSize / 2,
-            y: canvasSize / 2,
-            width: 30,
-            height: 30,
-            src: src,
-            visible: true,
-          });
+          // Открываем модальное окно векторизации
+          setPendingImageData(src);
+          setIsVectorizeModalOpen(true);
         };
         reader.readAsDataURL(file);
       }
@@ -193,6 +189,18 @@ export const Toolbar = () => {
 
       {/* Icon Search Modal */}
       <IconSearchModal isOpen={isIconSearchOpen} onClose={() => setIsIconSearchOpen(false)} />
+
+      {/* Vectorize Modal */}
+      {pendingImageData && (
+        <VectorizeModal
+          isOpen={isVectorizeModalOpen}
+          onClose={() => {
+            setIsVectorizeModalOpen(false);
+            setPendingImageData(null);
+          }}
+          imageData={pendingImageData}
+        />
+      )}
     </div>
   );
 };

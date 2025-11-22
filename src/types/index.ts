@@ -84,6 +84,9 @@ export interface IconElement extends BaseElement {
   width: number;
   height: number;
   svgContent?: string; // для custom SVG
+  fill?: string; // цвет заливки
+  stroke?: string; // цвет обводки
+  strokeWidth?: number; // толщина обводки
 }
 
 export type StampElement =

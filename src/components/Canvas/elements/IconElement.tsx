@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import type { IconElement as IconType } from '../../../types';
-import * as LucideIcons from 'lucide-react';
-import * as HeroIcons from '@heroicons/react/24/solid';
+import { getCachedSvg, applySvgStyles } from '../../../utils/extractSvgFromIcon';
 
 interface IconElementProps {
   element: IconType;
@@ -11,62 +10,59 @@ interface IconElementProps {
 export const IconElement = ({ element, scale }: IconElementProps) => {
   if (!element.visible) return null;
 
-  // Получаем компонент картинки в зависимости от источника
-  const IconComponent = useMemo(() => {
-    if (element.iconSource === 'lucide') {
-      // @ts-expect-error - динамический импорт картинки из lucide-react
-      return LucideIcons[element.iconName];
-    } else if (element.iconSource === 'heroicons') {
-      // @ts-expect-error - динамический импорт картинки из heroicons
-      return HeroIcons[element.iconName];
-    } else if (element.iconSource === 'custom' && element.svgContent) {
-      // Для custom SVG возвращаем null, будем рендерить через dangerouslySetInnerHTML
+  // Получаем SVG код с примененными стилями
+  const svgContent = useMemo(() => {
+    let content: string | null = null;
+
+    if (element.iconSource === 'custom' && element.svgContent) {
+      // Для custom SVG применяем стили напрямую
+      content = applySvgStyles(element.svgContent, {
+        fill: element.fill,
+        stroke: element.stroke,
+        strokeWidth: element.strokeWidth,
+      });
+    } else if (element.iconSource === 'lucide' || element.iconSource === 'heroicons') {
+      // Для lucide и heroicons извлекаем SVG из компонента
+      content = getCachedSvg(element.iconName, element.iconSource, {
+        fill: element.fill,
+        stroke: element.stroke,
+        strokeWidth: element.strokeWidth,
+      });
+    }
+
+    if (!content) {
+      console.warn(`Icon ${element.iconName} from ${element.iconSource} could not be rendered`);
       return null;
     }
-    return null;
-  }, [element.iconName, element.iconSource, element.svgContent]);
 
-  // Если используем custom SVG
-  if (element.iconSource === 'custom' && element.svgContent) {
-    return (
-      <g
-        transform={`translate(${(element.x - element.width / 2) * scale}, ${(element.y - element.height / 2) * scale})`}
-        dangerouslySetInnerHTML={{ __html: element.svgContent }}
-      />
-    );
+    // Добавляем атрибуты для масштабирования и позиционирования
+    // Заменяем width/height на 100% для корректного масштабирования
+    content = content
+      .replace(/width="[^"]*"/, `width="${element.width * scale}"`)
+      .replace(/height="[^"]*"/, `height="${element.height * scale}"`);
+
+    return content;
+  }, [
+    element.iconName,
+    element.iconSource,
+    element.svgContent,
+    element.fill,
+    element.stroke,
+    element.strokeWidth,
+    element.width,
+    element.height,
+    scale,
+  ]);
+
+  if (!svgContent) {
+    return null;
   }
 
-  // Если компонент не найден, не рендерим
-  if (!IconComponent) {
-    console.warn(`Icon ${element.iconName} from ${element.iconSource} not found`);
-    return null;
-  }
-
-  // Рендерим картинку из lucide-react или heroicons
-  // Эти библиотеки возвращают SVG, который мы можем вставить в foreignObject
+  // Рендерим SVG через группу с трансформацией
   return (
-    <foreignObject
-      x={(element.x - element.width / 2) * scale}
-      y={(element.y - element.height / 2) * scale}
-      width={element.width * scale}
-      height={element.height * scale}
-    >
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <IconComponent
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
-        />
-      </div>
-    </foreignObject>
+    <g
+      transform={`translate(${(element.x - element.width / 2) * scale}, ${(element.y - element.height / 2) * scale})`}
+      dangerouslySetInnerHTML={{ __html: svgContent }}
+    />
   );
 };
