@@ -64,7 +64,7 @@ export const IconGalleryModal = ({ isOpen, onClose }: IconGalleryModalProps) => 
       width: 15,
       height: 15,
       visible: true,
-      svgContent: icon.source === 'custom' ? undefined : undefined,
+      svgContent: undefined,
     });
     onClose();
   };

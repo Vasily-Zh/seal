@@ -204,7 +204,6 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
 // Компонент для редактирования параметров элемента
 function ElementSettings({ element }: { element: any }) {
   const updateElement = useStampStore((state) => state.updateElement);
-  const addElement = useStampStore((state) => state.addElement);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
 
   if (element.type === 'circle') {
