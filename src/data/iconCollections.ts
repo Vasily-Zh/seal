@@ -741,15 +741,15 @@ const iconsByCategory: Record<IconCategory, IconInfo[]> = {
 
 // Экспортируем категории
 export const categories: { id: IconCategory; name: string; icons: IconInfo[] }[] = [
-  { id: 'shapes', name: 'Фигуры', icons: shapesIcons },
   { id: 'stars', name: 'Звезды', icons: starsIcons },
+  { id: 'heraldry', name: 'Гербы', icons: heraldryIcons },
+  { id: 'shapes', name: 'Фигуры', icons: shapesIcons },
   { id: 'arrows', name: 'Стрелки', icons: arrowsIcons },
   { id: 'lines', name: 'Линии', icons: linesIcons },
   { id: 'decorative', name: 'Украшения', icons: decorativeIcons },
   { id: 'medicine', name: 'Медицина', icons: medicineIcons },
   { id: 'transport', name: 'Транспорт', icons: transportIcons },
   { id: 'law', name: 'Государство и право', icons: lawIcons },
-  { id: 'heraldry', name: 'Гербы', icons: heraldryIcons },
   { id: 'nature', name: 'Природа', icons: natureIcons },
   { id: 'symbols', name: 'Символы', icons: symbolsIcons },
   { id: 'business', name: 'Бизнес', icons: businessIcons },

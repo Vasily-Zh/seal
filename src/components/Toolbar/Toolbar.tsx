@@ -106,7 +106,7 @@ export const Toolbar = () => {
     { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
     { icon: Orbit, label: 'Добавить текст по кругу', onClick: handleAddCurvedText, id: 'curvedText' },
     { icon: Type, label: 'Добавить текст', onClick: handleAddCenteredText, id: 'text' },
-    { icon: Star, label: 'Добавить иконку', onClick: () => setIsIconGalleryOpen(true), id: 'icon' },
+    { icon: Star, label: 'Добавить картинку', onClick: () => setIsIconGalleryOpen(true), id: 'icon' },
     { icon: Search, label: 'Поиск картинок', onClick: () => setIsIconSearchOpen(true), id: 'iconSearch' },
     { icon: Image, label: 'Своя картинка', onClick: handleAddImage, id: 'image' },
   ];
