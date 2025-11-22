@@ -11,10 +11,10 @@ export const MainLayout = () => {
 
       {/* Основной контент - горизонтальный layout */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Блок 1: Добавить (Toolbar) - 12% */}
+        {/* Блок 1: Добавить (Toolbar) - 80px */}
         <div
           style={{
-            width: '12%',
+            width: '80px',
             borderRight: '1px solid #e5e7eb',
             backgroundColor: '#fff',
             padding: '16px 8px',
@@ -31,10 +31,10 @@ export const MainLayout = () => {
           <Toolbar />
         </div>
 
-        {/* Блок 2: Список элементов - 18% */}
+        {/* Блок 2: Список элементов - 20% */}
         <div
           style={{
-            width: '18%',
+            width: '20%',
             borderRight: '1px solid #e5e7eb',
             backgroundColor: '#fff',
             overflow: 'auto',
@@ -51,10 +51,10 @@ export const MainLayout = () => {
           </div>
         </div>
 
-        {/* Блок 3: Настройки элемента - 18% */}
+        {/* Блок 3: Настройки элемента - 20% */}
         <div
           style={{
-            width: '18%',
+            width: '20%',
             borderRight: '1px solid #e5e7eb',
             backgroundColor: '#fff',
             overflow: 'auto',
@@ -71,10 +71,10 @@ export const MainLayout = () => {
           </div>
         </div>
 
-        {/* Блок 4: Превью - 52% (адаптивное) */}
+        {/* Блок 4: Превью - ~33% */}
         <div
           style={{
-            flex: 1,
+            width: 'calc(100% - 80px - 20% - 20%)',
             backgroundColor: '#f9fafb',
             display: 'flex',
             flexDirection: 'column',
