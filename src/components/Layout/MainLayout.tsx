@@ -18,23 +18,23 @@ export const MainLayout = () => {
             borderRight: '1px solid #e5e7eb',
             backgroundColor: '#fff',
             padding: '16px 8px',
-            overflow: 'auto',
+            overflow: 'visible',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '8px',
           }}
         >
-          <div style={{ fontSize: '12px', fontWeight: '600', color: '#374151', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: '#374151', textAlign: 'center', marginBottom: '8px' }}>
             Добавить
           </div>
           <Toolbar />
         </div>
 
-        {/* Блок 2: Список элементов - 20% */}
+        {/* Блок 2: Список элементов - 25% */}
         <div
           style={{
-            width: '20%',
+            width: '25%',
             borderRight: '1px solid #e5e7eb',
             backgroundColor: '#fff',
             overflow: 'auto',
@@ -51,10 +51,10 @@ export const MainLayout = () => {
           </div>
         </div>
 
-        {/* Блок 3: Настройки элемента - 20% */}
+        {/* Блок 3: Настройки элемента - 25% */}
         <div
           style={{
-            width: '20%',
+            width: '25%',
             borderRight: '1px solid #e5e7eb',
             backgroundColor: '#fff',
             overflow: 'auto',
@@ -71,10 +71,10 @@ export const MainLayout = () => {
           </div>
         </div>
 
-        {/* Блок 4: Превью - ~33% */}
+        {/* Блок 4: Превью - треть экрана */}
         <div
           style={{
-            width: 'calc(100% - 80px - 20% - 20%)',
+            flex: 1,
             backgroundColor: '#f9fafb',
             display: 'flex',
             flexDirection: 'column',
