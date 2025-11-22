@@ -128,4 +128,5 @@ export const DEFAULT_CONFIG = {
   strokeWidth: 1.5, // мм
   strokeColor: '#0000ff',
   textColor: '#0000ff',
+  fontFamily: 'Arial, sans-serif', // шрифт по умолчанию
 };

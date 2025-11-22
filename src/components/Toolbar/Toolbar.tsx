@@ -29,7 +29,7 @@ export const Toolbar = () => {
       y: canvasSize / 2,
       text: 'Текст по кругу',
       fontSize: DEFAULT_CONFIG.fontSize,
-      fontFamily: 'Roboto',
+      fontFamily: DEFAULT_CONFIG.fontFamily,
       curved: true,
       curveRadius: DEFAULT_CONFIG.curvedTextRadius,
       startAngle: 90,
@@ -48,7 +48,7 @@ export const Toolbar = () => {
       y: canvasSize / 2,
       text: 'Центральный текст',
       fontSize: DEFAULT_CONFIG.fontSize,
-      fontFamily: 'Roboto',
+      fontFamily: DEFAULT_CONFIG.fontFamily,
       color: DEFAULT_CONFIG.textColor,
       bold: false,
       italic: false,
@@ -110,7 +110,7 @@ export const Toolbar = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '8px',
+        gap: '16px',
         width: '100%',
       }}
     >
@@ -132,7 +132,7 @@ export const Toolbar = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '10px 12px',
+              padding: '20px 24px',
               border: '1px solid #d1d5db',
               borderRadius: '6px',
               backgroundColor: '#e0f2fe',
@@ -140,7 +140,7 @@ export const Toolbar = () => {
               transition: 'all 0.2s',
             }}
           >
-            <tool.icon size={20} color="#0369a1" />
+            <tool.icon size={40} color="#0369a1" />
           </button>
 
           {/* Tooltip */}
