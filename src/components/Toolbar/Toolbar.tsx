@@ -103,12 +103,12 @@ export const Toolbar = () => {
 
   const tools = [
     { icon: Circle, label: 'Добавить круг', onClick: handleAddCircle, id: 'circle' },
+    { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
     { icon: Orbit, label: 'Добавить текст по кругу', onClick: handleAddCurvedText, id: 'curvedText' },
     { icon: Type, label: 'Добавить текст', onClick: handleAddCenteredText, id: 'text' },
-    { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
-    { icon: Image, label: 'Добавить картинку', onClick: handleAddImage, id: 'image' },
     { icon: Star, label: 'Добавить иконку', onClick: () => setIsIconGalleryOpen(true), id: 'icon' },
-    { icon: Search, label: 'Поиск картинок для печати', onClick: () => setIsIconSearchOpen(true), id: 'iconSearch' },
+    { icon: Search, label: 'Поиск картинок', onClick: () => setIsIconSearchOpen(true), id: 'iconSearch' },
+    { icon: Image, label: 'Своя картинка', onClick: handleAddImage, id: 'image' },
   ];
 
   return (
@@ -154,18 +154,19 @@ export const Toolbar = () => {
             <div
               style={{
                 position: 'absolute',
-                left: '100%',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                marginLeft: '8px',
+                left: '50%',
+                bottom: '100%',
+                transform: 'translateX(-50%)',
+                marginBottom: '8px',
                 backgroundColor: '#1f2937',
                 color: '#fff',
                 padding: '8px 12px',
                 borderRadius: '6px',
-                fontSize: '12px',
+                fontSize: '11px',
                 whiteSpace: 'nowrap',
                 zIndex: 1000,
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                pointerEvents: 'none',
               }}
             >
               {tool.label}
@@ -173,12 +174,12 @@ export const Toolbar = () => {
               <div
                 style={{
                   position: 'absolute',
-                  right: '100%',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  borderTop: '4px solid transparent',
-                  borderBottom: '4px solid transparent',
-                  borderRight: '4px solid #1f2937',
+                  left: '50%',
+                  top: '100%',
+                  transform: 'translateX(-50%)',
+                  borderLeft: '4px solid transparent',
+                  borderRight: '4px solid transparent',
+                  borderTop: '4px solid #1f2937',
                 }}
               />
             </div>
