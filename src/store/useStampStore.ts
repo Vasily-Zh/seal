@@ -4,7 +4,7 @@ import { DEFAULT_CONFIG } from '../types';
 
 // Начальные элементы по умолчанию
 const initialElements: StampElement[] = [
-  // Круг
+  // Круг внешний
   {
     id: 'circle-default',
     type: 'circle',
@@ -19,7 +19,7 @@ const initialElements: StampElement[] = [
   {
     id: 'text-default-1',
     type: 'text',
-    text: 'Текст по кругу',
+    text: 'ПРИМЕР ТЕКСТА ПО КРУГУ',
     x: 50,
     y: 50,
     fontSize: 6,
@@ -38,7 +38,7 @@ const initialElements: StampElement[] = [
   {
     id: 'text-default-2',
     type: 'text',
-    text: 'Текст по кругу',
+    text: 'ПРИМЕР ТЕКСТА ПО КРУГУ',
     x: 50,
     y: 50,
     fontSize: 6,
@@ -51,6 +51,17 @@ const initialElements: StampElement[] = [
     flipped: false,
     bold: false,
     italic: false,
+    visible: true,
+  },
+  // Круг внутренний
+  {
+    id: 'circle-default-2',
+    type: 'circle',
+    x: 50,
+    y: 50,
+    radius: 37,
+    strokeWidth: 1,
+    stroke: '#0000ff',
     visible: true,
   },
 ];
