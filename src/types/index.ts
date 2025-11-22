@@ -31,6 +31,7 @@ export interface TextElement extends BaseElement {
   letterSpacing?: number;
   bold?: boolean;
   italic?: boolean;
+  flipped?: boolean; // перевернуть текст
 }
 
 export interface TextCenteredElement extends BaseElement {
@@ -41,6 +42,7 @@ export interface TextCenteredElement extends BaseElement {
   color: string;
   bold?: boolean;
   italic?: boolean;
+  flipped?: boolean; // перевернуть текст
 }
 
 export interface RectangleElement extends BaseElement {

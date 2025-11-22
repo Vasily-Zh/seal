@@ -333,7 +333,7 @@ function ElementSettings({ element }: { element: any }) {
           onChange={(value) => updateElement(element.id, { letterSpacing: value })}
         />
 
-        <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+        <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
             <input
               type="checkbox"
@@ -352,6 +352,16 @@ function ElementSettings({ element }: { element: any }) {
               style={{ cursor: 'pointer' }}
             />
             <span style={{ fontSize: '14px', fontWeight: '500' }}>Курсив</span>
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={(element as TextElementType).flipped || false}
+              onChange={(e) => updateElement(element.id, { flipped: e.target.checked })}
+              style={{ cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>Перевернуть</span>
           </label>
         </div>
       </>
@@ -429,7 +439,7 @@ function ElementSettings({ element }: { element: any }) {
           onChange={(value) => updateElement(element.id, { y: value })}
         />
 
-        <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+        <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
             <input
               type="checkbox"
@@ -448,6 +458,16 @@ function ElementSettings({ element }: { element: any }) {
               style={{ cursor: 'pointer' }}
             />
             <span style={{ fontSize: '14px', fontWeight: '500' }}>Курсив</span>
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={(element as TextCenteredElementType).flipped || false}
+              onChange={(e) => updateElement(element.id, { flipped: e.target.checked })}
+              style={{ cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>Перевернуть</span>
           </label>
         </div>
       </>

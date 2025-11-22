@@ -10,6 +10,7 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
 
   const fontWeight = element.bold ? 'bold' : 'normal';
   const fontStyle = element.italic ? 'italic' : 'normal';
+  const isFlipped = element.flipped || false;
 
   if (element.curved && element.curveRadius) {
     // Текст по кругу
@@ -23,12 +24,16 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
     const x2 = element.x * scale + radius * Math.cos(((startAngle + 180) * Math.PI) / 180);
     const y2 = element.y * scale + radius * Math.sin(((startAngle + 180) * Math.PI) / 180);
 
+    // Если текст перевернут, меняем направление дуги
+    const arcFlag = isFlipped ? 0 : 1;
+    const pathD = `M ${x1},${y1} A ${radius},${radius} 0 0,${arcFlag} ${x2},${y2}`;
+
     return (
       <g>
         <defs>
           <path
             id={pathId}
-            d={`M ${x1},${y1} A ${radius},${radius} 0 0,1 ${x2},${y2}`}
+            d={pathD}
             fill="none"
           />
         </defs>
@@ -49,6 +54,8 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
   }
 
   // Обычный текст
+  const transform = isFlipped ? `rotate(180 ${element.x * scale} ${element.y * scale})` : undefined;
+
   return (
     <text
       x={element.x * scale}
@@ -61,6 +68,7 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
       letterSpacing={element.letterSpacing || 0}
       textAnchor="middle"
       dominantBaseline="middle"
+      transform={transform}
     >
       {element.text}
     </text>
