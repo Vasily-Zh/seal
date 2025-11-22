@@ -52,7 +52,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                     {element.type === 'textCentered' && 'Добавить текст'}
                     {element.type === 'rectangle' && 'Добавить прямоугольник'}
                     {element.type === 'image' && 'Добавить картинку'}
-                    {element.type === 'icon' && 'Добавить иконку'}
+                    {element.type === 'icon' && 'Добавить картинку'}
                   </span>
                 </div>
 
@@ -142,7 +142,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                     {element.type === 'textCentered' && 'Добавить текст'}
                     {element.type === 'rectangle' && 'Добавить прямоугольник'}
                     {element.type === 'image' && 'Добавить картинку'}
-                    {element.type === 'icon' && 'Добавить иконку'}
+                    {element.type === 'icon' && 'Добавить картинку'}
                   </span>
                 </div>
 
@@ -611,21 +611,12 @@ function ElementSettings({ element }: { element: any }) {
     return (
       <>
         <SliderInput
-          label="Ширина"
+          label="Размер"
           value={(element as IconElementType).width}
           min={5}
           max={50}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { width: value })}
-        />
-
-        <SliderInput
-          label="Высота"
-          value={(element as IconElementType).height}
-          min={5}
-          max={50}
-          step={0.5}
-          onChange={(value) => updateElement(element.id, { height: value })}
+          onChange={(value) => updateElement(element.id, { width: value, height: value })}
         />
 
         <SliderInput
@@ -661,7 +652,7 @@ function ElementSettings({ element }: { element: any }) {
               fontWeight: '500',
             }}
           >
-            Заменить иконку
+            Заменить картинку
           </button>
         </div>
 

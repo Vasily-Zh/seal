@@ -11,13 +11,13 @@ interface IconElementProps {
 export const IconElement = ({ element, scale }: IconElementProps) => {
   if (!element.visible) return null;
 
-  // Получаем компонент иконки в зависимости от источника
+  // Получаем компонент картинки в зависимости от источника
   const IconComponent = useMemo(() => {
     if (element.iconSource === 'lucide') {
-      // @ts-expect-error - динамический импорт иконки из lucide-react
+      // @ts-expect-error - динамический импорт картинки из lucide-react
       return LucideIcons[element.iconName];
     } else if (element.iconSource === 'heroicons') {
-      // @ts-expect-error - динамический импорт иконки из heroicons
+      // @ts-expect-error - динамический импорт картинки из heroicons
       return HeroIcons[element.iconName];
     } else if (element.iconSource === 'custom' && element.svgContent) {
       // Для custom SVG возвращаем null, будем рендерить через dangerouslySetInnerHTML
@@ -42,7 +42,7 @@ export const IconElement = ({ element, scale }: IconElementProps) => {
     return null;
   }
 
-  // Рендерим иконку из lucide-react или heroicons
+  // Рендерим картинку из lucide-react или heroicons
   // Эти библиотеки возвращают SVG, который мы можем вставить в foreignObject
   return (
     <foreignObject

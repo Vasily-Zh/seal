@@ -21,17 +21,17 @@ export const IconGalleryModal = ({ isOpen, onClose }: IconGalleryModalProps) => 
   const addElement = useStampStore((state) => state.addElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
-  // Получаем иконки текущей категории
+  // Получаем картинки текущей категории
   const currentCategoryIcons = useMemo(() => {
     if (selectedCategory === 'all') {
-      // Возвращаем все иконки из всех категорий
+      // Возвращаем все картинки из всех категорий
       return categories.flatMap((cat) => cat.icons);
     }
     const category = categories.find((c) => c.id === selectedCategory);
     return category ? category.icons : [];
   }, [selectedCategory]);
 
-  // Фильтруем иконки по поисковому запросу
+  // Фильтруем картинки по поисковому запросу
   const filteredIcons = useMemo(() => {
     if (!searchQuery.trim()) {
       return currentCategoryIcons;
@@ -44,15 +44,15 @@ export const IconGalleryModal = ({ isOpen, onClose }: IconGalleryModalProps) => 
     );
   }, [currentCategoryIcons, searchQuery]);
 
-  // Показываем только первые displayCount иконок
+  // Показываем только первые displayCount картинок
   const displayedIcons = useMemo(() => {
     return filteredIcons.slice(0, displayCount);
   }, [filteredIcons, displayCount]);
 
-  // Проверяем, есть ли еще иконки для загрузки
+  // Проверяем, есть ли еще картинки для загрузки
   const hasMore = displayedIcons.length < filteredIcons.length;
 
-  // Обработчик выбора иконки
+  // Обработчик выбора картинки
   const handleIconSelect = (icon: IconInfo) => {
     addElement({
       id: `icon-${Date.now()}`,
@@ -69,7 +69,7 @@ export const IconGalleryModal = ({ isOpen, onClose }: IconGalleryModalProps) => 
     onClose();
   };
 
-  // Обработчик загрузки дополнительных иконок
+  // Обработчик загрузки дополнительных картинок
   const handleLoadMore = () => {
     setDisplayCount((prev) => prev + ICONS_PER_PAGE);
   };
@@ -82,7 +82,7 @@ export const IconGalleryModal = ({ isOpen, onClose }: IconGalleryModalProps) => 
     setIsDropdownOpen(false);
   };
 
-  // Рендер иконки
+  // Рендер картинки
   const renderIcon = (icon: IconInfo) => {
     if (icon.source === 'lucide') {
       // @ts-expect-error - динамический импорт
@@ -338,7 +338,7 @@ export const IconGalleryModal = ({ isOpen, onClose }: IconGalleryModalProps) => 
                 color: '#9ca3af',
               }}
             >
-              Иконки не найдены
+              Картинки не найдены
             </div>
           )}
         </div>

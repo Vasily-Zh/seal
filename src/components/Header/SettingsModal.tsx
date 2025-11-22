@@ -87,7 +87,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             </p>
             <p style={{ margin: '8px 0 0', fontSize: 14 }}>
               Здесь вы сможете настраивать различные параметры конструктора,
-              загружать custom SVG иконки, и управлять другими параметрами.
+              загружать custom SVG картинки, и управлять другими параметрами.
             </p>
           </div>
         </div>
