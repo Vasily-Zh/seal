@@ -4,7 +4,8 @@ import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
 import { IconGalleryModal } from './IconGalleryModal';
 import { IconSearchModal } from './IconSearchModal';
-import { VectorizeModal } from './VectorizeModal';
+import { vectorizeImage } from '../../utils/vectorize';
+import { applySvgStyles } from '../../utils/extractSvgFromIcon';
 
 export const Toolbar = () => {
   const addElement = useStampStore((state) => state.addElement);
@@ -12,8 +13,7 @@ export const Toolbar = () => {
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
   const [isIconSearchOpen, setIsIconSearchOpen] = useState(false);
-  const [isVectorizeModalOpen, setIsVectorizeModalOpen] = useState(false);
-  const [pendingImageData, setPendingImageData] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAddCircle = () => {
     addElement({
@@ -81,15 +81,38 @@ export const Toolbar = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/png,image/jpeg,image/jpg';
-    input.onchange = (e: Event) => {
+    input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           const src = event.target?.result as string;
-          // Открываем модальное окно векторизации
-          setPendingImageData(src);
-          setIsVectorizeModalOpen(true);
+
+          // Автоматическая конвертация: высокое качество, 16 цветов, синий цвет
+          setIsProcessing(true);
+          try {
+            const svg = await vectorizeImage(src, { quality: 'high', colorCount: 16 });
+            const styledSvg = applySvgStyles(svg, { fill: '#0000ff' });
+
+            addElement({
+              id: `icon-${Date.now()}`,
+              type: 'icon',
+              iconName: 'vectorized',
+              iconSource: 'custom',
+              svgContent: styledSvg,
+              x: canvasSize / 2,
+              y: canvasSize / 2,
+              width: 20,
+              height: 20,
+              visible: true,
+              fill: '#0000ff',
+            });
+          } catch (error) {
+            console.error('Error vectorizing image:', error);
+            alert('Ошибка при конвертации изображения');
+          } finally {
+            setIsProcessing(false);
+          }
         };
         reader.readAsDataURL(file);
       }
@@ -189,18 +212,6 @@ export const Toolbar = () => {
 
       {/* Icon Search Modal */}
       <IconSearchModal isOpen={isIconSearchOpen} onClose={() => setIsIconSearchOpen(false)} />
-
-      {/* Vectorize Modal */}
-      {pendingImageData && (
-        <VectorizeModal
-          isOpen={isVectorizeModalOpen}
-          onClose={() => {
-            setIsVectorizeModalOpen(false);
-            setPendingImageData(null);
-          }}
-          imageData={pendingImageData}
-        />
-      )}
     </div>
   );
 };

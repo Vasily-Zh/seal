@@ -141,5 +141,6 @@ export const DEFAULT_CONFIG = {
   strokeWidth: 1.5, // мм
   strokeColor: '#0000ff',
   textColor: '#0000ff',
+  iconFill: '#0000ff', // цвет заливки иконок по умолчанию
   fontFamily: 'Arial, sans-serif', // шрифт по умолчанию
 };

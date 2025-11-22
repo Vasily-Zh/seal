@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import * as LucideIcons from 'lucide-react';
-import * as HeroIcons from '@heroicons/react/24/outline';
+import * as HeroIcons from '@heroicons/react/24/solid';
 
 /**
  * Извлекает SVG код из React компонента иконки и применяет стили
@@ -77,13 +77,19 @@ export function applySvgStyles(
     );
 
     graphicElements.forEach((el) => {
-      // Применяем fill
-      if (options.fill !== undefined) {
+      // Если передан только fill (без stroke), удаляем stroke
+      if (options.fill !== undefined && options.stroke === undefined) {
         el.setAttribute('fill', options.fill);
+        el.setAttribute('stroke', 'none');
       }
-
-      // Применяем stroke
-      if (options.stroke !== undefined) {
+      // Если передан только stroke (без fill), удаляем fill
+      else if (options.stroke !== undefined && options.fill === undefined) {
+        el.setAttribute('stroke', options.stroke);
+        el.setAttribute('fill', 'none');
+      }
+      // Если переданы оба, применяем оба
+      else if (options.fill !== undefined && options.stroke !== undefined) {
+        el.setAttribute('fill', options.fill);
         el.setAttribute('stroke', options.stroke);
       }
 

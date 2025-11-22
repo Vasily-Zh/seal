@@ -79,6 +79,8 @@ export const IconSearchModal = ({ isOpen, onClose }: IconSearchModalProps) => {
       height: 15,
       visible: true,
       svgContent: undefined,
+      // Lucide иконки используют stroke, Heroicons используют fill
+      ...(icon.source === 'lucide' ? { stroke: '#0000ff', strokeWidth: 2 } : { fill: '#0000ff' }),
     });
     onClose();
   };

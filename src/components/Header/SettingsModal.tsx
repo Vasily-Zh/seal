@@ -1,4 +1,7 @@
-import { X } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
+import { useState } from 'react';
+import { useStampStore } from '../../store/useStampStore';
+import { applySvgStyles } from '../../utils/extractSvgFromIcon';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -6,6 +9,58 @@ interface SettingsModalProps {
 }
 
 export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
+  const addElement = useStampStore((state) => state.addElement);
+  const canvasSize = useStampStore((state) => state.canvasSize);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleSvgUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.svg,image/svg+xml';
+    input.onchange = (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        setIsUploading(true);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const svgContent = event.target?.result as string;
+            // Применяем синий цвет
+            const styledSvg = applySvgStyles(svgContent, { fill: '#0000ff' });
+
+            // Добавляем на канвас
+            addElement({
+              id: `icon-${Date.now()}`,
+              type: 'icon',
+              iconName: 'custom-svg',
+              iconSource: 'custom',
+              svgContent: styledSvg,
+              x: canvasSize / 2,
+              y: canvasSize / 2,
+              width: 20,
+              height: 20,
+              visible: true,
+              fill: '#0000ff',
+            });
+
+            onClose();
+          } catch (error) {
+            console.error('Error loading SVG:', error);
+            alert('Ошибка при загрузке SVG файла');
+          } finally {
+            setIsUploading(false);
+          }
+        };
+        reader.onerror = () => {
+          alert('Ошибка при чтении файла');
+          setIsUploading(false);
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -75,20 +130,56 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             padding: 24,
           }}
         >
+          {/* Загрузка SVG */}
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: '#111827' }}>
+              Загрузка своего SVG
+            </h3>
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+              Загрузите свой SVG файл. Он будет автоматически добавлен на канвас с синей заливкой.
+            </p>
+            <button
+              onClick={handleSvgUpload}
+              disabled={isUploading}
+              style={{
+                width: '100%',
+                padding: '16px',
+                backgroundColor: isUploading ? '#9ca3af' : '#10b981',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: isUploading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              <Upload size={18} />
+              {isUploading ? 'Загрузка...' : 'Загрузить SVG файл'}
+            </button>
+          </div>
+
+          {/* Информация */}
           <div
             style={{
-              padding: 40,
-              textAlign: 'center',
-              color: '#6b7280',
+              padding: 16,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: 8,
             }}
           >
-            <p style={{ margin: 0, fontSize: 14 }}>
-              Функционал настроек находится в разработке.
-            </p>
-            <p style={{ margin: '8px 0 0', fontSize: 14 }}>
-              Здесь вы сможете настраивать различные параметры конструктора,
-              загружать custom SVG картинки, и управлять другими параметрами.
-            </p>
+            <h4 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px 0', color: '#1e40af' }}>
+              Информация о загрузке SVG
+            </h4>
+            <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#1e40af' }}>
+              <li>Поддерживаются только .svg файлы</li>
+              <li>SVG автоматически получит синюю заливку (#0000ff)</li>
+              <li>Файл будет добавлен на канвас в центре</li>
+              <li>После добавления вы можете изменить размер и позицию</li>
+            </ul>
           </div>
         </div>
 
