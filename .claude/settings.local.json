@@ -4,7 +4,9 @@
       "Bash(npm install:*)",
       "Bash(npm run dev:*)",
       "Bash(npm run build:*)",
-      "Bash(git -C \"C:\\Users\\user\\Desktop\\vjik-1\" log --oneline)"
+      "Bash(git -C \"C:\\Users\\user\\Desktop\\vjik-1\" log --oneline)",
+      "Bash(node:*)",
+      "Bash(del:*)"
     ],
     "deny": [],
     "ask": []
