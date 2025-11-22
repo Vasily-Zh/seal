@@ -124,7 +124,7 @@ export const DEFAULT_CONFIG = {
   canvasSize: 100, // мм
   circleRadius: 39, // мм
   fontSize: 6, // мм
-  strokeWidth: 3, // мм
+  strokeWidth: 1.5, // мм
   strokeColor: '#0000ff',
   textColor: '#0000ff',
 };

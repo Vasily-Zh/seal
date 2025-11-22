@@ -1,4 +1,4 @@
-import { Circle, Type, Square, Image } from 'lucide-react';
+import { Circle, Type, Square, Image, Orbit } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
@@ -99,7 +99,7 @@ export const Toolbar = () => {
 
   const tools = [
     { icon: Circle, label: 'Добавить круг', onClick: handleAddCircle, id: 'circle' },
-    { icon: Type, label: 'Добавить текст по кругу', onClick: handleAddCurvedText, id: 'curvedText' },
+    { icon: Orbit, label: 'Добавить текст по кругу', onClick: handleAddCurvedText, id: 'curvedText' },
     { icon: Type, label: 'Добавить текст', onClick: handleAddCenteredText, id: 'text' },
     { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
     { icon: Image, label: 'Добавить картинку', onClick: handleAddImage, id: 'image' },
