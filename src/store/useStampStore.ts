@@ -2,12 +2,65 @@ import { create } from 'zustand';
 import type { StampStore, StampElement } from '../types';
 import { DEFAULT_CONFIG } from '../types';
 
+// Начальные элементы по умолчанию
+const initialElements: StampElement[] = [
+  // Круг
+  {
+    id: 'circle-default',
+    type: 'circle',
+    x: 50,
+    y: 50,
+    radius: 39,
+    strokeWidth: 1.5,
+    stroke: '#0000ff',
+    visible: true,
+  },
+  // Текст по кругу (верхний)
+  {
+    id: 'text-default-1',
+    type: 'text',
+    text: 'Текст по кругу',
+    x: 50,
+    y: 50,
+    fontSize: 6,
+    fontFamily: 'Arial, sans-serif',
+    curved: true,
+    curveRadius: 33.5,
+    startAngle: 270,
+    letterSpacing: 0,
+    color: '#0000ff',
+    flipped: true,
+    bold: false,
+    italic: false,
+    visible: true,
+  },
+  // Текст по кругу (нижний)
+  {
+    id: 'text-default-2',
+    type: 'text',
+    text: 'Текст по кругу',
+    x: 50,
+    y: 50,
+    fontSize: 6,
+    fontFamily: 'Arial, sans-serif',
+    curved: true,
+    curveRadius: 30.5,
+    startAngle: 90,
+    letterSpacing: 0,
+    color: '#0000ff',
+    flipped: false,
+    bold: false,
+    italic: false,
+    visible: true,
+  },
+];
+
 export const useStampStore = create<StampStore>((set, get) => ({
   // Начальное состояние
-  elements: [],
+  elements: initialElements,
   selectedElementId: null,
   canvasSize: DEFAULT_CONFIG.canvasSize,
-  history: [[]],
+  history: [initialElements],
   historyIndex: 0,
 
   // Добавление элемента
