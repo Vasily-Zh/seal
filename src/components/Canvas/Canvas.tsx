@@ -2,6 +2,9 @@ import { useRef } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { CircleElement } from './elements/CircleElement';
 import { TextElement } from './elements/TextElement';
+import { TextCenteredElement } from './elements/TextCenteredElement';
+import { RectangleElement } from './elements/RectangleElement';
+import { ImageElement } from './elements/ImageElement';
 
 export const Canvas = () => {
   const canvasRef = useRef<SVGSVGElement>(null);
@@ -126,6 +129,12 @@ export const Canvas = () => {
                 return <CircleElement key={element.id} element={element} scale={scale} />;
               case 'text':
                 return <TextElement key={element.id} element={element} scale={scale} />;
+              case 'textCentered':
+                return <TextCenteredElement key={element.id} element={element} scale={scale} />;
+              case 'rectangle':
+                return <RectangleElement key={element.id} element={element} scale={scale} />;
+              case 'image':
+                return <ImageElement key={element.id} element={element} scale={scale} />;
               default:
                 return null;
             }

@@ -1,6 +1,6 @@
 // Типы элементов печати
 
-export type ElementType = 'circle' | 'text' | 'triangle' | 'rectangle' | 'line' | 'image';
+export type ElementType = 'circle' | 'text' | 'textCentered' | 'triangle' | 'rectangle' | 'line' | 'image';
 
 export interface BaseElement {
   id: string;
@@ -29,6 +29,16 @@ export interface TextElement extends BaseElement {
   startAngle?: number; // начальный угол для текста по кругу
   color: string;
   letterSpacing?: number;
+  bold?: boolean;
+  italic?: boolean;
+}
+
+export interface TextCenteredElement extends BaseElement {
+  type: 'textCentered';
+  text: string;
+  fontSize: number;
+  fontFamily: string;
+  color: string;
   bold?: boolean;
   italic?: boolean;
 }
@@ -68,6 +78,7 @@ export interface ImageElement extends BaseElement {
 export type StampElement =
   | CircleElement
   | TextElement
+  | TextCenteredElement
   | RectangleElement
   | TriangleElement
   | LineElement
