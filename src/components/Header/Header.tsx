@@ -1,7 +1,8 @@
-import { Undo2, Redo2, Download } from 'lucide-react';
+import { Undo2, Redo2, Download, Settings } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
 import { exportToPNG, exportToSVG } from '../../utils/export';
 import { useState } from 'react';
+import { SettingsModal } from './SettingsModal';
 
 export const Header = () => {
   const undo = useStampStore((state) => state.undo);
@@ -9,6 +10,7 @@ export const Header = () => {
   const canUndo = useStampStore((state) => state.canUndo());
   const canRedo = useStampStore((state) => state.canRedo());
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const handleExportPNG = () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
@@ -166,7 +168,31 @@ export const Header = () => {
             </div>
           )}
         </div>
+
+        {/* Кнопка Настройки */}
+        <button
+          onClick={() => setShowSettings(true)}
+          style={{
+            padding: '8px 16px',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            backgroundColor: '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            color: '#374151',
+          }}
+        >
+          <Settings size={16} />
+          Настройки
+        </button>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </header>
   );
 };

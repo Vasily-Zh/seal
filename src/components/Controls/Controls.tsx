@@ -1,8 +1,10 @@
 import { Trash2, Eye, EyeOff, GripVertical } from 'lucide-react';
+import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
 import { ALL_FONTS } from '../../utils/fonts';
-import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, ImageElement as ImageElementType } from '../../types';
+import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, ImageElement as ImageElementType, IconElement as IconElementType } from '../../types';
+import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
 
 interface ControlsProps {
   showOnlyElements?: boolean;
@@ -50,6 +52,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                     {element.type === 'textCentered' && 'Добавить текст'}
                     {element.type === 'rectangle' && 'Добавить прямоугольник'}
                     {element.type === 'image' && 'Добавить картинку'}
+                    {element.type === 'icon' && 'Добавить иконку'}
                   </span>
                 </div>
 
@@ -139,6 +142,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                     {element.type === 'textCentered' && 'Добавить текст'}
                     {element.type === 'rectangle' && 'Добавить прямоугольник'}
                     {element.type === 'image' && 'Добавить картинку'}
+                    {element.type === 'icon' && 'Добавить иконку'}
                   </span>
                 </div>
 
@@ -200,6 +204,8 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
 // Компонент для редактирования параметров элемента
 function ElementSettings({ element }: { element: any }) {
   const updateElement = useStampStore((state) => state.updateElement);
+  const addElement = useStampStore((state) => state.addElement);
+  const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
 
   if (element.type === 'circle') {
     return (
@@ -598,6 +604,73 @@ function ElementSettings({ element }: { element: any }) {
             Заменить изображение
           </button>
         </div>
+      </>
+    );
+  }
+
+  if (element.type === 'icon') {
+    return (
+      <>
+        <SliderInput
+          label="Ширина"
+          value={(element as IconElementType).width}
+          min={5}
+          max={50}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { width: value })}
+        />
+
+        <SliderInput
+          label="Высота"
+          value={(element as IconElementType).height}
+          min={5}
+          max={50}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { height: value })}
+        />
+
+        <SliderInput
+          label="Смещение по X"
+          value={element.x}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { x: value })}
+        />
+
+        <SliderInput
+          label="Смещение по Y"
+          value={element.y}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { y: value })}
+        />
+
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => setIsIconGalleryOpen(true)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+            }}
+          >
+            Заменить иконку
+          </button>
+        </div>
+
+        {/* Icon Gallery Modal */}
+        <IconGalleryModal
+          isOpen={isIconGalleryOpen}
+          onClose={() => setIsIconGalleryOpen(false)}
+        />
       </>
     );
   }

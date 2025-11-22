@@ -1,6 +1,6 @@
 // Типы элементов печати
 
-export type ElementType = 'circle' | 'text' | 'textCentered' | 'triangle' | 'rectangle' | 'line' | 'image';
+export type ElementType = 'circle' | 'text' | 'textCentered' | 'triangle' | 'rectangle' | 'line' | 'image' | 'icon';
 
 export interface BaseElement {
   id: string;
@@ -77,6 +77,15 @@ export interface ImageElement extends BaseElement {
   height: number;
 }
 
+export interface IconElement extends BaseElement {
+  type: 'icon';
+  iconName: string;
+  iconSource: 'lucide' | 'heroicons' | 'custom';
+  width: number;
+  height: number;
+  svgContent?: string; // для custom SVG
+}
+
 export type StampElement =
   | CircleElement
   | TextElement
@@ -84,7 +93,8 @@ export type StampElement =
   | RectangleElement
   | TriangleElement
   | LineElement
-  | ImageElement;
+  | ImageElement
+  | IconElement;
 
 // Интерфейс Store
 export interface StampStore {

@@ -1,12 +1,14 @@
-import { Circle, Type, Square, Image, Orbit } from 'lucide-react';
+import { Circle, Type, Square, Image, Orbit, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
+import { IconGalleryModal } from './IconGalleryModal';
 
 export const Toolbar = () => {
   const addElement = useStampStore((state) => state.addElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
+  const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
 
   const handleAddCircle = () => {
     addElement({
@@ -103,6 +105,7 @@ export const Toolbar = () => {
     { icon: Type, label: 'Добавить текст', onClick: handleAddCenteredText, id: 'text' },
     { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
     { icon: Image, label: 'Добавить картинку', onClick: handleAddImage, id: 'image' },
+    { icon: Star, label: 'Добавить иконку', onClick: () => setIsIconGalleryOpen(true), id: 'icon' },
   ];
 
   return (
@@ -179,6 +182,9 @@ export const Toolbar = () => {
           )}
         </div>
       ))}
+
+      {/* Icon Gallery Modal */}
+      <IconGalleryModal isOpen={isIconGalleryOpen} onClose={() => setIsIconGalleryOpen(false)} />
     </div>
   );
 };

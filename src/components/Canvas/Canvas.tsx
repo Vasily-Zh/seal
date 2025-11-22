@@ -5,6 +5,7 @@ import { TextElement } from './elements/TextElement';
 import { TextCenteredElement } from './elements/TextCenteredElement';
 import { RectangleElement } from './elements/RectangleElement';
 import { ImageElement } from './elements/ImageElement';
+import { IconElement } from './elements/IconElement';
 
 export const Canvas = () => {
   const canvasRef = useRef<SVGSVGElement>(null);
@@ -168,6 +169,8 @@ export const Canvas = () => {
                 return <RectangleElement key={element.id} element={element} scale={scale} />;
               case 'image':
                 return <ImageElement key={element.id} element={element} scale={scale} />;
+              case 'icon':
+                return <IconElement key={element.id} element={element} scale={scale} />;
               default:
                 return null;
             }
