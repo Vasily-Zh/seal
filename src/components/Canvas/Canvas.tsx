@@ -11,8 +11,9 @@ export const Canvas = () => {
   const elements = useStampStore((state) => state.elements);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
-  // Размер SVG в пикселях (для отображения)
-  const svgSize = 600; // px
+  // Размер SVG в пикселях (для отображения) - адаптивный
+  const maxSvgSize = 450; // максимальный размер для превью
+  const svgSize = maxSvgSize;
   const scale = svgSize / canvasSize;
 
   // Размер сетки в мм
@@ -31,12 +32,8 @@ export const Canvas = () => {
         position: 'relative',
       }}
     >
-      <div style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '500', color: '#6b7280' }}>
-        Превью
-      </div>
-
       {/* SVG Canvas */}
-      <div style={{ position: 'relative', border: '2px solid #e5e7eb', backgroundColor: 'white' }}>
+      <div style={{ position: 'relative', border: '1px solid #d1d5db', backgroundColor: 'white', maxWidth: '100%', maxHeight: '100%' }}>
         <svg
           ref={canvasRef}
           width={svgSize}
@@ -140,19 +137,6 @@ export const Canvas = () => {
             }
           })}
         </svg>
-
-        {/* Размеры внизу */}
-        <div
-          style={{
-            marginTop: '12px',
-            textAlign: 'center',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#374151',
-          }}
-        >
-          Размер клише: {canvasSize} мм × {canvasSize} мм
-        </div>
       </div>
     </div>
   );

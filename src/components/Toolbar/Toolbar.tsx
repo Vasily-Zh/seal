@@ -109,9 +109,9 @@ export const Toolbar = () => {
     <div
       style={{
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
         gap: '8px',
-        flexWrap: 'wrap',
+        width: '100%',
       }}
     >
       {tools.map((tool) => (
