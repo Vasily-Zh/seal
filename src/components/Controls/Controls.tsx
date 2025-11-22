@@ -211,11 +211,14 @@ function ElementSettings({ element }: { element: any }) {
   const [isConverting, setIsConverting] = useState(false);
 
   if (element.type === 'circle') {
+    const circleElement = element as CircleElementType;
+    const hasFill = circleElement.fill && circleElement.fill !== 'none';
+
     return (
       <>
         <SliderInput
           label="Радиус круга"
-          value={(element as CircleElementType).radius}
+          value={circleElement.radius}
           min={10}
           max={50}
           step={0.5}
@@ -224,7 +227,7 @@ function ElementSettings({ element }: { element: any }) {
 
         <SliderInput
           label="Обводка"
-          value={(element as CircleElementType).strokeWidth}
+          value={circleElement.strokeWidth}
           min={0}
           max={10}
           step={0.5}
@@ -233,7 +236,7 @@ function ElementSettings({ element }: { element: any }) {
 
         <SliderInput
           label="Прерывистая обводка"
-          value={(element as CircleElementType).strokeDashArray || 0}
+          value={circleElement.strokeDashArray || 0}
           min={0}
           max={20}
           step={1}
@@ -257,6 +260,34 @@ function ElementSettings({ element }: { element: any }) {
           step={1}
           onChange={(value) => updateElement(element.id, { y: value })}
         />
+
+        {/* Кнопка переключения заливки/обводки */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => {
+              if (hasFill) {
+                // Переключить на обводку
+                updateElement(element.id, { fill: undefined, stroke: '#0000ff', strokeWidth: 1.5 });
+              } else {
+                // Переключить на заливку
+                updateElement(element.id, { fill: '#0000ff', stroke: undefined, strokeWidth: undefined });
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#0000ff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+            }}
+          >
+            {hasFill ? 'Обводка' : 'Заливка'}
+          </button>
+        </div>
       </>
     );
   }

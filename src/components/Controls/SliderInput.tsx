@@ -20,11 +20,13 @@ export const SliderInput = ({
   onChange,
   unit = '',
 }: SliderInputProps) => {
-  const [inputValue, setInputValue] = useState(value.toString());
+  // Защита от undefined/null значений
+  const safeValue = value ?? min;
+  const [inputValue, setInputValue] = useState(safeValue.toString());
 
   useEffect(() => {
-    setInputValue(value.toString());
-  }, [value]);
+    setInputValue(safeValue.toString());
+  }, [safeValue]);
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
@@ -38,7 +40,7 @@ export const SliderInput = ({
   const handleInputBlur = () => {
     let newValue = parseFloat(inputValue);
     if (isNaN(newValue)) {
-      newValue = value;
+      newValue = safeValue;
     } else {
       newValue = Math.max(min, Math.min(max, newValue));
     }
@@ -47,12 +49,12 @@ export const SliderInput = ({
   };
 
   const handleIncrement = () => {
-    const newValue = Math.min(max, value + step);
+    const newValue = Math.min(max, safeValue + step);
     onChange(newValue);
   };
 
   const handleDecrement = () => {
-    const newValue = Math.max(min, value - step);
+    const newValue = Math.max(min, safeValue - step);
     onChange(newValue);
   };
 
@@ -94,13 +96,13 @@ export const SliderInput = ({
           }}>
             <button
               onClick={handleIncrement}
-              disabled={value >= max}
+              disabled={safeValue >= max}
               style={{
                 padding: '2px 4px',
                 border: '1px solid #d1d5db',
                 borderRadius: '4px',
-                backgroundColor: value >= max ? '#f3f4f6' : '#fff',
-                cursor: value >= max ? 'not-allowed' : 'pointer',
+                backgroundColor: safeValue >= max ? '#f3f4f6' : '#fff',
+                cursor: safeValue >= max ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -110,13 +112,13 @@ export const SliderInput = ({
             </button>
             <button
               onClick={handleDecrement}
-              disabled={value <= min}
+              disabled={safeValue <= min}
               style={{
                 padding: '2px 4px',
                 border: '1px solid #d1d5db',
                 borderRadius: '4px',
-                backgroundColor: value <= min ? '#f3f4f6' : '#fff',
-                cursor: value <= min ? 'not-allowed' : 'pointer',
+                backgroundColor: safeValue <= min ? '#f3f4f6' : '#fff',
+                cursor: safeValue <= min ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -140,7 +142,7 @@ export const SliderInput = ({
               textAlign: 'center',
             }}
           >
-            {value}{unit}
+            {safeValue}{unit}
           </div>
         </div>
 
@@ -150,14 +152,14 @@ export const SliderInput = ({
           min={min}
           max={max}
           step={step}
-          value={value}
+          value={safeValue}
           onChange={handleSliderChange}
           style={{
             flex: 1,
             height: '6px',
             borderRadius: '3px',
             outline: 'none',
-            background: `linear-gradient(to right, #10b981 0%, #10b981 ${((value - min) / (max - min)) * 100}%, #e5e7eb ${((value - min) / (max - min)) * 100}%, #e5e7eb 100%)`,
+            background: `linear-gradient(to right, #10b981 0%, #10b981 ${((safeValue - min) / (max - min)) * 100}%, #e5e7eb ${((safeValue - min) / (max - min)) * 100}%, #e5e7eb 100%)`,
           }}
         />
       </div>
