@@ -81,15 +81,10 @@ public/
 ## Шрифты
 
 ### С засечками (Serif):
-1. Playfair Display
-2. Merriweather
-3. Lora
-4. PT Serif
-5. Crimson Text
+1. Times New Roman
 
 ### Без засечек (Sans-serif):
-1. Roboto
-2. Open Sans
-3. Montserrat
-4. Raleway
-5. Ubuntu
+1. Arial
+2. Roboto
+3. Open Sans
+4. Ubuntu
