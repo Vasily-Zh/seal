@@ -221,7 +221,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Радиус круга"
           value={circleElement.radius}
           min={10}
-          max={50}
+          max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { radius: value })}
         />
@@ -375,7 +375,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Радиус кривой"
           value={(element as TextElementType).curveRadius || 39}
           min={10}
-          max={50}
+          max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { curveRadius: value })}
         />
@@ -600,7 +600,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Ширина"
           value={rectangleElement.width}
           min={5}
-          max={50}
+          max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { width: value })}
         />
@@ -609,7 +609,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Высота"
           value={rectangleElement.height}
           min={5}
-          max={50}
+          max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { height: value })}
         />
@@ -706,7 +706,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Ширина"
           value={imageElement.width}
           min={5}
-          max={50}
+          max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { width: value })}
         />
@@ -715,7 +715,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Высота"
           value={imageElement.height}
           min={5}
-          max={50}
+          max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { height: value })}
         />
@@ -858,7 +858,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Размер"
           value={iconElement.width}
           min={5}
-          max={50}
+          max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { width: value, height: value })}
         />
