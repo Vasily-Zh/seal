@@ -221,7 +221,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Радиус круга"
           value={circleElement.radius}
           min={10}
-          max={100}
+          max={50}
           step={0.5}
           onChange={(value) => updateElement(element.id, { radius: value })}
         />
@@ -375,7 +375,7 @@ function ElementSettings({ element }: { element: any }) {
           label="Радиус кривой"
           value={(element as TextElementType).curveRadius || 39}
           min={10}
-          max={100}
+          max={50}
           step={0.5}
           onChange={(value) => updateElement(element.id, { curveRadius: value })}
         />
