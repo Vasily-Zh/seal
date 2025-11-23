@@ -54,27 +54,23 @@ export const VectorizeModal = ({ isOpen, onClose, imageData, imageElementId }: V
   const handleApply = useCallback(() => {
     if (!previewSvg) return;
 
-    // Вычисляем размер элемента на основе исходного изображения
-    let elementWidth = 20;
-    let elementHeight = 20;
+    // Фиксированный максимальный размер - треть от размера печати
+    const maxSize = canvasSize / 3; // ~33 мм для печати 100 мм
+    let elementWidth = maxSize;
+    let elementHeight = maxSize;
 
     if (imageDimensions) {
-      const maxSize = canvasSize * 0.6; // Максимум 60% от размера холста
       const imgRatio = imageDimensions.width / imageDimensions.height;
 
       if (imgRatio >= 1) {
         // Ширина больше или равна высоте
-        elementWidth = Math.min(imageDimensions.width / 20, maxSize); // Масштабируем из пиксели в мм
-        elementHeight = elementWidth / imgRatio;
+        elementWidth = maxSize;
+        elementHeight = maxSize / imgRatio;
       } else {
         // Высота больше ширины
-        elementHeight = Math.min(imageDimensions.height / 20, maxSize);
-        elementWidth = elementHeight * imgRatio;
+        elementHeight = maxSize;
+        elementWidth = maxSize * imgRatio;
       }
-
-      // Убеждаемся что размеры разумные
-      elementWidth = Math.max(5, Math.min(elementWidth, maxSize));
-      elementHeight = Math.max(5, Math.min(elementHeight, maxSize));
     }
 
     if (imageElementId) {

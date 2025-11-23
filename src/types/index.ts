@@ -123,6 +123,9 @@ export interface StampStore {
 
   // История
   saveToHistory: () => void;
+
+  // Центрирование
+  centerElement: (id: string) => void;
 }
 
 // Конфигурация шрифтов

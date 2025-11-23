@@ -1,4 +1,4 @@
-import { Trash2, Eye, EyeOff, GripVertical } from 'lucide-react';
+import { Trash2, Eye, EyeOff, GripVertical, Target } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
@@ -206,6 +206,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
 // Компонент для редактирования параметров элемента
 function ElementSettings({ element }: { element: any }) {
   const updateElement = useStampStore((state) => state.updateElement);
+  const centerElement = useStampStore((state) => state.centerElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
@@ -260,6 +261,31 @@ function ElementSettings({ element }: { element: any }) {
           step={1}
           onChange={(value) => updateElement(element.id, { y: value })}
         />
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
 
         {/* Кнопка переключения заливки/обводки */}
         <div style={{ marginTop: '16px' }}>
@@ -404,6 +430,31 @@ function ElementSettings({ element }: { element: any }) {
             <span style={{ fontSize: '14px', fontWeight: '500' }}>Перевернуть</span>
           </label>
         </div>
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
       </>
     );
   }
@@ -510,6 +561,31 @@ function ElementSettings({ element }: { element: any }) {
             <span style={{ fontSize: '14px', fontWeight: '500' }}>Перевернуть</span>
           </label>
         </div>
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
       </>
     );
   }
@@ -564,6 +640,31 @@ function ElementSettings({ element }: { element: any }) {
           step={1}
           onChange={(value) => updateElement(element.id, { y: value })}
         />
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
 
         {/* Кнопка переключения заливки/обводки */}
         <div style={{ marginTop: '16px' }}>
@@ -636,6 +737,31 @@ function ElementSettings({ element }: { element: any }) {
           step={1}
           onChange={(value) => updateElement(element.id, { y: value })}
         />
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
 
         {/* Кнопка конвертации в SVG */}
         <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px' }}>
@@ -754,6 +880,31 @@ function ElementSettings({ element }: { element: any }) {
           step={1}
           onChange={(value) => updateElement(element.id, { y: value })}
         />
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
 
         {/* Кнопка переключения заливки/обводки */}
         <div style={{ marginTop: '16px' }}>

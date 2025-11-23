@@ -176,4 +176,18 @@ export const useStampStore = create<StampStore>((set, get) => ({
     const state = get();
     return state.historyIndex < state.history.length - 1;
   },
+
+  // Центрирование элемента
+  centerElement: (id: string) => {
+    const state = get();
+    const centerX = state.canvasSize / 2;
+    const centerY = state.canvasSize / 2;
+
+    set((state) => ({
+      elements: state.elements.map((el) =>
+        el.id === id ? ({ ...el, x: centerX, y: centerY } as StampElement) : el
+      ),
+    }));
+    get().saveToHistory();
+  },
 }));

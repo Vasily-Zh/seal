@@ -1,7 +1,10 @@
-import { X, Upload } from 'lucide-react';
-import { useState } from 'react';
+import { X, Upload, ShieldCheck, LogIn } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { applySvgStyles } from '../../utils/extractSvgFromIcon';
+import { isAdminLoggedIn } from '../../utils/auth';
+import { AdminLoginModal } from '../Admin/AdminLoginModal';
+import { AdminPanel } from '../Admin/AdminPanel';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -12,6 +15,32 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const addElement = useStampStore((state) => state.addElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
+
+  // Проверяем статус авторизации при открытии модалки
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoggedIn(isAdminLoggedIn());
+    }
+  }, [isOpen]);
+
+  const handleLoginSuccess = (needsChange: boolean) => {
+    setIsLoggedIn(true);
+    setNeedsPasswordChange(needsChange);
+    setIsLoginModalOpen(false);
+    setIsAdminPanelOpen(true);
+  };
+
+  const handleOpenAdminPanel = () => {
+    if (isLoggedIn) {
+      setIsAdminPanelOpen(true);
+    } else {
+      setIsLoginModalOpen(true);
+    }
+  };
 
   const handleSvgUpload = () => {
     const input = document.createElement('input');
@@ -162,6 +191,48 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             </button>
           </div>
 
+          {/* Админ-панель */}
+          <div style={{ marginBottom: 24, paddingTop: 24, borderTop: '1px solid #e5e7eb' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: '#111827' }}>
+              Управление SVG-библиотекой
+            </h3>
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+              {isLoggedIn
+                ? 'Вы авторизованы как администратор. Управляйте категориями и загружайте SVG в общую библиотеку.'
+                : 'Войдите как администратор для управления категориями и SVG-файлами.'}
+            </p>
+            <button
+              onClick={handleOpenAdminPanel}
+              style={{
+                width: '100%',
+                padding: '16px',
+                backgroundColor: isLoggedIn ? '#3b82f6' : '#f59e0b',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              {isLoggedIn ? (
+                <>
+                  <ShieldCheck size={18} />
+                  Открыть админ-панель
+                </>
+              ) : (
+                <>
+                  <LogIn size={18} />
+                  Войти как администратор
+                </>
+              )}
+            </button>
+          </div>
+
           {/* Информация */}
           <div
             style={{
@@ -209,6 +280,23 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           </button>
         </div>
       </div>
+
+      {/* Модальное окно логина */}
+      <AdminLoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* Админ-панель */}
+      <AdminPanel
+        isOpen={isAdminPanelOpen}
+        onClose={() => {
+          setIsAdminPanelOpen(false);
+          setIsLoggedIn(isAdminLoggedIn()); // Обновляем статус
+        }}
+        needsPasswordChange={needsPasswordChange}
+      />
     </div>
   );
 };

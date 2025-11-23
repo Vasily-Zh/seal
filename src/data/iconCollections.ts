@@ -19,8 +19,10 @@ export type IconCategory =
 
 export interface IconInfo {
   name: string;
-  source: 'lucide' | 'heroicons';
+  source: 'lucide' | 'heroicons' | 'custom';
   displayName: string;
+  svgContent?: string; // для custom SVG
+  categoryId?: string; // для привязки к кастомной категории
 }
 
 // Функция для форматирования названия иконки (не используется, т.к. displayName заданы вручную)
@@ -782,3 +784,35 @@ export const getAllIcons = (): IconInfo[] => {
 
 // Экспортируем компоненты иконок для использования в рендере
 export { LucideIcons, HeroIcons };
+
+// Функция для получения всех категорий (библиотечные + кастомные)
+export const getAllCategories = (): { id: string; name: string; icons: IconInfo[]; isCustom?: boolean }[] => {
+  // Загружаем кастомные категории из localStorage
+  let customCategories: any[] = [];
+
+  try {
+    const data = localStorage.getItem('customIconCategories');
+    if (data) {
+      customCategories = JSON.parse(data);
+    }
+  } catch (error) {
+    console.warn('Не удалось загрузить кастомные категории:', error);
+  }
+
+  // Преобразуем кастомные категории в формат IconInfo
+  const customCategoriesFormatted = customCategories.map(cat => ({
+    id: cat.id,
+    name: cat.name,
+    isCustom: true,
+    icons: cat.icons.map((icon: any) => ({
+      name: icon.name,
+      source: 'custom' as const,
+      displayName: icon.displayName,
+      svgContent: icon.svgContent,
+      categoryId: cat.id,
+    })),
+  }));
+
+  // Объединяем библиотечные и кастомные категории
+  return [...categories, ...customCategoriesFormatted];
+};

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import * as HeroIcons from '@heroicons/react/24/solid';
-import { categories, type IconCategory, type IconInfo } from '../../data/iconCollections';
+import { getAllCategories, type IconInfo } from '../../data/iconCollections';
 import { useStampStore } from '../../store/useStampStore';
 
 interface IconGalleryModalProps {
@@ -14,7 +14,7 @@ interface IconGalleryModalProps {
 const ICONS_PER_PAGE = 25;
 
 export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGalleryModalProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<IconCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [displayCount, setDisplayCount] = useState(ICONS_PER_PAGE);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -23,15 +23,18 @@ export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGal
   const updateElement = useStampStore((state) => state.updateElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
+  // Получаем все категории (библиотечные + кастомные)
+  const allCategories = useMemo(() => getAllCategories(), []);
+
   // Получаем картинки текущей категории
   const currentCategoryIcons = useMemo(() => {
     if (selectedCategory === 'all') {
       // Возвращаем все картинки из всех категорий
-      return categories.flatMap((cat) => cat.icons);
+      return allCategories.flatMap((cat) => cat.icons);
     }
-    const category = categories.find((c) => c.id === selectedCategory);
+    const category = allCategories.find((c) => c.id === selectedCategory);
     return category ? category.icons : [];
-  }, [selectedCategory]);
+  }, [selectedCategory, allCategories]);
 
   // Фильтруем картинки по поисковому запросу
   const filteredIcons = useMemo(() => {
@@ -61,8 +64,8 @@ export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGal
       updateElement(selectedElementId, {
         iconName: icon.name,
         iconSource: icon.source,
-        svgContent: undefined,
-        // Lucide иконки используют stroke, Heroicons используют fill
+        svgContent: icon.source === 'custom' ? icon.svgContent : undefined,
+        // Lucide иконки используют stroke, Heroicons и custom используют fill
         ...(icon.source === 'lucide' ? { stroke: '#0000ff', strokeWidth: 2 } : { fill: '#0000ff' }),
       });
     } else {
@@ -77,8 +80,8 @@ export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGal
         width: 15,
         height: 15,
         visible: true,
-        svgContent: undefined,
-        // Lucide иконки используют stroke, Heroicons используют fill
+        svgContent: icon.source === 'custom' ? icon.svgContent : undefined,
+        // Lucide иконки используют stroke, Heroicons и custom используют fill
         ...(icon.source === 'lucide' ? { stroke: '#0000ff', strokeWidth: 2 } : { fill: '#0000ff' }),
       });
     }
@@ -91,7 +94,7 @@ export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGal
   };
 
   // Обработчик смены категории
-  const handleCategoryChange = (categoryId: IconCategory | 'all') => {
+  const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
     setDisplayCount(ICONS_PER_PAGE);
     setSearchQuery('');
@@ -108,9 +111,14 @@ export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGal
       // @ts-expect-error - динамический импорт
       const IconComponent = HeroIcons[icon.name];
       return IconComponent ? <IconComponent style={{ width: 32, height: 32 }} /> : null;
-    } else if (icon.source === 'custom' && icon.name) {
-      // Для custom SVG можно показать placeholder
-      return <div style={{ width: 32, height: 32, background: '#e5e7eb', borderRadius: 4 }} />;
+    } else if (icon.source === 'custom' && icon.svgContent) {
+      // Для custom SVG рендерим напрямую
+      return (
+        <div
+          style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          dangerouslySetInnerHTML={{ __html: icon.svgContent }}
+        />
+      );
     }
     return null;
   };
@@ -216,7 +224,7 @@ export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGal
               <span>
                 {selectedCategory === 'all'
                   ? 'Выбор категории'
-                  : categories.find((c) => c.id === selectedCategory)?.name || 'Выбор категории'}
+                  : allCategories.find((c) => c.id === selectedCategory)?.name || 'Выбор категории'}
               </span>
               <ChevronDown
                 size={16}
@@ -262,7 +270,7 @@ export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGal
                   Выбор категории
                 </button>
 
-                {categories.map((category) => (
+                {allCategories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => handleCategoryChange(category.id)}
@@ -276,9 +284,26 @@ export const IconGalleryModal = ({ isOpen, onClose, selectedElementId }: IconGal
                       textAlign: 'left',
                       fontSize: 14,
                       color: '#111827',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
                     }}
                   >
-                    {category.name}
+                    <span>{category.name}</span>
+                    {category.isCustom && (
+                      <span
+                        style={{
+                          fontSize: 11,
+                          padding: '2px 6px',
+                          backgroundColor: '#dbeafe',
+                          color: '#1e40af',
+                          borderRadius: 3,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Мои
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
