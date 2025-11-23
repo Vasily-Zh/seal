@@ -787,8 +787,11 @@ export { LucideIcons, HeroIcons };
 
 // Функция для получения всех категорий (библиотечные + кастомные)
 export const getAllCategories = (): { id: string; name: string; icons: IconInfo[]; isCustom?: boolean }[] => {
-  // Загружаем кастомные категории из localStorage
+  // Загружаем данные из localStorage
   let customCategories: any[] = [];
+  let hiddenBuiltinCategories: string[] = [];
+  let hiddenBuiltinIcons: Array<{ categoryId: string; iconName: string }> = [];
+  let customBuiltinIcons: Array<{ categoryId: string; icon: any }> = [];
 
   try {
     const data = localStorage.getItem('customIconCategories');
@@ -797,6 +800,33 @@ export const getAllCategories = (): { id: string; name: string; icons: IconInfo[
     }
   } catch (error) {
     console.warn('Не удалось загрузить кастомные категории:', error);
+  }
+
+  try {
+    const hiddenData = localStorage.getItem('hiddenBuiltinCategories');
+    if (hiddenData) {
+      hiddenBuiltinCategories = JSON.parse(hiddenData);
+    }
+  } catch (error) {
+    console.warn('Не удалось загрузить скрытые категории:', error);
+  }
+
+  try {
+    const hiddenIconsData = localStorage.getItem('hiddenBuiltinIcons');
+    if (hiddenIconsData) {
+      hiddenBuiltinIcons = JSON.parse(hiddenIconsData);
+    }
+  } catch (error) {
+    console.warn('Не удалось загрузить скрытые иконки:', error);
+  }
+
+  try {
+    const customIconsData = localStorage.getItem('customBuiltinIcons');
+    if (customIconsData) {
+      customBuiltinIcons = JSON.parse(customIconsData);
+    }
+  } catch (error) {
+    console.warn('Не удалось загрузить пользовательские иконки:', error);
   }
 
   // Преобразуем кастомные категории в формат IconInfo
@@ -813,6 +843,34 @@ export const getAllCategories = (): { id: string; name: string; icons: IconInfo[
     })),
   }));
 
+  // Фильтруем скрытые встроенные категории и обрабатываем иконки
+  const visibleBuiltinCategories = categories
+    .filter(cat => !hiddenBuiltinCategories.includes(cat.id))
+    .map(cat => {
+      // Фильтруем скрытые иконки
+      const visibleIcons = cat.icons.filter(
+        icon => !hiddenBuiltinIcons.some(
+          h => h.categoryId === cat.id && h.iconName === icon.name
+        )
+      );
+
+      // Добавляем пользовательские иконки для этой категории
+      const customIconsForCategory = customBuiltinIcons
+        .filter(item => item.categoryId === cat.id)
+        .map(item => ({
+          name: item.icon.name,
+          source: 'custom' as const,
+          displayName: item.icon.displayName,
+          svgContent: item.icon.svgContent,
+          categoryId: cat.id,
+        }));
+
+      return {
+        ...cat,
+        icons: [...visibleIcons, ...customIconsForCategory],
+      };
+    });
+
   // Объединяем библиотечные и кастомные категории
-  return [...categories, ...customCategoriesFormatted];
+  return [...visibleBuiltinCategories, ...customCategoriesFormatted];
 };

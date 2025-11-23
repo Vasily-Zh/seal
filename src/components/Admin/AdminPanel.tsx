@@ -11,8 +11,18 @@ import {
   importCategoriesFromJSON,
   getStorageSize,
   isCategoryNameExists,
+  hideBuiltinCategory,
+  showBuiltinCategory,
+  getHiddenBuiltinCategories,
+  hideBuiltinIcon,
+  addIconToBuiltinCategory,
+  deleteIconFromBuiltinCategory,
   type CustomCategory,
 } from '../../utils/customIcons';
+import { getAllCategories, type IconInfo } from '../../data/iconCollections';
+import { extractSvgFromIcon } from '../../utils/extractSvgFromIcon';
+import * as LucideIcons from 'lucide-react';
+import * as HeroIcons from '@heroicons/react/24/solid';
 import { changeCredentials, logout, getCurrentAdminLogin } from '../../utils/auth';
 import { processSVG, readSVGFile } from '../../utils/svgValidator';
 
@@ -24,9 +34,23 @@ interface AdminPanelProps {
 
 type Tab = 'categories' | 'settings';
 
+// Универсальный тип для отображения категорий
+interface DisplayCategory {
+  id: string;
+  name: string;
+  icons: Array<{
+    id: string;
+    name: string;
+    displayName: string;
+    svgContent?: string;
+    source?: 'lucide' | 'heroicons' | 'custom';
+  }>;
+  isCustom: boolean;
+}
+
 export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsPasswordChange }: AdminPanelProps) => {
   const [activeTab, setActiveTab] = useState<Tab>(initialNeedsPasswordChange ? 'settings' : 'categories');
-  const [categories, setCategories] = useState<CustomCategory[]>([]);
+  const [categories, setCategories] = useState<DisplayCategory[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [needsPasswordChange, setNeedsPasswordChange] = useState(initialNeedsPasswordChange);
 
@@ -55,10 +79,32 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
   }, [isOpen]);
 
   const loadCategories = () => {
-    const loaded = loadCustomCategories();
-    setCategories(loaded);
-    if (loaded.length > 0 && !selectedCategoryId) {
-      setSelectedCategoryId(loaded[0].id);
+    // Получаем все категории (библиотечные + кастомные)
+    const allCategories = getAllCategories();
+
+    // Конвертируем их в DisplayCategory синхронно
+    const displayCategories: DisplayCategory[] = allCategories.map((cat) => {
+      const icons = cat.icons.map((icon) => {
+        return {
+          id: icon.name || icon.id || '', // Для библиотечных иконок используем name как id
+          name: icon.name || '',
+          displayName: icon.displayName || '',
+          svgContent: icon.svgContent || '',
+          source: icon.source,
+        };
+      });
+
+      return {
+        id: cat.id,
+        name: cat.name,
+        icons: icons,
+        isCustom: cat.isCustom || false,
+      };
+    });
+
+    setCategories(displayCategories);
+    if (displayCategories.length > 0 && !selectedCategoryId) {
+      setSelectedCategoryId(displayCategories[0].id);
     }
   };
 
@@ -84,6 +130,12 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
   const handleRenameCategory = () => {
     if (!selectedCategoryId) return;
 
+    const category = categories.find(c => c.id === selectedCategoryId);
+    if (!category || !category.isCustom) {
+      setError('Нельзя переименовать библиотечную категорию');
+      return;
+    }
+
     if (!categoryNameInput.trim()) {
       setError('Введите название категории');
       return;
@@ -107,26 +159,47 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
     const category = categories.find(c => c.id === categoryId);
     if (!category) return;
 
-    const confirmDelete = window.confirm(
-      category.icons.length > 0
-        ? `Удалить категорию "${category.name}"? В ней ${category.icons.length} иконок.`
-        : `Удалить категорию "${category.name}"?`
-    );
+    // Для встроенных категорий - скрываем, для кастомных - удаляем
+    if (!category.isCustom) {
+      const confirmHide = window.confirm(
+        `Скрыть встроенную категорию "${category.name}"?\n\nВы сможете восстановить её позже через настройки.`
+      );
 
-    if (!confirmDelete) return;
+      if (!confirmHide) return;
 
-    const success = deleteCategory(categoryId);
-    if (success) {
-      const newCategories = categories.filter(c => c.id !== categoryId);
-      setCategories(newCategories);
-      if (selectedCategoryId === categoryId) {
-        setSelectedCategoryId(newCategories.length > 0 ? newCategories[0].id : null);
+      const success = hideBuiltinCategory(categoryId);
+      if (success) {
+        loadCategories();
+        if (selectedCategoryId === categoryId) {
+          const newCategories = categories.filter(c => c.id !== categoryId);
+          setSelectedCategoryId(newCategories.length > 0 ? newCategories[0].id : null);
+        }
+      }
+    } else {
+      const confirmDelete = window.confirm(
+        category.icons.length > 0
+          ? `Удалить категорию "${category.name}"? В ней ${category.icons.length} иконок.`
+          : `Удалить категорию "${category.name}"?`
+      );
+
+      if (!confirmDelete) return;
+
+      const success = deleteCategory(categoryId);
+      if (success) {
+        loadCategories();
+        if (selectedCategoryId === categoryId) {
+          const newCategories = categories.filter(c => c.id !== categoryId);
+          setSelectedCategoryId(newCategories.length > 0 ? newCategories[0].id : null);
+        }
       }
     }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!selectedCategoryId) return;
+
+    const category = categories.find(c => c.id === selectedCategoryId);
+    if (!category) return;
 
     const files = event.target.files;
     if (!files || files.length === 0) return;
@@ -154,7 +227,12 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
         const baseName = file.name.replace('.svg', '');
         const name = baseName.toLowerCase().replace(/\s+/g, '-');
 
-        const newIcon = addIcon(selectedCategoryId, name, baseName, processed.svg!);
+        // Для встроенных категорий используем addIconToBuiltinCategory
+        // Для кастомных - addIcon
+        const newIcon = category.isCustom
+          ? addIcon(selectedCategoryId, name, baseName, processed.svg!)
+          : addIconToBuiltinCategory(selectedCategoryId, name, baseName, processed.svg!);
+
         if (newIcon) {
           loadCategories();
         }
@@ -170,13 +248,30 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
     }
   };
 
-  const handleDeleteIcon = (iconId: string) => {
+  const handleDeleteIcon = (iconId: string, iconName: string, iconSource?: string) => {
     if (!selectedCategoryId) return;
+
+    const category = categories.find(c => c.id === selectedCategoryId);
+    if (!category) return;
 
     const confirmDelete = window.confirm('Удалить эту иконку?');
     if (!confirmDelete) return;
 
-    const success = deleteIcon(selectedCategoryId, iconId);
+    let success = false;
+
+    // Для встроенных библиотечных иконок - скрываем
+    if (!category.isCustom && (iconSource === 'lucide' || iconSource === 'heroicons')) {
+      success = hideBuiltinIcon(selectedCategoryId, iconName);
+    }
+    // Для пользовательских иконок в кастомных категориях - удаляем
+    else if (category.isCustom) {
+      success = deleteIcon(selectedCategoryId, iconId);
+    }
+    // Для пользовательских иконок во встроенных категориях - удаляем
+    else if (!category.isCustom && iconSource === 'custom') {
+      success = deleteIconFromBuiltinCategory(selectedCategoryId, iconId);
+    }
+
     if (success) {
       loadCategories();
     }
@@ -443,36 +538,56 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
+                      border: category.isCustom ? '1px solid transparent' : '1px solid #e5e7eb',
                     }}
                     onClick={() => setSelectedCategoryId(category.id)}
                   >
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 500 }}>{category.name}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {category.name}
+                        {!category.isCustom && (
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              padding: '2px 6px',
+                              backgroundColor: '#f3f4f6',
+                              color: '#666',
+                              borderRadius: '3px',
+                              fontWeight: 400,
+                            }}
+                            title="Встроенная категория"
+                          >
+                            встроенная
+                          </span>
+                        )}
+                      </div>
                       <div style={{ fontSize: '12px', color: '#666' }}>
                         {category.icons.length} иконок
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '5px' }}>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCategoryId(category.id);
-                          setCategoryNameInput(category.name);
-                          setIsRenamingCategory(true);
-                          setError('');
-                        }}
-                        style={{
-                          padding: '4px 8px',
-                          border: 'none',
-                          borderRadius: '3px',
-                          backgroundColor: '#f3f4f6',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                        }}
-                        title="Переименовать"
-                      >
-                        ✏
-                      </button>
+                      {category.isCustom && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCategoryId(category.id);
+                            setCategoryNameInput(category.name);
+                            setIsRenamingCategory(true);
+                            setError('');
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            border: 'none',
+                            borderRadius: '3px',
+                            backgroundColor: '#f3f4f6',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                          }}
+                          title="Переименовать"
+                        >
+                          ✏
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -487,9 +602,9 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
                           cursor: 'pointer',
                           fontSize: '12px',
                         }}
-                        title="Удалить"
+                        title={category.isCustom ? 'Удалить' : 'Скрыть категорию'}
                       >
-                        🗑
+                        {category.isCustom ? '🗑' : '👁‍🗨'}
                       </button>
                     </div>
                   </div>
@@ -509,6 +624,11 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
                     <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>
                         {selectedCategory.name}
+                        {!selectedCategory.isCustom && (
+                          <span style={{ fontSize: '14px', fontWeight: 400, color: '#666', marginLeft: '10px' }}>
+                            (встроенная категория)
+                          </span>
+                        )}
                       </h3>
                       <div>
                         <input
@@ -544,53 +664,72 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
                           gap: '15px',
                         }}
                       >
-                        {selectedCategory.icons.map((icon) => (
-                          <div
-                            key={icon.id}
-                            style={{
-                              border: '1px solid #e5e7eb',
-                              borderRadius: '6px',
-                              padding: '15px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              gap: '10px',
-                            }}
-                          >
+                        {selectedCategory.icons.map((icon) => {
+                          // Для библиотечных иконок рендерим React-компоненты
+                          let IconComponent = null;
+                          if (icon.source === 'lucide') {
+                            IconComponent = (LucideIcons as any)[icon.name];
+                          } else if (icon.source === 'heroicons') {
+                            IconComponent = (HeroIcons as any)[icon.name];
+                          }
+
+                          return (
                             <div
+                              key={icon.id}
                               style={{
-                                width: '60px',
-                                height: '60px',
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '6px',
+                                padding: '15px',
                                 display: 'flex',
+                                flexDirection: 'column',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
-                              dangerouslySetInnerHTML={{ __html: icon.svgContent }}
-                            />
-                            <div style={{ fontSize: '12px', textAlign: 'center', width: '100%', wordWrap: 'break-word' }}>
-                              {icon.displayName}
-                            </div>
-                            <button
-                              onClick={() => handleDeleteIcon(icon.id)}
-                              style={{
-                                padding: '5px 10px',
-                                border: 'none',
-                                borderRadius: '3px',
-                                backgroundColor: '#fee2e2',
-                                color: '#dc2626',
-                                cursor: 'pointer',
-                                fontSize: '11px',
-                                width: '100%',
+                                gap: '10px',
                               }}
                             >
-                              Удалить
-                            </button>
-                          </div>
-                        ))}
+                              <div
+                                style={{
+                                  width: '60px',
+                                  height: '60px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                {IconComponent ? (
+                                  <IconComponent size={48} strokeWidth={1.5} />
+                                ) : icon.svgContent ? (
+                                  <div dangerouslySetInnerHTML={{ __html: icon.svgContent }} />
+                                ) : (
+                                  <div style={{ color: '#ccc' }}>?</div>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '12px', textAlign: 'center', width: '100%', wordWrap: 'break-word' }}>
+                                {icon.displayName}
+                              </div>
+                              <button
+                                onClick={() => handleDeleteIcon(icon.id, icon.name, icon.source)}
+                                style={{
+                                  padding: '5px 10px',
+                                  border: 'none',
+                                  borderRadius: '3px',
+                                  backgroundColor: '#fee2e2',
+                                  color: '#dc2626',
+                                  cursor: 'pointer',
+                                  fontSize: '11px',
+                                  width: '100%',
+                                }}
+                              >
+                                Удалить
+                              </button>
+                            </div>
+                          );
+                        })}
                       </div>
                     ) : (
                       <div style={{ textAlign: 'center', color: '#999', fontSize: '14px', marginTop: '40px' }}>
-                        В этой категории пока нет иконок. Загрузите SVG-файлы.
+                        {selectedCategory.isCustom
+                          ? 'В этой категории пока нет иконок. Загрузите SVG-файлы.'
+                          : 'В этой категории пока нет иконок.'}
                       </div>
                     )}
                   </>
@@ -798,6 +937,54 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Восстановление скрытых категорий */}
+              <div style={{ marginTop: '30px', paddingTop: '30px', borderTop: '1px solid #e5e7eb' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '18px', fontWeight: 600 }}>
+                  Восстановление скрытых категорий
+                </h3>
+                {(() => {
+                  const hiddenCategories = getHiddenBuiltinCategories();
+
+                  if (hiddenCategories.length === 0) {
+                    return (
+                      <div style={{ color: '#666', fontSize: '14px' }}>
+                        Нет скрытых категорий
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                      {hiddenCategories.map((categoryId) => (
+                        <button
+                          key={categoryId}
+                          onClick={() => {
+                            showBuiltinCategory(categoryId);
+                            loadCategories();
+                          }}
+                          style={{
+                            padding: '8px 16px',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            backgroundColor: 'white',
+                            color: '#3b82f6',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                          }}
+                        >
+                          <span>↺</span>
+                          {/* Найти название категории по ID */}
+                          {categoryId.charAt(0).toUpperCase() + categoryId.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}

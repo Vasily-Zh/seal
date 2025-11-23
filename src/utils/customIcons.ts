@@ -5,6 +5,9 @@
 
 const CUSTOM_CATEGORIES_KEY = 'customIconCategories';
 const CUSTOM_SETTINGS_KEY = 'customIconSettings';
+const HIDDEN_BUILTIN_CATEGORIES_KEY = 'hiddenBuiltinCategories';
+const HIDDEN_BUILTIN_ICONS_KEY = 'hiddenBuiltinIcons'; // { categoryId: string, iconName: string }[]
+const CUSTOM_BUILTIN_ICONS_KEY = 'customBuiltinIcons'; // { categoryId: string, icon: CustomIcon }[]
 
 export interface CustomIcon {
   id: string;
@@ -367,4 +370,194 @@ export function isIconNameExists(categoryId: string, name: string, excludeId?: s
   return category.icons.some(
     ico => ico.name.toLowerCase() === trimmedName && ico.id !== excludeId
   );
+}
+
+/**
+ * Получить список скрытых встроенных категорий
+ */
+export function getHiddenBuiltinCategories(): string[] {
+  try {
+    const data = localStorage.getItem(HIDDEN_BUILTIN_CATEGORIES_KEY);
+    if (!data) return [];
+    return JSON.parse(data) as string[];
+  } catch (error) {
+    console.error('Ошибка загрузки скрытых категорий:', error);
+    return [];
+  }
+}
+
+/**
+ * Скрыть встроенную категорию
+ */
+export function hideBuiltinCategory(categoryId: string): boolean {
+  try {
+    const hidden = getHiddenBuiltinCategories();
+    if (!hidden.includes(categoryId)) {
+      hidden.push(categoryId);
+      localStorage.setItem(HIDDEN_BUILTIN_CATEGORIES_KEY, JSON.stringify(hidden));
+    }
+    return true;
+  } catch (error) {
+    console.error('Ошибка скрытия категории:', error);
+    return false;
+  }
+}
+
+/**
+ * Показать встроенную категорию
+ */
+export function showBuiltinCategory(categoryId: string): boolean {
+  try {
+    const hidden = getHiddenBuiltinCategories();
+    const index = hidden.indexOf(categoryId);
+    if (index !== -1) {
+      hidden.splice(index, 1);
+      localStorage.setItem(HIDDEN_BUILTIN_CATEGORIES_KEY, JSON.stringify(hidden));
+    }
+    return true;
+  } catch (error) {
+    console.error('Ошибка показа категории:', error);
+    return false;
+  }
+}
+
+/**
+ * Интерфейс для скрытых встроенных иконок
+ */
+export interface HiddenBuiltinIcon {
+  categoryId: string;
+  iconName: string;
+}
+
+/**
+ * Интерфейс для пользовательских иконок во встроенных категориях
+ */
+export interface CustomBuiltinIcon {
+  categoryId: string;
+  icon: CustomIcon;
+}
+
+/**
+ * Получить список скрытых встроенных иконок
+ */
+export function getHiddenBuiltinIcons(): HiddenBuiltinIcon[] {
+  try {
+    const data = localStorage.getItem(HIDDEN_BUILTIN_ICONS_KEY);
+    if (!data) return [];
+    return JSON.parse(data) as HiddenBuiltinIcon[];
+  } catch (error) {
+    console.error('Ошибка загрузки скрытых иконок:', error);
+    return [];
+  }
+}
+
+/**
+ * Скрыть встроенную иконку
+ */
+export function hideBuiltinIcon(categoryId: string, iconName: string): boolean {
+  try {
+    const hidden = getHiddenBuiltinIcons();
+    const exists = hidden.some(
+      h => h.categoryId === categoryId && h.iconName === iconName
+    );
+
+    if (!exists) {
+      hidden.push({ categoryId, iconName });
+      localStorage.setItem(HIDDEN_BUILTIN_ICONS_KEY, JSON.stringify(hidden));
+    }
+    return true;
+  } catch (error) {
+    console.error('Ошибка скрытия иконки:', error);
+    return false;
+  }
+}
+
+/**
+ * Показать встроенную иконку
+ */
+export function showBuiltinIcon(categoryId: string, iconName: string): boolean {
+  try {
+    const hidden = getHiddenBuiltinIcons();
+    const index = hidden.findIndex(
+      h => h.categoryId === categoryId && h.iconName === iconName
+    );
+
+    if (index !== -1) {
+      hidden.splice(index, 1);
+      localStorage.setItem(HIDDEN_BUILTIN_ICONS_KEY, JSON.stringify(hidden));
+    }
+    return true;
+  } catch (error) {
+    console.error('Ошибка показа иконки:', error);
+    return false;
+  }
+}
+
+/**
+ * Получить пользовательские иконки для встроенных категорий
+ */
+export function getCustomBuiltinIcons(): CustomBuiltinIcon[] {
+  try {
+    const data = localStorage.getItem(CUSTOM_BUILTIN_ICONS_KEY);
+    if (!data) return [];
+    return JSON.parse(data) as CustomBuiltinIcon[];
+  } catch (error) {
+    console.error('Ошибка загрузки пользовательских иконок:', error);
+    return [];
+  }
+}
+
+/**
+ * Добавить пользовательскую иконку во встроенную категорию
+ */
+export function addIconToBuiltinCategory(
+  categoryId: string,
+  name: string,
+  displayName: string,
+  svgContent: string
+): CustomIcon | null {
+  try {
+    const customBuiltinIcons = getCustomBuiltinIcons();
+
+    const newIcon: CustomIcon = {
+      id: generateId(),
+      name: name.trim(),
+      displayName: displayName.trim(),
+      svgContent: svgContent.trim(),
+      createdAt: Date.now(),
+    };
+
+    customBuiltinIcons.push({
+      categoryId,
+      icon: newIcon,
+    });
+
+    localStorage.setItem(CUSTOM_BUILTIN_ICONS_KEY, JSON.stringify(customBuiltinIcons));
+    return newIcon;
+  } catch (error) {
+    console.error('Ошибка добавления иконки:', error);
+    return null;
+  }
+}
+
+/**
+ * Удалить пользовательскую иконку из встроенной категории
+ */
+export function deleteIconFromBuiltinCategory(categoryId: string, iconId: string): boolean {
+  try {
+    const customBuiltinIcons = getCustomBuiltinIcons();
+    const index = customBuiltinIcons.findIndex(
+      item => item.categoryId === categoryId && item.icon.id === iconId
+    );
+
+    if (index !== -1) {
+      customBuiltinIcons.splice(index, 1);
+      localStorage.setItem(CUSTOM_BUILTIN_ICONS_KEY, JSON.stringify(customBuiltinIcons));
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Ошибка удаления иконки:', error);
+    return false;
+  }
 }
