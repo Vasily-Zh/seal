@@ -261,7 +261,6 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
 function ElementSettings({ element }: { element: any }) {
   const updateElement = useStampStore((state) => state.updateElement);
   const centerElement = useStampStore((state) => state.centerElement);
-  const canvasSize = useStampStore((state) => state.canvasSize);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
 
   if (element.type === 'circle') {

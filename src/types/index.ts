@@ -126,6 +126,7 @@ export interface StampStore {
   // Методы
   addElement: (element: StampElement) => void;
   removeElement: (id: string) => void;
+  duplicateElement: (id: string) => void;
   updateElement: (id: string, updates: Partial<StampElement>) => void;
   selectElement: (id: string | null) => void;
   getSelectedElement: () => StampElement | null;

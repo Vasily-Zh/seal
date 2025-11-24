@@ -33,6 +33,7 @@ import {
   ArrowDown,
   ChevronsUp,
   ChevronsDown,
+  Copy,
 } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
 import type { StampElement } from '../../types';
@@ -45,6 +46,7 @@ interface LayerItemProps {
   onSelect: () => void;
   onToggleVisibility: () => void;
   onToggleLock: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
@@ -84,6 +86,7 @@ const LayerItem = ({
   onSelect,
   onToggleVisibility,
   onToggleLock,
+  onDuplicate,
   onDelete,
   onMoveUp,
   onMoveDown,
@@ -280,6 +283,26 @@ const LayerItem = ({
           {element.locked ? <Lock size={16} /> : <Unlock size={16} />}
         </button>
 
+        {/* Дублирование */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate();
+          }}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '4px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            color: '#6b7280',
+          }}
+          title="Дублировать"
+        >
+          <Copy size={16} />
+        </button>
+
         {/* Видимость */}
         <button
           onClick={(e) => {
@@ -330,6 +353,7 @@ export const LayersPanel = () => {
   const selectElement = useStampStore((state) => state.selectElement);
   const updateElement = useStampStore((state) => state.updateElement);
   const removeElement = useStampStore((state) => state.removeElement);
+  const duplicateElement = useStampStore((state) => state.duplicateElement);
   const toggleElementLock = useStampStore((state) => state.toggleElementLock);
   const moveElementUp = useStampStore((state) => state.moveElementUp);
   const moveElementDown = useStampStore((state) => state.moveElementDown);
@@ -426,6 +450,7 @@ export const LayersPanel = () => {
                     onSelect={() => selectElement(element.id)}
                     onToggleVisibility={() => updateElement(element.id, { visible: !element.visible })}
                     onToggleLock={() => toggleElementLock(element.id)}
+                    onDuplicate={() => duplicateElement(element.id)}
                     onDelete={() => {
                       if (element.type === 'group') {
                         if (confirm('Удалить группу? Дочерние элементы останутся.')) {
@@ -459,6 +484,7 @@ export const LayersPanel = () => {
                           onSelect={() => selectElement(child.id)}
                           onToggleVisibility={() => updateElement(child.id, { visible: !child.visible })}
                           onToggleLock={() => toggleElementLock(child.id)}
+                          onDuplicate={() => duplicateElement(child.id)}
                           onDelete={() => removeElement(child.id)}
                           onMoveUp={() => moveElementUp(child.id)}
                           onMoveDown={() => moveElementDown(child.id)}
