@@ -2,7 +2,9 @@ import { Undo2, Redo2, Download, Settings, Save, FolderOpen } from 'lucide-react
 import { useStampStore } from '../../store/useStampStore';
 import { exportToPNG, exportToSVG } from '../../utils/export';
 import { useState } from 'react';
-import { SettingsModal } from './SettingsModal';
+import { AdminLoginModal } from '../Admin/AdminLoginModal';
+import { AdminPanel } from '../Admin/AdminPanel';
+import { isAdminLoggedIn } from '../../utils/auth';
 import { ProjectManager } from '../ProjectManager/ProjectManager';
 import { saveProject, generateThumbnail } from '../../utils/projectStorage';
 
@@ -19,9 +21,11 @@ export const Header = () => {
   const loadProjectData = useStampStore((state) => state.loadProjectData);
 
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showProjectManager, setShowProjectManager] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
 
   const handleExportPNG = () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
@@ -59,6 +63,20 @@ export const Header = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSettingsClick = () => {
+    if (isAdminLoggedIn()) {
+      setShowAdminPanel(true);
+    } else {
+      setShowLoginModal(true);
+    }
+  };
+
+  const handleLoginSuccess = (needsChange: boolean) => {
+    setNeedsPasswordChange(needsChange);
+    setShowLoginModal(false);
+    setShowAdminPanel(true);
   };
 
   return (
@@ -255,7 +273,7 @@ export const Header = () => {
 
         {/* Кнопка Настройки */}
         <button
-          onClick={() => setShowSettings(true)}
+          onClick={handleSettingsClick}
           style={{
             padding: '8px 16px',
             border: '1px solid #d1d5db',
@@ -275,8 +293,19 @@ export const Header = () => {
         </button>
       </div>
 
-      {/* Settings Modal */}
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      {/* Admin Login Modal */}
+      <AdminLoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* Admin Panel */}
+      <AdminPanel
+        isOpen={showAdminPanel}
+        onClose={() => setShowAdminPanel(false)}
+        needsPasswordChange={needsPasswordChange}
+      />
 
       {/* Project Manager */}
       <ProjectManager

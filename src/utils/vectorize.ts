@@ -205,18 +205,30 @@ export async function vectorizeWithPotrace(
       img.src = imageData;
     });
 
+    // Масштабируем большие изображения для предотвращения ошибок памяти
+    const MAX_DIMENSION = 1000; // Максимальный размер по любой стороне
+    let targetWidth = img.width;
+    let targetHeight = img.height;
+
+    if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
+      const scale = Math.min(MAX_DIMENSION / img.width, MAX_DIMENSION / img.height);
+      targetWidth = Math.floor(img.width * scale);
+      targetHeight = Math.floor(img.height * scale);
+      console.log(`Scaling image from ${img.width}x${img.height} to ${targetWidth}x${targetHeight}`);
+    }
+
     // Создаём canvas для обработки изображения
     const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {
       throw new Error('Failed to get canvas context');
     }
 
-    // Рисуем изображение
-    ctx.drawImage(img, 0, 0);
+    // Рисуем изображение (масштабированное если нужно)
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
     // Получаем данные пикселей для черно-белой конвертации
     const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
