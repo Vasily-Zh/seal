@@ -1,6 +1,6 @@
 import { Undo2, Redo2, Download, Settings, Save, FolderOpen } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
-import { exportToPNG, exportToSVG, exportToPNGTransparent, exportToPDF } from '../../utils/export';
+import { exportToZIP } from '../../utils/export';
 import { useState } from 'react';
 import { AdminLoginModal } from '../Admin/AdminLoginModal';
 import { AdminPanel } from '../Admin/AdminPanel';
@@ -20,35 +20,24 @@ export const Header = () => {
   const setCurrentProject = useStampStore((state) => state.setCurrentProject);
   const loadProjectData = useStampStore((state) => state.loadProjectData);
 
-  const [showExportMenu, setShowExportMenu] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showProjectManager, setShowProjectManager] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
 
-  const handleExportPNG = () => {
+  const handleExportZIP = async () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
-    exportToPNG(svgElement);
-    setShowExportMenu(false);
-  };
-
-  const handleExportPNGTransparent = () => {
-    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
-    exportToPNGTransparent(svgElement);
-    setShowExportMenu(false);
-  };
-
-  const handleExportSVG = () => {
-    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
-    exportToSVG(svgElement);
-    setShowExportMenu(false);
-  };
-
-  const handleExportPDF = () => {
-    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
-    exportToPDF(svgElement);
-    setShowExportMenu(false);
+    setIsExporting(true);
+    try {
+      await exportToZIP(svgElement);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Ошибка при экспорте файлов');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleSaveProject = async () => {
@@ -200,130 +189,28 @@ export const Header = () => {
           Вернуть
         </button>
 
-        {/* Кнопка Экспорт */}
-        <div style={{ position: 'relative' }}>
-          <button
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-            }}
-          >
-            <Download size={16} />
-            Сохранить
-          </button>
-
-          {showExportMenu && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '4px',
-                backgroundColor: '#fff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                zIndex: 10,
-                minWidth: '150px',
-              }}
-            >
-              <button
-                onClick={handleExportPNG}
-                style={{
-                  width: '100%',
-                  padding: '10px 16px',
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: '#374151',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Сохранить как PNG
-              </button>
-              <button
-                onClick={handleExportPNGTransparent}
-                style={{
-                  width: '100%',
-                  padding: '10px 16px',
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: '#374151',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Сохранить как PNG (без фона)
-              </button>
-              <button
-                onClick={handleExportSVG}
-                style={{
-                  width: '100%',
-                  padding: '10px 16px',
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: '#374151',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Сохранить как SVG
-              </button>
-              <button
-                onClick={handleExportPDF}
-                style={{
-                  width: '100%',
-                  padding: '10px 16px',
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: '#374151',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Сохранить как PDF
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Кнопка Скачать */}
+        <button
+          onClick={handleExportZIP}
+          disabled={isExporting}
+          style={{
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '6px',
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            cursor: isExporting ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            opacity: isExporting ? 0.6 : 1,
+          }}
+        >
+          <Download size={16} />
+          {isExporting ? 'Скачивание...' : 'Скачать'}
+        </button>
 
         {/* Кнопка Настройки */}
         <button
