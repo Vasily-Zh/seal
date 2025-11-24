@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { X, Upload, Image as ImageIcon, Wand2 } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
 import {
-  vectorizeImage,
   vectorizeWithPotrace,
-  isImageSuitableForPotrace,
   loadImageAsBase64,
-  type VectorizeQuality,
   type PotraceOptions,
 } from '../../utils/vectorize';
 import { applySvgStyles } from '../../utils/extractSvgFromIcon';
@@ -16,21 +13,13 @@ interface VectorizationDialogProps {
   onClose: () => void;
 }
 
-type VectorizationMethod = 'imagetracer' | 'potrace';
-
 export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProps) => {
   const addElement = useStampStore((state) => state.addElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
-  const [method, setMethod] = useState<VectorizationMethod>('imagetracer');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuitableForPotrace, setIsSuitableForPotrace] = useState<boolean | null>(null);
-
-  // Настройки для ImageTracer
-  const [quality, setQuality] = useState<VectorizeQuality>('high');
-  const [colorCount, setColorCount] = useState<number>(16);
 
   // Настройки для Potrace
   const [threshold, setThreshold] = useState<number>(128);
@@ -48,15 +37,6 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
     reader.onload = async (event) => {
       const url = event.target?.result as string;
       setPreviewUrl(url);
-
-      // Проверяем, подходит ли изображение для Potrace
-      const suitable = await isImageSuitableForPotrace(url);
-      setIsSuitableForPotrace(suitable);
-
-      // Автоматически выбираем метод если изображение подходит для Potrace
-      if (suitable) {
-        setMethod('potrace');
-      }
     };
     reader.readAsDataURL(file);
   };
@@ -68,26 +48,18 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
 
     try {
       const base64 = await loadImageAsBase64(selectedFile);
-      let svg: string;
 
-      if (method === 'imagetracer') {
-        // Векторизация через ImageTracer
-        svg = await vectorizeImage(base64, { quality, colorCount });
-      } else {
-        // Векторизация через Potrace
-        const potraceOptions: PotraceOptions = {
-          threshold,
-          turdSize,
-          optCurve: true,
-          color: potraceColor,
-        };
-        svg = await vectorizeWithPotrace(base64, potraceOptions);
-      }
+      // Векторизация через Potrace
+      const potraceOptions: PotraceOptions = {
+        threshold,
+        turdSize,
+        optCurve: true,
+        color: potraceColor,
+      };
+      const svg = await vectorizeWithPotrace(base64, potraceOptions);
 
-      // Применяем стили если используется Potrace
-      const styledSvg = method === 'potrace'
-        ? applySvgStyles(svg, { fill: potraceColor })
-        : svg;
+      // Применяем стили
+      const styledSvg = applySvgStyles(svg, { fill: potraceColor });
 
       // Добавляем элемент на холст
       addElement({
@@ -100,7 +72,7 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
         y: canvasSize / 2,
         width: 20,
         height: 20,
-        fill: method === 'potrace' ? potraceColor : undefined,
+        fill: potraceColor,
         visible: true,
       });
 
@@ -118,8 +90,6 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
   const resetState = () => {
     setSelectedFile(null);
     setPreviewUrl('');
-    setMethod('imagetracer');
-    setIsSuitableForPotrace(null);
   };
 
   const handleClose = () => {
@@ -234,142 +204,42 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
               />
             </div>
 
-            {/* Рекомендация по методу */}
-            {isSuitableForPotrace !== null && (
-              <div
-                style={{
-                  padding: '12px',
-                  borderRadius: '6px',
-                  backgroundColor: isSuitableForPotrace ? '#dbeafe' : '#fef3c7',
-                  border: `1px solid ${isSuitableForPotrace ? '#93c5fd' : '#fcd34d'}`,
-                  marginBottom: '20px',
-                }}
-              >
-                <p style={{ margin: 0, fontSize: '14px', color: '#374151' }}>
-                  {isSuitableForPotrace
-                    ? '✓ Изображение подходит для Potrace (ч/б логотип)'
-                    : 'ℹ Для цветных изображений лучше использовать ImageTracer'}
-                </p>
-              </div>
-            )}
-
-            {/* Выбор метода */}
+            {/* Настройки Potrace */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                Метод векторизации
+                Порог (threshold): {threshold}
               </label>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button
-                  onClick={() => setMethod('imagetracer')}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    border: method === 'imagetracer' ? '2px solid #3b82f6' : '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    backgroundColor: method === 'imagetracer' ? '#eff6ff' : 'white',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                  }}
-                >
-                  ImageTracer
-                  <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>Цветные изображения</div>
-                </button>
-                <button
-                  onClick={() => setMethod('potrace')}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    border: method === 'potrace' ? '2px solid #3b82f6' : '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    backgroundColor: method === 'potrace' ? '#eff6ff' : 'white',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                  }}
-                >
-                  Potrace
-                  <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>Ч/Б логотипы</div>
-                </button>
-              </div>
+              <input
+                type="range"
+                min="0"
+                max="255"
+                value={threshold}
+                onChange={(e) => setThreshold(Number(e.target.value))}
+                style={{ width: '100%', marginBottom: '12px' }}
+              />
+
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
+                Фильтр деталей (turdSize): {turdSize}
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={turdSize}
+                onChange={(e) => setTurdSize(Number(e.target.value))}
+                style={{ width: '100%', marginBottom: '12px' }}
+              />
+
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
+                Цвет
+              </label>
+              <input
+                type="color"
+                value={potraceColor}
+                onChange={(e) => setPotraceColor(e.target.value)}
+                style={{ width: '100%', height: '40px', border: '1px solid #d1d5db', borderRadius: '6px' }}
+              />
             </div>
-
-            {/* Настройки ImageTracer */}
-            {method === 'imagetracer' && (
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  Качество
-                </label>
-                <select
-                  value={quality}
-                  onChange={(e) => setQuality(e.target.value as VectorizeQuality)}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    marginBottom: '12px',
-                  }}
-                >
-                  <option value="low">Низкое (быстро)</option>
-                  <option value="medium">Среднее</option>
-                  <option value="high">Высокое (медленно)</option>
-                </select>
-
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  Количество цветов: {colorCount}
-                </label>
-                <input
-                  type="range"
-                  min="4"
-                  max="32"
-                  step="4"
-                  value={colorCount}
-                  onChange={(e) => setColorCount(Number(e.target.value))}
-                  style={{ width: '100%' }}
-                />
-              </div>
-            )}
-
-            {/* Настройки Potrace */}
-            {method === 'potrace' && (
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  Порог (threshold): {threshold}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="255"
-                  value={threshold}
-                  onChange={(e) => setThreshold(Number(e.target.value))}
-                  style={{ width: '100%', marginBottom: '12px' }}
-                />
-
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  Фильтр деталей (turdSize): {turdSize}
-                </label>
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={turdSize}
-                  onChange={(e) => setTurdSize(Number(e.target.value))}
-                  style={{ width: '100%', marginBottom: '12px' }}
-                />
-
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  Цвет
-                </label>
-                <input
-                  type="color"
-                  value={potraceColor}
-                  onChange={(e) => setPotraceColor(e.target.value)}
-                  style={{ width: '100%', height: '40px', border: '1px solid #d1d5db', borderRadius: '6px' }}
-                />
-              </div>
-            )}
 
             {/* Buttons */}
             <div style={{ display: 'flex', gap: '12px' }}>

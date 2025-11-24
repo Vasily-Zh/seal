@@ -5,8 +5,6 @@ import { SliderInput } from './SliderInput';
 import { ALL_FONTS } from '../../utils/fonts';
 import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, ImageElement as ImageElementType, IconElement as IconElementType } from '../../types';
 import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
-import { vectorizeImage } from '../../utils/vectorize';
-import { applySvgStyles } from '../../utils/extractSvgFromIcon';
 import { LayersPanel } from './LayersPanel';
 import { exportElementToSVG } from '../../utils/export';
 
@@ -265,7 +263,6 @@ function ElementSettings({ element }: { element: any }) {
   const centerElement = useStampStore((state) => state.centerElement);
   const canvasSize = useStampStore((state) => state.canvasSize);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
-  const [isConverting, setIsConverting] = useState(false);
 
   if (element.type === 'circle') {
     const circleElement = element as CircleElementType;
@@ -816,53 +813,6 @@ function ElementSettings({ element }: { element: any }) {
           >
             <Target size={16} />
             Центрировать
-          </button>
-        </div>
-
-        {/* Кнопка конвертации в SVG */}
-        <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px' }}>
-          <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#1e40af' }}>
-            <strong>Совет:</strong> Конвертируйте в SVG для возможности изменения цвета
-          </p>
-          <button
-            onClick={async () => {
-              setIsConverting(true);
-              try {
-                // Автоматическая конвертация: высокое качество, 16 цветов
-                const svg = await vectorizeImage(imageElement.src, { quality: 'high', colorCount: 16 });
-                // Применяем синий цвет
-                const styledSvg = applySvgStyles(svg, { fill: '#0000ff' });
-
-                // Заменяем ImageElement на IconElement и размещаем в центре
-                updateElement(element.id, {
-                  type: 'icon',
-                  iconSource: 'custom',
-                  svgContent: styledSvg,
-                  fill: '#0000ff',
-                  x: canvasSize / 2,
-                  y: canvasSize / 2,
-                });
-              } catch (error) {
-                console.error('Error vectorizing image:', error);
-                alert('Ошибка при конвертации изображения');
-              } finally {
-                setIsConverting(false);
-              }
-            }}
-            disabled={isConverting}
-            style={{
-              width: '100%',
-              padding: '10px',
-              backgroundColor: isConverting ? '#9ca3af' : '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: isConverting ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              fontWeight: '600',
-            }}
-          >
-            {isConverting ? 'Конвертация...' : 'Конвертировать в SVG'}
           </button>
         </div>
 

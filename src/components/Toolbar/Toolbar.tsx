@@ -1,12 +1,10 @@
-import { Circle, Type, Square, Image, Orbit, Star, Search, Wand2 } from 'lucide-react';
+import { Circle, Type, Square, Orbit, Star, Search, Wand2 } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
 import { IconGalleryModal } from './IconGalleryModal';
 import { IconSearchModal } from './IconSearchModal';
 import { VectorizationDialog } from './VectorizationDialog';
-import { vectorizeImage } from '../../utils/vectorize';
-import { applySvgStyles } from '../../utils/extractSvgFromIcon';
 
 export const Toolbar = () => {
   const addElement = useStampStore((state) => state.addElement);
@@ -15,7 +13,6 @@ export const Toolbar = () => {
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
   const [isIconSearchOpen, setIsIconSearchOpen] = useState(false);
   const [isVectorizationOpen, setIsVectorizationOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAddCircle = () => {
     addElement({
@@ -79,49 +76,6 @@ export const Toolbar = () => {
     });
   };
 
-  const handleAddImage = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/png,image/jpeg,image/jpg';
-    input.onchange = async (e: Event) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const src = event.target?.result as string;
-
-          // Автоматическая конвертация: высокое качество, 16 цветов, синий цвет
-          setIsProcessing(true);
-          try {
-            const svg = await vectorizeImage(src, { quality: 'high', colorCount: 16 });
-            const styledSvg = applySvgStyles(svg, { fill: '#0000ff' });
-
-            addElement({
-              id: `icon-${Date.now()}`,
-              type: 'icon',
-              iconName: 'vectorized',
-              iconSource: 'custom',
-              svgContent: styledSvg,
-              x: canvasSize / 2,
-              y: canvasSize / 2,
-              width: 20,
-              height: 20,
-              visible: true,
-              fill: '#0000ff',
-            });
-          } catch (error) {
-            console.error('Error vectorizing image:', error);
-            alert('Ошибка при конвертации изображения');
-          } finally {
-            setIsProcessing(false);
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
-  };
-
   const tools = [
     { icon: Circle, label: 'Добавить круг', onClick: handleAddCircle, id: 'circle' },
     { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
@@ -130,7 +84,6 @@ export const Toolbar = () => {
     { icon: Star, label: 'Добавить картинку', onClick: () => setIsIconGalleryOpen(true), id: 'icon' },
     { icon: Search, label: 'Поиск картинок', onClick: () => setIsIconSearchOpen(true), id: 'iconSearch' },
     { icon: Wand2, label: 'Векторизация (Potrace)', onClick: () => setIsVectorizationOpen(true), id: 'vectorize' },
-    { icon: Image, label: 'Своя картинка', onClick: handleAddImage, id: 'image' },
   ];
 
   return (
@@ -146,7 +99,6 @@ export const Toolbar = () => {
         <div key={tool.id} style={{ position: 'relative' }}>
           <button
             onClick={tool.onClick}
-            disabled={isProcessing && tool.id === 'image'}
             onMouseEnter={(e) => {
               setHoveredTool(tool.id);
               e.currentTarget.style.backgroundColor = '#bae6fd';
@@ -164,11 +116,10 @@ export const Toolbar = () => {
               padding: '12px 16px',
               border: '1px solid #d1d5db',
               borderRadius: '6px',
-              backgroundColor: (isProcessing && tool.id === 'image') ? '#c7d2e0' : '#e0f2fe',
-              cursor: (isProcessing && tool.id === 'image') ? 'not-allowed' : 'pointer',
+              backgroundColor: '#e0f2fe',
+              cursor: 'pointer',
               transition: 'all 0.2s',
               width: '100%',
-              opacity: (isProcessing && tool.id === 'image') ? 0.6 : 1,
             }}
           >
             <tool.icon size={28} color="#0369a1" />
