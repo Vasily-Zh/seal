@@ -1,6 +1,6 @@
 import { Undo2, Redo2, Download, Settings, Save, FolderOpen } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
-import { exportToPNG, exportToSVG } from '../../utils/export';
+import { exportToPNG, exportToSVG, exportToPNGTransparent, exportToPDF } from '../../utils/export';
 import { useState } from 'react';
 import { AdminLoginModal } from '../Admin/AdminLoginModal';
 import { AdminPanel } from '../Admin/AdminPanel';
@@ -33,9 +33,21 @@ export const Header = () => {
     setShowExportMenu(false);
   };
 
+  const handleExportPNGTransparent = () => {
+    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
+    exportToPNGTransparent(svgElement);
+    setShowExportMenu(false);
+  };
+
   const handleExportSVG = () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
     exportToSVG(svgElement);
+    setShowExportMenu(false);
+  };
+
+  const handleExportPDF = () => {
+    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
+    exportToPDF(svgElement);
     setShowExportMenu(false);
   };
 
@@ -247,6 +259,27 @@ export const Header = () => {
                 Сохранить как PNG
               </button>
               <button
+                onClick={handleExportPNGTransparent}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: '#374151',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                Сохранить как PNG (без фона)
+              </button>
+              <button
                 onClick={handleExportSVG}
                 style={{
                   width: '100%',
@@ -266,6 +299,27 @@ export const Header = () => {
                 }}
               >
                 Сохранить как SVG
+              </button>
+              <button
+                onClick={handleExportPDF}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: '#374151',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                Сохранить как PDF
               </button>
             </div>
           )}

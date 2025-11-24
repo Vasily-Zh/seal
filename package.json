@@ -15,6 +15,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@heroicons/react": "^2.2.0",
     "esm-potrace-wasm": "^0.4.1",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

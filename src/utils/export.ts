@@ -1,6 +1,7 @@
 import type { StampElement, IconElement } from '../types';
 import { getCachedSvg } from './extractSvgFromIcon';
 import { optimizeSVG } from './svgOptimizer';
+import { jsPDF } from 'jspdf';
 
 // Экспорт в PNG
 export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string = 'stamp.png') => {
@@ -31,6 +32,54 @@ export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string =
     // Белый фон
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Рисуем изображение
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Конвертируем в PNG и скачиваем
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const pngUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = pngUrl;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(pngUrl);
+    }, 'image/png');
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.src = url;
+};
+
+// Экспорт в PNG без фона (прозрачный фон)
+export const exportToPNGTransparent = (svgElement: SVGSVGElement | null, filename: string = 'stamp-transparent.png') => {
+  if (!svgElement) {
+    console.error('SVG element not found');
+    return;
+  }
+
+  // Клонируем SVG
+  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+
+  // Создаем Blob из SVG
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  // Создаем изображение
+  const img = new Image();
+  img.onload = () => {
+    // Создаем canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = svgElement.clientWidth * 2; // Увеличиваем для лучшего качества
+    canvas.height = svgElement.clientHeight * 2;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // НЕ заполняем фон - оставляем прозрачным
 
     // Рисуем изображение
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -222,4 +271,64 @@ export const exportElementToSVG = async (
     console.error('Error exporting element to SVG:', error);
     throw error;
   }
+};
+
+// Экспорт в PDF
+export const exportToPDF = (svgElement: SVGSVGElement | null, filename: string = 'stamp.pdf') => {
+  if (!svgElement) {
+    console.error('SVG element not found');
+    return;
+  }
+
+  // Клонируем SVG
+  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+
+  // Создаем Blob из SVG
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  // Создаем изображение
+  const img = new Image();
+  img.onload = () => {
+    // Создаем canvas для конвертации SVG в изображение
+    const canvas = document.createElement('canvas');
+    const scale = 2; // Масштаб для лучшего качества
+    canvas.width = svgElement.clientWidth * scale;
+    canvas.height = svgElement.clientHeight * scale;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Белый фон
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Рисуем изображение
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Конвертируем canvas в изображение для PDF
+    const imgData = canvas.toDataURL('image/png');
+
+    // Создаем PDF
+    // Размеры в мм (A4: 210 x 297, но мы подстроим под размер изображения)
+    const imgWidth = svgElement.clientWidth * 0.264583; // px to mm
+    const imgHeight = svgElement.clientHeight * 0.264583; // px to mm
+
+    const pdf = new jsPDF({
+      orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: [imgWidth, imgHeight],
+    });
+
+    // Добавляем изображение в PDF
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+    // Сохраняем PDF
+    pdf.save(filename);
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.src = url;
 };

@@ -17,7 +17,6 @@ export async function optimizeSVG(
   const {
     precision = 2,
     removeComments = true,
-    removeMetadata = true,
   } = options;
 
   try {
