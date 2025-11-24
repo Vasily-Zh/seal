@@ -73,6 +73,8 @@ export const useStampStore = create<StampStore>((set, get) => ({
   canvasSize: DEFAULT_CONFIG.canvasSize,
   history: [initialElements],
   historyIndex: 0,
+  currentProjectId: null,
+  currentProjectName: null,
 
   // Добавление элемента
   addElement: (element: StampElement) => {
@@ -189,5 +191,239 @@ export const useStampStore = create<StampStore>((set, get) => ({
       ),
     }));
     get().saveToHistory();
+  },
+
+  // Управление порядком элементов (z-index через позицию в массиве)
+  moveElementUp: (id: string) => {
+    set((state) => {
+      const index = state.elements.findIndex((el) => el.id === id);
+      if (index === -1 || index === state.elements.length - 1) return state;
+
+      const newElements = [...state.elements];
+      [newElements[index], newElements[index + 1]] = [newElements[index + 1], newElements[index]];
+
+      return { elements: newElements };
+    });
+    get().saveToHistory();
+  },
+
+  moveElementDown: (id: string) => {
+    set((state) => {
+      const index = state.elements.findIndex((el) => el.id === id);
+      if (index <= 0) return state;
+
+      const newElements = [...state.elements];
+      [newElements[index], newElements[index - 1]] = [newElements[index - 1], newElements[index]];
+
+      return { elements: newElements };
+    });
+    get().saveToHistory();
+  },
+
+  moveToTop: (id: string) => {
+    set((state) => {
+      const element = state.elements.find((el) => el.id === id);
+      if (!element) return state;
+
+      const newElements = state.elements.filter((el) => el.id !== id);
+      newElements.push(element);
+
+      return { elements: newElements };
+    });
+    get().saveToHistory();
+  },
+
+  moveToBottom: (id: string) => {
+    set((state) => {
+      const element = state.elements.find((el) => el.id === id);
+      if (!element) return state;
+
+      const newElements = state.elements.filter((el) => el.id !== id);
+      newElements.unshift(element);
+
+      return { elements: newElements };
+    });
+    get().saveToHistory();
+  },
+
+  reorderElements: (elementIds: string[]) => {
+    set((state) => {
+      // Создаём Map для быстрого доступа к элементам
+      const elementsMap = new Map(state.elements.map((el) => [el.id, el]));
+
+      // Создаём новый массив в порядке elementIds
+      const newElements = elementIds
+        .map((id) => elementsMap.get(id))
+        .filter((el): el is StampElement => el !== undefined);
+
+      // Если количество элементов изменилось, возвращаем старое состояние
+      if (newElements.length !== state.elements.length) return state;
+
+      return { elements: newElements };
+    });
+    get().saveToHistory();
+  },
+
+  // Группировка элементов
+  createGroup: (elementIds: string[], name?: string) => {
+    const state = get();
+    const groupId = `group-${Date.now()}`;
+
+    // Проверяем, что все элементы существуют
+    const elementsToGroup = state.elements.filter((el) => elementIds.includes(el.id));
+    if (elementsToGroup.length === 0) return groupId;
+
+    // Вычисляем центр группы
+    const avgX = elementsToGroup.reduce((sum, el) => sum + el.x, 0) / elementsToGroup.length;
+    const avgY = elementsToGroup.reduce((sum, el) => sum + el.y, 0) / elementsToGroup.length;
+
+    // Создаём группу
+    const group: StampElement = {
+      id: groupId,
+      type: 'group',
+      name: name || `Группа ${new Date().toLocaleTimeString()}`,
+      children: elementIds,
+      expanded: true,
+      x: avgX,
+      y: avgY,
+      visible: true,
+    };
+
+    set((state) => ({
+      elements: [
+        // Обновляем parentId у всех элементов группы
+        ...state.elements.map((el) =>
+          elementIds.includes(el.id)
+            ? ({ ...el, parentId: groupId } as StampElement)
+            : el
+        ),
+        // Добавляем группу в конец
+        group,
+      ],
+      selectedElementId: groupId,
+    }));
+    get().saveToHistory();
+
+    return groupId;
+  },
+
+  ungroupElements: (groupId: string) => {
+    set((state) => {
+      const group = state.elements.find((el) => el.id === groupId);
+      if (!group || group.type !== 'group') return state;
+
+      return {
+        elements: state.elements
+          // Удаляем группу
+          .filter((el) => el.id !== groupId)
+          // Убираем parentId у дочерних элементов
+          .map((el) =>
+            group.children.includes(el.id)
+              ? ({ ...el, parentId: undefined } as StampElement)
+              : el
+          ),
+        selectedElementId: null,
+      };
+    });
+    get().saveToHistory();
+  },
+
+  addToGroup: (groupId: string, elementIds: string[]) => {
+    set((state) => {
+      const group = state.elements.find((el) => el.id === groupId);
+      if (!group || group.type !== 'group') return state;
+
+      // Обновляем группу и элементы
+      return {
+        elements: state.elements.map((el) => {
+          if (el.id === groupId && el.type === 'group') {
+            return {
+              ...el,
+              children: [...new Set([...el.children, ...elementIds])],
+            } as StampElement;
+          }
+          if (elementIds.includes(el.id)) {
+            return { ...el, parentId: groupId } as StampElement;
+          }
+          return el;
+        }),
+      };
+    });
+    get().saveToHistory();
+  },
+
+  removeFromGroup: (groupId: string, elementIds: string[]) => {
+    set((state) => {
+      const group = state.elements.find((el) => el.id === groupId);
+      if (!group || group.type !== 'group') return state;
+
+      return {
+        elements: state.elements.map((el) => {
+          if (el.id === groupId && el.type === 'group') {
+            return {
+              ...el,
+              children: el.children.filter((id) => !elementIds.includes(id)),
+            } as StampElement;
+          }
+          if (elementIds.includes(el.id)) {
+            return { ...el, parentId: undefined } as StampElement;
+          }
+          return el;
+        }),
+      };
+    });
+    get().saveToHistory();
+  },
+
+  expandGroup: (groupId: string, expanded: boolean) => {
+    set((state) => ({
+      elements: state.elements.map((el) =>
+        el.id === groupId && el.type === 'group'
+          ? ({ ...el, expanded } as StampElement)
+          : el
+      ),
+    }));
+    // Не сохраняем в историю - это только UI состояние
+  },
+
+  // Блокировка элементов
+  toggleElementLock: (id: string) => {
+    set((state) => ({
+      elements: state.elements.map((el) =>
+        el.id === id ? ({ ...el, locked: !el.locked } as StampElement) : el
+      ),
+    }));
+    get().saveToHistory();
+  },
+
+  // Управление проектами
+  loadProjectData: (project) => {
+    set({
+      elements: project.elements,
+      canvasSize: project.canvasSize,
+      currentProjectId: project.id,
+      currentProjectName: project.name,
+      selectedElementId: null,
+      history: [project.elements],
+      historyIndex: 0,
+    });
+  },
+
+  setCurrentProject: (id, name) => {
+    set({
+      currentProjectId: id,
+      currentProjectName: name,
+    });
+  },
+
+  clearCanvas: () => {
+    set({
+      elements: [],
+      selectedElementId: null,
+      currentProjectId: null,
+      currentProjectName: null,
+      history: [[]],
+      historyIndex: 0,
+    });
   },
 }));

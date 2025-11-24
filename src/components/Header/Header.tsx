@@ -1,16 +1,27 @@
-import { Undo2, Redo2, Download, Settings } from 'lucide-react';
+import { Undo2, Redo2, Download, Settings, Save, FolderOpen } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
 import { exportToPNG, exportToSVG } from '../../utils/export';
 import { useState } from 'react';
 import { SettingsModal } from './SettingsModal';
+import { ProjectManager } from '../ProjectManager/ProjectManager';
+import { saveProject, generateThumbnail } from '../../utils/projectStorage';
 
 export const Header = () => {
   const undo = useStampStore((state) => state.undo);
   const redo = useStampStore((state) => state.redo);
   const canUndo = useStampStore((state) => state.canUndo());
   const canRedo = useStampStore((state) => state.canRedo());
+  const elements = useStampStore((state) => state.elements);
+  const canvasSize = useStampStore((state) => state.canvasSize);
+  const currentProjectId = useStampStore((state) => state.currentProjectId);
+  const currentProjectName = useStampStore((state) => state.currentProjectName);
+  const setCurrentProject = useStampStore((state) => state.setCurrentProject);
+  const loadProjectData = useStampStore((state) => state.loadProjectData);
+
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showProjectManager, setShowProjectManager] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleExportPNG = () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
@@ -22,6 +33,32 @@ export const Header = () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
     exportToSVG(svgElement);
     setShowExportMenu(false);
+  };
+
+  const handleSaveProject = async () => {
+    const projectName = currentProjectName || prompt('Введите название проекта:', 'Новый проект');
+    if (!projectName) return;
+
+    setIsSaving(true);
+    try {
+      const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
+      const thumbnail = await generateThumbnail(svgElement);
+
+      const projectId = saveProject(
+        projectName,
+        elements,
+        canvasSize,
+        currentProjectId || undefined,
+        thumbnail
+      );
+
+      setCurrentProject(projectId, projectName);
+      alert('Проект успешно сохранён!');
+    } catch (error) {
+      alert((error as Error).message || 'Ошибка при сохранении проекта');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -42,6 +79,53 @@ export const Header = () => {
       </div>
 
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        {/* Кнопка Сохранить проект */}
+        <button
+          onClick={handleSaveProject}
+          disabled={isSaving}
+          style={{
+            padding: '8px 16px',
+            border: '1px solid #10b981',
+            borderRadius: '6px',
+            backgroundColor: '#10b981',
+            color: 'white',
+            cursor: isSaving ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            opacity: isSaving ? 0.6 : 1,
+          }}
+        >
+          <Save size={16} />
+          {isSaving ? 'Сохранение...' : currentProjectName ? 'Сохранить' : 'Сохранить проект'}
+        </button>
+
+        {/* Кнопка Загрузить проект */}
+        <button
+          onClick={() => setShowProjectManager(true)}
+          style={{
+            padding: '8px 16px',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            backgroundColor: '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            color: '#374151',
+          }}
+        >
+          <FolderOpen size={16} />
+          Проекты
+        </button>
+
+        {/* Разделитель */}
+        <div style={{ width: '1px', height: '32px', backgroundColor: '#e5e7eb' }} />
+
         {/* Кнопка Отмена */}
         <button
           onClick={undo}
@@ -193,6 +277,15 @@ export const Header = () => {
 
       {/* Settings Modal */}
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+
+      {/* Project Manager */}
+      <ProjectManager
+        isOpen={showProjectManager}
+        onClose={() => setShowProjectManager(false)}
+        onLoadProject={(project) => {
+          loadProjectData(project);
+        }}
+      />
     </header>
   );
 };

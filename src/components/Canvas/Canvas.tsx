@@ -6,10 +6,12 @@ import { TextCenteredElement } from './elements/TextCenteredElement';
 import { RectangleElement } from './elements/RectangleElement';
 import { ImageElement } from './elements/ImageElement';
 import { IconElement } from './elements/IconElement';
+import { GroupElement } from './elements/GroupElement';
 
 export const Canvas = () => {
   const canvasRef = useRef<SVGSVGElement>(null);
   const elements = useStampStore((state) => state.elements);
+  const selectedElementId = useStampStore((state) => state.selectedElementId);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
   // Размер SVG в пикселях (для отображения) - адаптивный
@@ -157,24 +159,37 @@ export const Canvas = () => {
           </text>
 
           {/* Рендеринг элементов */}
-          {elements.map((element) => {
-            switch (element.type) {
-              case 'circle':
-                return <CircleElement key={element.id} element={element} scale={scale} />;
-              case 'text':
-                return <TextElement key={element.id} element={element} scale={scale} />;
-              case 'textCentered':
-                return <TextCenteredElement key={element.id} element={element} scale={scale} />;
-              case 'rectangle':
-                return <RectangleElement key={element.id} element={element} scale={scale} />;
-              case 'image':
-                return <ImageElement key={element.id} element={element} scale={scale} />;
-              case 'icon':
-                return <IconElement key={element.id} element={element} scale={scale} />;
-              default:
-                return null;
-            }
-          })}
+          {elements
+            // Фильтруем элементы - рендерим только те, которые не имеют parentId (не вложены в группы)
+            .filter((element) => !element.parentId)
+            .map((element) => {
+              switch (element.type) {
+                case 'circle':
+                  return <CircleElement key={element.id} element={element} scale={scale} />;
+                case 'text':
+                  return <TextElement key={element.id} element={element} scale={scale} />;
+                case 'textCentered':
+                  return <TextCenteredElement key={element.id} element={element} scale={scale} />;
+                case 'rectangle':
+                  return <RectangleElement key={element.id} element={element} scale={scale} />;
+                case 'image':
+                  return <ImageElement key={element.id} element={element} scale={scale} />;
+                case 'icon':
+                  return <IconElement key={element.id} element={element} scale={scale} />;
+                case 'group':
+                  return (
+                    <GroupElement
+                      key={element.id}
+                      element={element}
+                      scale={scale}
+                      allElements={elements}
+                      isSelected={selectedElementId === element.id}
+                    />
+                  );
+                default:
+                  return null;
+              }
+            })}
         </svg>
       </div>
 

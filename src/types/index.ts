@@ -1,6 +1,6 @@
 // Типы элементов печати
 
-export type ElementType = 'circle' | 'text' | 'textCentered' | 'triangle' | 'rectangle' | 'line' | 'image' | 'icon';
+export type ElementType = 'circle' | 'text' | 'textCentered' | 'triangle' | 'rectangle' | 'line' | 'image' | 'icon' | 'group';
 
 export interface BaseElement {
   id: string;
@@ -8,6 +8,8 @@ export interface BaseElement {
   x: number;
   y: number;
   visible: boolean;
+  locked?: boolean; // блокировка редактирования элемента
+  parentId?: string; // ID родительской группы для вложенных элементов
 }
 
 export interface CircleElement extends BaseElement {
@@ -89,6 +91,16 @@ export interface IconElement extends BaseElement {
   strokeWidth?: number; // толщина обводки
 }
 
+export interface GroupElement extends BaseElement {
+  type: 'group';
+  name: string; // название группы
+  children: string[]; // массив ID дочерних элементов
+  expanded?: boolean; // состояние раскрытия в UI панели слоёв
+  rotation?: number; // поворот группы в градусах
+  scaleX?: number; // масштаб по X
+  scaleY?: number; // масштаб по Y
+}
+
 export type StampElement =
   | CircleElement
   | TextElement
@@ -97,7 +109,8 @@ export type StampElement =
   | TriangleElement
   | LineElement
   | ImageElement
-  | IconElement;
+  | IconElement
+  | GroupElement;
 
 // Интерфейс Store
 export interface StampStore {
@@ -107,6 +120,8 @@ export interface StampStore {
   canvasSize: number; // размер поля в мм
   history: StampElement[][];
   historyIndex: number;
+  currentProjectId: string | null; // ID текущего открытого проекта
+  currentProjectName: string | null; // Название текущего проекта
 
   // Методы
   addElement: (element: StampElement) => void;
@@ -114,6 +129,23 @@ export interface StampStore {
   updateElement: (id: string, updates: Partial<StampElement>) => void;
   selectElement: (id: string | null) => void;
   getSelectedElement: () => StampElement | null;
+
+  // Управление порядком элементов (z-index через позицию в массиве)
+  moveElementUp: (id: string) => void;
+  moveElementDown: (id: string) => void;
+  moveToTop: (id: string) => void;
+  moveToBottom: (id: string) => void;
+  reorderElements: (elementIds: string[]) => void;
+
+  // Группировка элементов
+  createGroup: (elementIds: string[], name?: string) => string; // возвращает ID новой группы
+  ungroupElements: (groupId: string) => void;
+  addToGroup: (groupId: string, elementIds: string[]) => void;
+  removeFromGroup: (groupId: string, elementIds: string[]) => void;
+  expandGroup: (groupId: string, expanded: boolean) => void;
+
+  // Блокировка элементов
+  toggleElementLock: (id: string) => void;
 
   // Undo/Redo
   undo: () => void;
@@ -126,6 +158,11 @@ export interface StampStore {
 
   // Центрирование
   centerElement: (id: string) => void;
+
+  // Управление проектами
+  loadProjectData: (project: { elements: StampElement[]; canvasSize: number; id: string; name: string }) => void;
+  setCurrentProject: (id: string | null, name: string | null) => void;
+  clearCanvas: () => void;
 }
 
 // Конфигурация шрифтов

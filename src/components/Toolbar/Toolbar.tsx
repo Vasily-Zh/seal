@@ -1,9 +1,10 @@
-import { Circle, Type, Square, Image, Orbit, Star, Search } from 'lucide-react';
+import { Circle, Type, Square, Image, Orbit, Star, Search, Wand2 } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
 import { IconGalleryModal } from './IconGalleryModal';
 import { IconSearchModal } from './IconSearchModal';
+import { VectorizationDialog } from './VectorizationDialog';
 import { vectorizeImage } from '../../utils/vectorize';
 import { applySvgStyles } from '../../utils/extractSvgFromIcon';
 
@@ -13,6 +14,7 @@ export const Toolbar = () => {
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
   const [isIconSearchOpen, setIsIconSearchOpen] = useState(false);
+  const [isVectorizationOpen, setIsVectorizationOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAddCircle = () => {
@@ -127,6 +129,7 @@ export const Toolbar = () => {
     { icon: Type, label: 'Добавить текст', onClick: handleAddCenteredText, id: 'text' },
     { icon: Star, label: 'Добавить картинку', onClick: () => setIsIconGalleryOpen(true), id: 'icon' },
     { icon: Search, label: 'Поиск картинок', onClick: () => setIsIconSearchOpen(true), id: 'iconSearch' },
+    { icon: Wand2, label: 'Векторизация (Potrace)', onClick: () => setIsVectorizationOpen(true), id: 'vectorize' },
     { icon: Image, label: 'Своя картинка', onClick: handleAddImage, id: 'image' },
   ];
 
@@ -214,6 +217,9 @@ export const Toolbar = () => {
 
       {/* Icon Search Modal */}
       <IconSearchModal isOpen={isIconSearchOpen} onClose={() => setIsIconSearchOpen(false)} />
+
+      {/* Vectorization Dialog */}
+      <VectorizationDialog isOpen={isVectorizationOpen} onClose={() => setIsVectorizationOpen(false)} />
     </div>
   );
 };

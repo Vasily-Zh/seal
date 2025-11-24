@@ -1,4 +1,4 @@
-import { Trash2, Eye, EyeOff, GripVertical, Target } from 'lucide-react';
+import { Trash2, Eye, EyeOff, GripVertical, Target, Settings as SettingsIcon, Layers, Download } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
@@ -7,6 +7,8 @@ import type { CircleElement as CircleElementType, TextElement as TextElementType
 import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
 import { vectorizeImage } from '../../utils/vectorize';
 import { applySvgStyles } from '../../utils/extractSvgFromIcon';
+import { LayersPanel } from './LayersPanel';
+import { exportElementToSVG } from '../../utils/export';
 
 interface ControlsProps {
   showOnlyElements?: boolean;
@@ -14,6 +16,7 @@ interface ControlsProps {
 }
 
 export const Controls = ({ showOnlyElements = false, showOnlySettings = false }: ControlsProps) => {
+  const [activeTab, setActiveTab] = useState<'settings' | 'layers'>('settings');
   const elements = useStampStore((state) => state.elements);
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const updateElement = useStampStore((state) => state.updateElement);
@@ -109,13 +112,64 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
     return <ElementSettings element={selectedElement} />;
   }
 
-  // Иначе показываем оба блока
+  // Иначе показываем табы
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div>
-        <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: '#111827' }}>
-          Список элементов
-        </h4>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Табы */}
+      <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: '16px' }}>
+        <button
+          onClick={() => setActiveTab('settings')}
+          style={{
+            flex: 1,
+            padding: '12px',
+            backgroundColor: activeTab === 'settings' ? '#3b82f6' : 'transparent',
+            color: activeTab === 'settings' ? 'white' : '#6b7280',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'all 0.2s',
+          }}
+        >
+          <SettingsIcon size={16} />
+          Настройки
+        </button>
+        <button
+          onClick={() => setActiveTab('layers')}
+          style={{
+            flex: 1,
+            padding: '12px',
+            backgroundColor: activeTab === 'layers' ? '#3b82f6' : 'transparent',
+            color: activeTab === 'layers' ? 'white' : '#6b7280',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'all 0.2s',
+          }}
+        >
+          <Layers size={16} />
+          Слои
+        </button>
+      </div>
+
+      {/* Контент табов */}
+      {activeTab === 'layers' ? (
+        <LayersPanel />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: '#111827' }}>
+              Список элементов
+            </h4>
         {elements.length === 0 ? (
           <p style={{ color: '#9ca3af', fontSize: '14px' }}>Элементов пока нет</p>
         ) : (
@@ -184,19 +238,21 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
         )}
       </div>
 
-      {selectedElement && (
-        <div
-          style={{
-            backgroundColor: '#f9fafb',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
-            padding: '16px',
-          }}
-        >
-          <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px', color: '#111827' }}>
-            Настройки элемента
-          </h4>
-          <ElementSettings element={selectedElement} />
+          {selectedElement && (
+            <div
+              style={{
+                backgroundColor: '#f9fafb',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                padding: '16px',
+              }}
+            >
+              <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px', color: '#111827' }}>
+                Настройки элемента
+              </h4>
+              <ElementSettings element={selectedElement} />
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -950,6 +1006,38 @@ function ElementSettings({ element }: { element: any }) {
             }}
           >
             Заменить картинку
+          </button>
+        </div>
+
+        {/* Кнопка экспорта SVG */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={async () => {
+              try {
+                await exportElementToSVG(iconElement);
+              } catch (error) {
+                console.error('Error exporting element:', error);
+                alert('Ошибка при экспорте элемента');
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Download size={16} />
+            Экспорт SVG
           </button>
         </div>
 

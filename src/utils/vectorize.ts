@@ -321,3 +321,196 @@ export function normalizeSvgFromImageTracer(svgString: string | any): string {
     return svgString;
   }
 }
+
+/**
+ * Настройки для Potrace векторизации
+ */
+export interface PotraceOptions {
+  threshold?: number; // Порог для черно-белой конвертации (0-255, по умолчанию 128)
+  turdSize?: number; // Размер для фильтрации мелких деталей (по умолчанию 2)
+  optCurve?: boolean; // Оптимизировать кривые (по умолчанию true)
+  color?: string; // Цвет для SVG (по умолчанию '#000000')
+}
+
+/**
+ * Конвертирует изображение в монохромный SVG используя Potrace WASM
+ * Лучше всего работает с черно-белыми логотипами
+ *
+ * @param imageData - Base64 строка изображения или URL
+ * @param options - Опции векторизации Potrace
+ * @returns Promise с SVG строкой
+ */
+export async function vectorizeWithPotrace(
+  imageData: string,
+  options: PotraceOptions = {}
+): Promise<string> {
+  const {
+    threshold = 128,
+    turdSize = 2,
+    optCurve = true,
+    color = '#000000',
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    try {
+      // Создаём изображение для обработки
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+
+      img.onload = async () => {
+        try {
+          // Создаём canvas для конвертации изображения в черно-белое
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+
+          if (!ctx) {
+            reject(new Error('Failed to get canvas context'));
+            return;
+          }
+
+          // Рисуем изображение
+          ctx.drawImage(img, 0, 0);
+
+          // Получаем данные пикселей
+          const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const pixels = imageDataObj.data;
+
+          // Конвертируем в черно-белое используя порог
+          for (let i = 0; i < pixels.length; i += 4) {
+            const r = pixels[i];
+            const g = pixels[i + 1];
+            const b = pixels[i + 2];
+
+            // Вычисляем яркость (grayscale)
+            const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+            // Применяем порог
+            const bw = brightness >= threshold ? 255 : 0;
+
+            pixels[i] = bw;
+            pixels[i + 1] = bw;
+            pixels[i + 2] = bw;
+          }
+
+          // Возвращаем обработанное изображение на canvas
+          ctx.putImageData(imageDataObj, 0, 0);
+
+          // Импортируем Potrace динамически
+          import('potrace-wasm')
+            .then(async (potraceModule) => {
+              try {
+                const { loadImage, posterize } = potraceModule;
+
+                // Конвертируем canvas в Blob
+                canvas.toBlob(async (blob) => {
+                  if (!blob) {
+                    reject(new Error('Failed to convert canvas to blob'));
+                    return;
+                  }
+
+                  try {
+                    // Загружаем изображение в Potrace
+                    const imageBuffer = await blob.arrayBuffer();
+                    const potraceImage = await loadImage(new Uint8Array(imageBuffer));
+
+                    // Выполняем векторизацию
+                    const svg = await posterize(potraceImage, {
+                      threshold,
+                      turdSize,
+                      optCurve,
+                      color,
+                    });
+
+                    // Добавляем xmlns если его нет
+                    let svgString = svg;
+                    if (!svgString.includes('xmlns')) {
+                      svgString = svgString.replace(
+                        '<svg',
+                        '<svg xmlns="http://www.w3.org/2000/svg"'
+                      );
+                    }
+
+                    resolve(svgString);
+                  } catch (error) {
+                    reject(new Error(`Potrace vectorization failed: ${error}`));
+                  }
+                }, 'image/png');
+              } catch (error) {
+                reject(new Error(`Potrace module error: ${error}`));
+              }
+            })
+            .catch((error) => {
+              reject(new Error(`Failed to load Potrace module: ${error}`));
+            });
+        } catch (error) {
+          reject(new Error(`Image processing error: ${error}`));
+        }
+      };
+
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+
+      img.src = imageData;
+    } catch (error) {
+      reject(new Error(`Potrace initialization error: ${error}`));
+    }
+  });
+}
+
+/**
+ * Определяет, подходит ли изображение для Potrace (черно-белое)
+ * Возвращает true если изображение в основном черно-белое
+ */
+export async function isImageSuitableForPotrace(imageData: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.min(img.width, 200); // Для производительности
+        canvas.height = Math.min(img.height, 200);
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          resolve(false);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageDataObj.data;
+
+        // Подсчитываем количество уникальных цветов
+        const colors = new Set<string>();
+        for (let i = 0; i < pixels.length; i += 4) {
+          const r = pixels[i];
+          const g = pixels[i + 1];
+          const b = pixels[i + 2];
+          colors.add(`${r},${g},${b}`);
+
+          // Если цветов слишком много, сразу возвращаем false
+          if (colors.size > 16) {
+            resolve(false);
+                return;
+              }
+            }
+
+        // Изображение подходит если у него мало цветов
+        resolve(colors.size <= 8);
+      } catch (error) {
+        resolve(false);
+      }
+    };
+
+    img.onerror = () => {
+      resolve(false);
+    };
+
+    img.src = imageData;
+  });
+}
