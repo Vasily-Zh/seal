@@ -10,7 +10,9 @@
       "Bash(dir:*)",
       "WebSearch",
       "mcp__ide__getDiagnostics",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": [],
     "ask": []

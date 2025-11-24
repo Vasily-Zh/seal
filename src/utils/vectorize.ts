@@ -351,113 +351,99 @@ export async function vectorizeWithPotrace(
     color = '#000000',
   } = options;
 
-  return new Promise((resolve, reject) => {
-    try {
-      // Создаём изображение для обработки
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
+  try {
+    // Импортируем esm-potrace-wasm
+    const { potrace, init } = await import('esm-potrace-wasm');
 
-      img.onload = async () => {
-        try {
-          // Создаём canvas для конвертации изображения в черно-белое
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
+    // Инициализируем WASM модуль
+    await init();
 
-          if (!ctx) {
-            reject(new Error('Failed to get canvas context'));
-            return;
-          }
+    // Создаём изображение для обработки
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
 
-          // Рисуем изображение
-          ctx.drawImage(img, 0, 0);
-
-          // Получаем данные пикселей
-          const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const pixels = imageDataObj.data;
-
-          // Конвертируем в черно-белое используя порог
-          for (let i = 0; i < pixels.length; i += 4) {
-            const r = pixels[i];
-            const g = pixels[i + 1];
-            const b = pixels[i + 2];
-
-            // Вычисляем яркость (grayscale)
-            const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-
-            // Применяем порог
-            const bw = brightness >= threshold ? 255 : 0;
-
-            pixels[i] = bw;
-            pixels[i + 1] = bw;
-            pixels[i + 2] = bw;
-          }
-
-          // Возвращаем обработанное изображение на canvas
-          ctx.putImageData(imageDataObj, 0, 0);
-
-          // Импортируем Potrace динамически
-          import('potrace-wasm')
-            .then(async (potraceModule) => {
-              try {
-                const { loadImage, posterize } = potraceModule;
-
-                // Конвертируем canvas в Blob
-                canvas.toBlob(async (blob) => {
-                  if (!blob) {
-                    reject(new Error('Failed to convert canvas to blob'));
-                    return;
-                  }
-
-                  try {
-                    // Загружаем изображение в Potrace
-                    const imageBuffer = await blob.arrayBuffer();
-                    const potraceImage = await loadImage(new Uint8Array(imageBuffer));
-
-                    // Выполняем векторизацию
-                    const svg = await posterize(potraceImage, {
-                      threshold,
-                      turdSize,
-                      optCurve,
-                      color,
-                    });
-
-                    // Добавляем xmlns если его нет
-                    let svgString = svg;
-                    if (!svgString.includes('xmlns')) {
-                      svgString = svgString.replace(
-                        '<svg',
-                        '<svg xmlns="http://www.w3.org/2000/svg"'
-                      );
-                    }
-
-                    resolve(svgString);
-                  } catch (error) {
-                    reject(new Error(`Potrace vectorization failed: ${error}`));
-                  }
-                }, 'image/png');
-              } catch (error) {
-                reject(new Error(`Potrace module error: ${error}`));
-              }
-            })
-            .catch((error) => {
-              reject(new Error(`Failed to load Potrace module: ${error}`));
-            });
-        } catch (error) {
-          reject(new Error(`Image processing error: ${error}`));
-        }
-      };
-
-      img.onerror = () => {
-        reject(new Error('Failed to load image'));
-      };
-
+    // Загружаем изображение
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Failed to load image'));
       img.src = imageData;
-    } catch (error) {
-      reject(new Error(`Potrace initialization error: ${error}`));
+    });
+
+    // Создаём canvas для обработки изображения
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      throw new Error('Failed to get canvas context');
     }
-  });
+
+    // Рисуем изображение
+    ctx.drawImage(img, 0, 0);
+
+    // Получаем данные пикселей для черно-белой конвертации
+    const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageDataObj.data;
+
+    // Конвертируем в черно-белое используя порог
+    for (let i = 0; i < pixels.length; i += 4) {
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+
+      // Вычисляем яркость (grayscale)
+      const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      // Применяем порог
+      const bw = brightness >= threshold ? 255 : 0;
+
+      pixels[i] = bw;
+      pixels[i + 1] = bw;
+      pixels[i + 2] = bw;
+    }
+
+    // Возвращаем обработанное изображение на canvas
+    ctx.putImageData(imageDataObj, 0, 0);
+
+    // Конвертируем canvas в Blob для potrace
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((b) => {
+        if (b) resolve(b);
+        else reject(new Error('Failed to convert canvas to blob'));
+      }, 'image/png');
+    });
+
+    // Выполняем векторизацию с помощью potrace
+    const svg = await potrace(blob, {
+      turdsize: turdSize,
+      opticurve: optCurve ? 1 : 0,
+      opttolerance: 0.2,
+      pathonly: false,
+      extractcolors: false,
+      posterizelevel: 2,
+      posterizationalgorithm: 0,
+    });
+
+    // Добавляем xmlns если его нет
+    let svgString = svg;
+    if (!svgString.includes('xmlns')) {
+      svgString = svgString.replace(
+        '<svg',
+        '<svg xmlns="http://www.w3.org/2000/svg"'
+      );
+    }
+
+    // Заменяем цвет если указан (не черный)
+    if (color !== '#000000' && color !== '#000') {
+      svgString = svgString.replace(/fill="[^"]*"/g, `fill="${color}"`);
+      svgString = svgString.replace(/stroke="[^"]*"/g, `stroke="${color}"`);
+    }
+
+    return svgString;
+  } catch (error) {
+    throw new Error(`Potrace vectorization failed: ${error}`);
+  }
 }
 
 /**

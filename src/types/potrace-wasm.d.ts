@@ -1,20 +1,21 @@
-declare module 'potrace-wasm' {
-  export interface PotraceImage {
-    width: number;
-    height: number;
+declare module 'esm-potrace-wasm' {
+  export interface PotraceOptions {
+    turdsize?: number;
+    turnpolicy?: number;
+    alphamax?: number;
+    opticurve?: number;
+    opttolerance?: number;
+    pathonly?: boolean;
+    extractcolors?: boolean;
+    posterizelevel?: number;
+    posterizationalgorithm?: number;
   }
 
-  export interface PosterizeOptions {
-    threshold?: number;
-    turdSize?: number;
-    optCurve?: boolean;
-    color?: string;
-  }
+  export function init(): Promise<void>;
 
-  export function loadImage(imageData: Uint8Array): Promise<PotraceImage>;
-
-  export function posterize(
-    image: PotraceImage,
-    options?: PosterizeOptions
+  export function potrace(
+    imageBitmapSource: HTMLImageElement | SVGImageElement | HTMLVideoElement |
+                       HTMLCanvasElement | ImageData | ImageBitmap | Blob,
+    options?: PotraceOptions
   ): Promise<string>;
 }
