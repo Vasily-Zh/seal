@@ -12,7 +12,8 @@
       "mcp__ide__getDiagnostics",
       "Bash(cat:*)",
       "WebFetch(domain:github.com)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(ls -la \"C:\\Users\\user\\Desktop\\vjik-1\\src\\components\\Canvas\"\" 2>/dev/null || echo \"Canvas directory not found \")"
     ],
     "deny": [],
     "ask": []
