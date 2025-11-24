@@ -3,8 +3,18 @@ import { Toolbar } from '../Toolbar/Toolbar';
 import { Controls } from '../Controls/Controls';
 import { LayersPanel } from '../Controls/LayersPanel';
 import { Canvas } from '../Canvas/Canvas';
+import { useStampStore } from '../../store/useStampStore';
+import { Trash2 } from 'lucide-react';
 
 export const MainLayout = () => {
+  const clearCanvas = useStampStore((state) => state.clearCanvas);
+
+  const handleClearCanvas = () => {
+    if (window.confirm('Вы уверены, что хотите удалить все элементы с макета?')) {
+      clearCanvas();
+    }
+  };
+
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Шапка */}
@@ -76,10 +86,32 @@ export const MainLayout = () => {
             overflow: 'hidden',
           }}
         >
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#fff' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: 0 }}>
               Превью
             </h3>
+            <button
+              onClick={handleClearCanvas}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                fontSize: '12px',
+                backgroundColor: '#ef4444',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ef4444')}
+              title="Очистить макет"
+            >
+              <Trash2 size={14} />
+              Очистить
+            </button>
           </div>
           <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Canvas />
