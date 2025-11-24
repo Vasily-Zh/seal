@@ -21,10 +21,15 @@ export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string =
   // Создаем изображение
   const img = new Image();
   img.onload = () => {
-    // Создаем canvas
+    // Рассчитываем размер canvas (4000px по большей стороне)
+    const maxSize = 4000;
+    const sourceWidth = svgElement.clientWidth;
+    const sourceHeight = svgElement.clientHeight;
+    const scale = maxSize / Math.max(sourceWidth, sourceHeight);
+
     const canvas = document.createElement('canvas');
-    canvas.width = svgElement.clientWidth * 2; // Увеличиваем для лучшего качества
-    canvas.height = svgElement.clientHeight * 2;
+    canvas.width = Math.round(sourceWidth * scale);
+    canvas.height = Math.round(sourceHeight * scale);
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -62,6 +67,13 @@ export const exportToPNGTransparent = (svgElement: SVGSVGElement | null, filenam
 
   // Клонируем SVG
   const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+
+  // Удаляем белый фон из SVG (первый rect элемент)
+  const firstRect = svgClone.querySelector('rect[fill="white"]');
+  if (firstRect) {
+    firstRect.remove();
+  }
+
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
   // Создаем Blob из SVG
@@ -71,10 +83,15 @@ export const exportToPNGTransparent = (svgElement: SVGSVGElement | null, filenam
   // Создаем изображение
   const img = new Image();
   img.onload = () => {
-    // Создаем canvas
+    // Рассчитываем размер canvas (4000px по большей стороне)
+    const maxSize = 4000;
+    const sourceWidth = svgElement.clientWidth;
+    const sourceHeight = svgElement.clientHeight;
+    const scale = maxSize / Math.max(sourceWidth, sourceHeight);
+
     const canvas = document.createElement('canvas');
-    canvas.width = svgElement.clientWidth * 2; // Увеличиваем для лучшего качества
-    canvas.height = svgElement.clientHeight * 2;
+    canvas.width = Math.round(sourceWidth * scale);
+    canvas.height = Math.round(sourceHeight * scale);
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -291,11 +308,15 @@ export const exportToPDF = (svgElement: SVGSVGElement | null, filename: string =
   // Создаем изображение
   const img = new Image();
   img.onload = () => {
-    // Создаем canvas для конвертации SVG в изображение
+    // Рассчитываем размер canvas (500px по большей стороне для PDF)
+    const maxSize = 500;
+    const sourceWidth = svgElement.clientWidth;
+    const sourceHeight = svgElement.clientHeight;
+    const scale = maxSize / Math.max(sourceWidth, sourceHeight);
+
     const canvas = document.createElement('canvas');
-    const scale = 2; // Масштаб для лучшего качества
-    canvas.width = svgElement.clientWidth * scale;
-    canvas.height = svgElement.clientHeight * scale;
+    canvas.width = Math.round(sourceWidth * scale);
+    canvas.height = Math.round(sourceHeight * scale);
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -311,9 +332,9 @@ export const exportToPDF = (svgElement: SVGSVGElement | null, filename: string =
     const imgData = canvas.toDataURL('image/png');
 
     // Создаем PDF
-    // Размеры в мм (A4: 210 x 297, но мы подстроим под размер изображения)
-    const imgWidth = svgElement.clientWidth * 0.264583; // px to mm
-    const imgHeight = svgElement.clientHeight * 0.264583; // px to mm
+    // Размеры в мм (используем оригинальные размеры canvas для соотношения сторон)
+    const imgWidth = sourceWidth * 0.264583; // px to mm
+    const imgHeight = sourceHeight * 0.264583; // px to mm
 
     const pdf = new jsPDF({
       orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
@@ -321,7 +342,7 @@ export const exportToPDF = (svgElement: SVGSVGElement | null, filename: string =
       format: [imgWidth, imgHeight],
     });
 
-    // Добавляем изображение в PDF
+    // Добавляем изображение в PDF с высоким разрешением
     pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
 
     // Сохраняем PDF
