@@ -1,8 +1,10 @@
 import { Undo2, Redo2, Download, Settings, Save, FolderOpen } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
-import { exportToPNG, exportToSVG } from '../../utils/export';
+import { exportToZIP } from '../../utils/export';
 import { useState } from 'react';
-import { SettingsModal } from './SettingsModal';
+import { AdminLoginModal } from '../Admin/AdminLoginModal';
+import { AdminPanel } from '../Admin/AdminPanel';
+import { isAdminLoggedIn } from '../../utils/auth';
 import { ProjectManager } from '../ProjectManager/ProjectManager';
 import { saveProject, generateThumbnail } from '../../utils/projectStorage';
 
@@ -18,21 +20,24 @@ export const Header = () => {
   const setCurrentProject = useStampStore((state) => state.setCurrentProject);
   const loadProjectData = useStampStore((state) => state.loadProjectData);
 
-  const [showExportMenu, setShowExportMenu] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showProjectManager, setShowProjectManager] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
 
-  const handleExportPNG = () => {
+  const handleExportZIP = async () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
-    exportToPNG(svgElement);
-    setShowExportMenu(false);
-  };
-
-  const handleExportSVG = () => {
-    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
-    exportToSVG(svgElement);
-    setShowExportMenu(false);
+    setIsExporting(true);
+    try {
+      await exportToZIP(svgElement);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Ошибка при экспорте файлов');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleSaveProject = async () => {
@@ -59,6 +64,20 @@ export const Header = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSettingsClick = () => {
+    if (isAdminLoggedIn()) {
+      setShowAdminPanel(true);
+    } else {
+      setShowLoginModal(true);
+    }
+  };
+
+  const handleLoginSuccess = (needsChange: boolean) => {
+    setNeedsPasswordChange(needsChange);
+    setShowLoginModal(false);
+    setShowAdminPanel(true);
   };
 
   return (
@@ -170,92 +189,32 @@ export const Header = () => {
           Вернуть
         </button>
 
-        {/* Кнопка Экспорт */}
-        <div style={{ position: 'relative' }}>
-          <button
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-            }}
-          >
-            <Download size={16} />
-            Сохранить
-          </button>
-
-          {showExportMenu && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '4px',
-                backgroundColor: '#fff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                zIndex: 10,
-                minWidth: '150px',
-              }}
-            >
-              <button
-                onClick={handleExportPNG}
-                style={{
-                  width: '100%',
-                  padding: '10px 16px',
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: '#374151',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Сохранить как PNG
-              </button>
-              <button
-                onClick={handleExportSVG}
-                style={{
-                  width: '100%',
-                  padding: '10px 16px',
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: '#374151',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Сохранить как SVG
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Кнопка Скачать */}
+        <button
+          onClick={handleExportZIP}
+          disabled={isExporting}
+          style={{
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '6px',
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            cursor: isExporting ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            opacity: isExporting ? 0.6 : 1,
+          }}
+        >
+          <Download size={16} />
+          {isExporting ? 'Скачивание...' : 'Скачать'}
+        </button>
 
         {/* Кнопка Настройки */}
         <button
-          onClick={() => setShowSettings(true)}
+          onClick={handleSettingsClick}
           style={{
             padding: '8px 16px',
             border: '1px solid #d1d5db',
@@ -275,8 +234,19 @@ export const Header = () => {
         </button>
       </div>
 
-      {/* Settings Modal */}
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      {/* Admin Login Modal */}
+      <AdminLoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* Admin Panel */}
+      <AdminPanel
+        isOpen={showAdminPanel}
+        onClose={() => setShowAdminPanel(false)}
+        needsPasswordChange={needsPasswordChange}
+      />
 
       {/* Project Manager */}
       <ProjectManager

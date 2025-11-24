@@ -1,5 +1,3 @@
-import { optimize } from 'svgo';
-
 interface OptimizeSVGOptions {
   precision?: number; // Точность округления чисел (по умолчанию 2)
   removeComments?: boolean; // Удалить комментарии
@@ -7,7 +5,7 @@ interface OptimizeSVGOptions {
 }
 
 /**
- * Оптимизирует SVG строку используя SVGO
+ * Простая оптимизация SVG без использования SVGO (для совместимости с браузером)
  * @param svgString - SVG код для оптимизации
  * @param options - Опции оптимизации
  * @returns Оптимизированный SVG код
@@ -19,74 +17,31 @@ export async function optimizeSVG(
   const {
     precision = 2,
     removeComments = true,
-    removeMetadata = true,
   } = options;
 
   try {
-    // Собираем плагины
-    const plugins: any[] = [
-      {
-        name: 'preset-default',
-        params: {
-          overrides: {
-            // Отключаем некоторые плагины которые могут навредить
-            removeViewBox: false, // Не удаляем viewBox - он нужен для правильного масштабирования
-            cleanupIds: false, // Не чистим ID - они могут использоваться
-          },
-        },
-      },
-      // Дополнительные плагины для оптимизации
-      'removeDoctype',
-      'removeXMLProcInst',
-      'removeEditorsNSData',
-      'cleanupAttrs',
-      'mergeStyles',
-      'inlineStyles',
-      {
-        name: 'minifyStyles',
-        params: {
-          usage: {
-            force: true,
-          },
-        },
-      },
-      {
-        name: 'cleanupNumericValues',
-        params: {
-          floatPrecision: precision,
-        },
-      },
-      'convertColors',
-      'removeUselessDefs',
-      'mergePaths',
-      'convertShapeToPath',
-      'removeEmptyContainers',
-      'removeUnusedNS',
-      'sortAttrs',
-      {
-        name: 'removeDimensions',
-        params: {},
-      },
-    ];
+    let optimized = svgString;
 
-    // Добавляем условные плагины
+    // Удаляем комментарии
     if (removeComments) {
-      plugins.push('removeComments');
-    }
-    if (removeMetadata) {
-      plugins.push('removeMetadata');
+      optimized = optimized.replace(/<!--[\s\S]*?-->/g, '');
     }
 
-    const result = optimize(svgString, {
-      multipass: true, // Несколько проходов для лучшей оптимизации
-      plugins,
-    });
+    // Удаляем лишние пробелы и переносы строк
+    optimized = optimized
+      .replace(/\s+/g, ' ') // Множественные пробелы в один
+      .replace(/>\s+</g, '><') // Пробелы между тегами
+      .trim();
 
-    if (result.data) {
-      return result.data;
+    // Округляем числа до заданной точности
+    if (precision >= 0) {
+      optimized = optimized.replace(
+        /(\d+\.\d+)/g,
+        (match) => parseFloat(match).toFixed(precision)
+      );
     }
 
-    throw new Error('SVGO optimization failed');
+    return optimized;
   } catch (error) {
     console.error('SVG optimization error:', error);
     // В случае ошибки возвращаем оригинальный SVG

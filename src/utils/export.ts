@@ -1,6 +1,8 @@
 import type { StampElement, IconElement } from '../types';
 import { getCachedSvg } from './extractSvgFromIcon';
 import { optimizeSVG } from './svgOptimizer';
+import { jsPDF } from 'jspdf';
+import JSZip from 'jszip';
 
 // Экспорт в PNG
 export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string = 'stamp.png') => {
@@ -20,10 +22,15 @@ export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string =
   // Создаем изображение
   const img = new Image();
   img.onload = () => {
-    // Создаем canvas
+    // Рассчитываем размер canvas (4000px по большей стороне)
+    const maxSize = 4000;
+    const sourceWidth = svgElement.clientWidth;
+    const sourceHeight = svgElement.clientHeight;
+    const scale = maxSize / Math.max(sourceWidth, sourceHeight);
+
     const canvas = document.createElement('canvas');
-    canvas.width = svgElement.clientWidth * 2; // Увеличиваем для лучшего качества
-    canvas.height = svgElement.clientHeight * 2;
+    canvas.width = Math.round(sourceWidth * scale);
+    canvas.height = Math.round(sourceHeight * scale);
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -31,6 +38,66 @@ export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string =
     // Белый фон
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Рисуем изображение
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Конвертируем в PNG и скачиваем
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const pngUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = pngUrl;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(pngUrl);
+    }, 'image/png');
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.src = url;
+};
+
+// Экспорт в PNG без фона (прозрачный фон)
+export const exportToPNGTransparent = (svgElement: SVGSVGElement | null, filename: string = 'stamp-transparent.png') => {
+  if (!svgElement) {
+    console.error('SVG element not found');
+    return;
+  }
+
+  // Клонируем SVG
+  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+
+  // Удаляем белый фон из SVG (первый rect элемент)
+  const firstRect = svgClone.querySelector('rect[fill="white"]');
+  if (firstRect) {
+    firstRect.remove();
+  }
+
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+
+  // Создаем Blob из SVG
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  // Создаем изображение
+  const img = new Image();
+  img.onload = () => {
+    // Рассчитываем размер canvas (4000px по большей стороне)
+    const maxSize = 4000;
+    const sourceWidth = svgElement.clientWidth;
+    const sourceHeight = svgElement.clientHeight;
+    const scale = maxSize / Math.max(sourceWidth, sourceHeight);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(sourceWidth * scale);
+    canvas.height = Math.round(sourceHeight * scale);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // НЕ заполняем фон - оставляем прозрачным
 
     // Рисуем изображение
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -222,4 +289,199 @@ export const exportElementToSVG = async (
     console.error('Error exporting element to SVG:', error);
     throw error;
   }
+};
+
+// Экспорт в PDF
+export const exportToPDF = (svgElement: SVGSVGElement | null, filename: string = 'stamp.pdf') => {
+  if (!svgElement) {
+    console.error('SVG element not found');
+    return;
+  }
+
+  // Клонируем SVG
+  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+
+  // Создаем Blob из SVG
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  // Создаем изображение
+  const img = new Image();
+  img.onload = () => {
+    // Рассчитываем размер canvas (500px по большей стороне для PDF)
+    const maxSize = 500;
+    const sourceWidth = svgElement.clientWidth;
+    const sourceHeight = svgElement.clientHeight;
+    const scale = maxSize / Math.max(sourceWidth, sourceHeight);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(sourceWidth * scale);
+    canvas.height = Math.round(sourceHeight * scale);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Белый фон
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Рисуем изображение
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Конвертируем canvas в изображение для PDF
+    const imgData = canvas.toDataURL('image/png');
+
+    // Создаем PDF
+    // Размеры в мм (используем оригинальные размеры canvas для соотношения сторон)
+    const imgWidth = sourceWidth * 0.264583; // px to mm
+    const imgHeight = sourceHeight * 0.264583; // px to mm
+
+    const pdf = new jsPDF({
+      orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: [imgWidth, imgHeight],
+    });
+
+    // Добавляем изображение в PDF с высоким разрешением
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+    // Сохраняем PDF
+    pdf.save(filename);
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.src = url;
+};
+
+// Экспорт всех форматов в ZIP архив
+export const exportToZIP = async (svgElement: SVGSVGElement | null, filename: string = 'stamp.zip') => {
+  if (!svgElement) {
+    console.error('SVG element not found');
+    return;
+  }
+
+  const zip = new JSZip();
+
+  // Клонируем SVG для разных экспортов
+  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+
+  // Создаем Blob из SVG
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  // Создаем изображение
+  const img = new Image();
+
+  return new Promise<void>((resolve, reject) => {
+    img.onload = async () => {
+      try {
+        const maxSize = 4000;
+        const sourceWidth = svgElement.clientWidth;
+        const sourceHeight = svgElement.clientHeight;
+        const scale = maxSize / Math.max(sourceWidth, sourceHeight);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(sourceWidth * scale);
+        canvas.height = Math.round(sourceHeight * scale);
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas context not available'));
+          return;
+        }
+
+        // 1. PNG с белым фоном
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const pngBlob = await new Promise<Blob>((res) => {
+          canvas.toBlob((b) => res(b!), 'image/png');
+        });
+        zip.file('stamp.png', pngBlob);
+
+        // 2. PNG без фона (прозрачный)
+        const svgCloneTransparent = svgElement.cloneNode(true) as SVGSVGElement;
+        const firstRect = svgCloneTransparent.querySelector('rect[fill="white"]');
+        if (firstRect) firstRect.remove();
+        const svgStringTransparent = new XMLSerializer().serializeToString(svgCloneTransparent);
+        const blobTransparent = new Blob([svgStringTransparent], { type: 'image/svg+xml;charset=utf-8' });
+        const urlTransparent = URL.createObjectURL(blobTransparent);
+
+        const imgTransparent = new Image();
+        await new Promise<void>((res) => {
+          imgTransparent.onload = () => res();
+          imgTransparent.src = urlTransparent;
+        });
+
+        const canvasTransparent = document.createElement('canvas');
+        canvasTransparent.width = Math.round(sourceWidth * scale);
+        canvasTransparent.height = Math.round(sourceHeight * scale);
+        const ctxTransparent = canvasTransparent.getContext('2d');
+        if (ctxTransparent) {
+          ctxTransparent.drawImage(imgTransparent, 0, 0, canvasTransparent.width, canvasTransparent.height);
+          const pngTransparentBlob = await new Promise<Blob>((res) => {
+            canvasTransparent.toBlob((b) => res(b!), 'image/png');
+          });
+          zip.file('stamp-transparent.png', pngTransparentBlob);
+        }
+        URL.revokeObjectURL(urlTransparent);
+
+        // 3. PDF
+        const pdfCanvas = document.createElement('canvas');
+        const pdfScale = 500 / Math.max(sourceWidth, sourceHeight);
+        pdfCanvas.width = Math.round(sourceWidth * pdfScale);
+        pdfCanvas.height = Math.round(sourceHeight * pdfScale);
+        const pdfCtx = pdfCanvas.getContext('2d');
+        if (pdfCtx) {
+          pdfCtx.fillStyle = 'white';
+          pdfCtx.fillRect(0, 0, pdfCanvas.width, pdfCanvas.height);
+          pdfCtx.drawImage(img, 0, 0, pdfCanvas.width, pdfCanvas.height);
+          const imgData = pdfCanvas.toDataURL('image/png');
+
+          const imgWidth = sourceWidth * 0.264583;
+          const imgHeight = sourceHeight * 0.264583;
+          const pdf = new jsPDF({
+            orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
+            unit: 'mm',
+            format: [imgWidth, imgHeight],
+          });
+          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+          const pdfBlob = pdf.output('blob');
+          zip.file('stamp.pdf', pdfBlob);
+        }
+
+        // 4. SVG
+        const svgCloneFinal = svgElement.cloneNode(true) as SVGSVGElement;
+        if (!svgCloneFinal.getAttribute('xmlns')) {
+          svgCloneFinal.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        }
+        const svgStringFinal = new XMLSerializer().serializeToString(svgCloneFinal);
+        const svgBlob = new Blob([svgStringFinal], { type: 'image/svg+xml;charset=utf-8' });
+        zip.file('stamp.svg', svgBlob);
+
+        // Генерируем и скачиваем ZIP
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const zipUrl = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.href = zipUrl;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(zipUrl);
+        URL.revokeObjectURL(url);
+
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    img.onerror = () => {
+      reject(new Error('Failed to load image'));
+    };
+
+    img.src = url;
+  });
 };

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { X, Upload, Image as ImageIcon, Wand2 } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Wand2, Info } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
 import {
   vectorizeWithPotrace,
   loadImageAsBase64,
+  getImageDimensions,
   type PotraceOptions,
 } from '../../utils/vectorize';
 import { applySvgStyles } from '../../utils/extractSvgFromIcon';
@@ -20,6 +21,7 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
 
   // Настройки для Potrace
   const [threshold, setThreshold] = useState<number>(128);
@@ -37,6 +39,14 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
     reader.onload = async (event) => {
       const url = event.target?.result as string;
       setPreviewUrl(url);
+
+      // Получаем размеры изображения
+      try {
+        const dimensions = await getImageDimensions(url);
+        setImageSize(dimensions);
+      } catch (error) {
+        console.error('Failed to get image dimensions:', error);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -90,6 +100,7 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
   const resetState = () => {
     setSelectedFile(null);
     setPreviewUrl('');
+    setImageSize(null);
   };
 
   const handleClose = () => {
@@ -203,6 +214,29 @@ export const VectorizationDialog = ({ isOpen, onClose }: VectorizationDialogProp
                 }}
               />
             </div>
+
+            {/* Информация о размере изображения */}
+            {imageSize && (imageSize.width > 1000 || imageSize.height > 1000) && (
+              <div
+                style={{
+                  marginBottom: '20px',
+                  padding: '12px',
+                  backgroundColor: '#fef3c7',
+                  border: '1px solid #fbbf24',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <Info size={20} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div style={{ fontSize: '14px', color: '#92400e' }}>
+                  <strong>Изображение будет масштабировано</strong>
+                  <br />
+                  Размер: {imageSize.width}×{imageSize.height}px. Для предотвращения ошибок памяти большие изображения автоматически масштабируются до максимум 1000×1000px с сохранением пропорций.
+                </div>
+              </div>
+            )}
 
             {/* Настройки Potrace */}
             <div style={{ marginBottom: '20px' }}>

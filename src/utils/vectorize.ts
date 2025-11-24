@@ -56,107 +56,107 @@ export function getSvgSize(svgString: string): number {
   return new Blob([svgString]).size / 1024;
 }
 
-/**
- * Вычисляет bounding box SVG содержимого
- */
-function calculateSvgBoundingBox(svgElement: Element): { x: number; y: number; width: number; height: number } | null {
-  try {
-    const elements = svgElement.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, line, text, image');
-
-    if (elements.length === 0) {
-      return null;
-    }
-
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-
-    elements.forEach((el) => {
-      try {
-        // Используем getBBox если доступен (работает с SVGElement)
-        if ('getBBox' in el && typeof (el as any).getBBox === 'function') {
-          try {
-            const bbox = (el as any).getBBox();
-            minX = Math.min(minX, bbox.x);
-            minY = Math.min(minY, bbox.y);
-            maxX = Math.max(maxX, bbox.x + bbox.width);
-            maxY = Math.max(maxY, bbox.y + bbox.height);
-          } catch (e) {
-            // getBBox может не работать в некоторых случаях
-          }
-        }
-
-        // Для path элементов пытаемся парсить координаты
-        if (el.tagName === 'path') {
-          const d = el.getAttribute('d');
-          if (d) {
-            const coords = d.match(/[\d.]+/g);
-            if (coords) {
-              for (let i = 0; i < coords.length; i += 2) {
-                const x = parseFloat(coords[i]);
-                const y = parseFloat(coords[i + 1]);
-                if (!isNaN(x)) minX = Math.min(minX, x);
-                if (!isNaN(y)) minY = Math.min(minY, y);
-                if (!isNaN(x)) maxX = Math.max(maxX, x);
-                if (!isNaN(y)) maxY = Math.max(maxY, y);
-              }
-            }
-          }
-        }
-
-        // Для rect элементов
-        if (el.tagName === 'rect') {
-          const x = parseFloat(el.getAttribute('x') || '0');
-          const y = parseFloat(el.getAttribute('y') || '0');
-          const w = parseFloat(el.getAttribute('width') || '0');
-          const h = parseFloat(el.getAttribute('height') || '0');
-          if (!isNaN(x)) minX = Math.min(minX, x);
-          if (!isNaN(y)) minY = Math.min(minY, y);
-          if (!isNaN(x) && !isNaN(w)) maxX = Math.max(maxX, x + w);
-          if (!isNaN(y) && !isNaN(h)) maxY = Math.max(maxY, y + h);
-        }
-
-        // Для circle элементов
-        if (el.tagName === 'circle') {
-          const cx = parseFloat(el.getAttribute('cx') || '0');
-          const cy = parseFloat(el.getAttribute('cy') || '0');
-          const r = parseFloat(el.getAttribute('r') || '0');
-          if (!isNaN(cx) && !isNaN(r)) {
-            minX = Math.min(minX, cx - r);
-            maxX = Math.max(maxX, cx + r);
-          }
-          if (!isNaN(cy) && !isNaN(r)) {
-            minY = Math.min(minY, cy - r);
-            maxY = Math.max(maxY, cy + r);
-          }
-        }
-      } catch (e) {
-        // Игнорируем ошибки при расчете для отдельных элементов
-      }
-    });
-
-    if (isFinite(minX) && isFinite(minY) && isFinite(maxX) && isFinite(maxY)) {
-      const width = maxX - minX;
-      const height = maxY - minY;
-
-      // Добавляем небольшой padding для уверенности
-      const padding = Math.max(width, height) * 0.05;
-
-      return {
-        x: minX - padding,
-        y: minY - padding,
-        width: width + padding * 2,
-        height: height + padding * 2,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error calculating bounding box:', error);
-    return null;
-  }
-}
+// /**
+//  * Вычисляет bounding box SVG содержимого
+//  */
+// function calculateSvgBoundingBox(svgElement: Element): { x: number; y: number; width: number; height: number } | null {
+//   try {
+//     const elements = svgElement.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, line, text, image');
+//
+//     if (elements.length === 0) {
+//       return null;
+//     }
+//
+//     let minX = Infinity;
+//     let minY = Infinity;
+//     let maxX = -Infinity;
+//     let maxY = -Infinity;
+//
+//     elements.forEach((el) => {
+//       try {
+//         // Используем getBBox если доступен (работает с SVGElement)
+//         if ('getBBox' in el && typeof (el as any).getBBox === 'function') {
+//           try {
+//             const bbox = (el as any).getBBox();
+//             minX = Math.min(minX, bbox.x);
+//             minY = Math.min(minY, bbox.y);
+//             maxX = Math.max(maxX, bbox.x + bbox.width);
+//             maxY = Math.max(maxY, bbox.y + bbox.height);
+//           } catch (e) {
+//             // getBBox может не работать в некоторых случаях
+//           }
+//         }
+//
+//         // Для path элементов пытаемся парсить координаты
+//         if (el.tagName === 'path') {
+//           const d = el.getAttribute('d');
+//           if (d) {
+//             const coords = d.match(/[\d.]+/g);
+//             if (coords) {
+//               for (let i = 0; i < coords.length; i += 2) {
+//                 const x = parseFloat(coords[i]);
+//                 const y = parseFloat(coords[i + 1]);
+//                 if (!isNaN(x)) minX = Math.min(minX, x);
+//                 if (!isNaN(y)) minY = Math.min(minY, y);
+//                 if (!isNaN(x)) maxX = Math.max(maxX, x);
+//                 if (!isNaN(y)) maxY = Math.max(maxY, y);
+//               }
+//             }
+//           }
+//         }
+//
+//         // Для rect элементов
+//         if (el.tagName === 'rect') {
+//           const x = parseFloat(el.getAttribute('x') || '0');
+//           const y = parseFloat(el.getAttribute('y') || '0');
+//           const w = parseFloat(el.getAttribute('width') || '0');
+//           const h = parseFloat(el.getAttribute('height') || '0');
+//           if (!isNaN(x)) minX = Math.min(minX, x);
+//           if (!isNaN(y)) minY = Math.min(minY, y);
+//           if (!isNaN(x) && !isNaN(w)) maxX = Math.max(maxX, x + w);
+//           if (!isNaN(y) && !isNaN(h)) maxY = Math.max(maxY, y + h);
+//         }
+//
+//         // Для circle элементов
+//         if (el.tagName === 'circle') {
+//           const cx = parseFloat(el.getAttribute('cx') || '0');
+//           const cy = parseFloat(el.getAttribute('cy') || '0');
+//           const r = parseFloat(el.getAttribute('r') || '0');
+//           if (!isNaN(cx) && !isNaN(r)) {
+//             minX = Math.min(minX, cx - r);
+//             maxX = Math.max(maxX, cx + r);
+//           }
+//           if (!isNaN(cy) && !isNaN(r)) {
+//             minY = Math.min(minY, cy - r);
+//             maxY = Math.max(maxY, cy + r);
+//           }
+//         }
+//       } catch (e) {
+//         // Игнорируем ошибки при расчете для отдельных элементов
+//       }
+//     });
+//
+//     if (isFinite(minX) && isFinite(minY) && isFinite(maxX) && isFinite(maxY)) {
+//       const width = maxX - minX;
+//       const height = maxY - minY;
+//
+//       // Добавляем небольшой padding для уверенности
+//       const padding = Math.max(width, height) * 0.05;
+//
+//       return {
+//         x: minX - padding,
+//         y: minY - padding,
+//         width: width + padding * 2,
+//         height: height + padding * 2,
+//       };
+//     }
+//
+//     return null;
+//   } catch (error) {
+//     console.error('Error calculating bounding box:', error);
+//     return null;
+//   }
+// }
 
 /**
  * Настройки для Potrace векторизации
@@ -205,18 +205,30 @@ export async function vectorizeWithPotrace(
       img.src = imageData;
     });
 
+    // Масштабируем большие изображения для предотвращения ошибок памяти
+    const MAX_DIMENSION = 1000; // Максимальный размер по любой стороне
+    let targetWidth = img.width;
+    let targetHeight = img.height;
+
+    if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
+      const scale = Math.min(MAX_DIMENSION / img.width, MAX_DIMENSION / img.height);
+      targetWidth = Math.floor(img.width * scale);
+      targetHeight = Math.floor(img.height * scale);
+      console.log(`Scaling image from ${img.width}x${img.height} to ${targetWidth}x${targetHeight}`);
+    }
+
     // Создаём canvas для обработки изображения
     const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {
       throw new Error('Failed to get canvas context');
     }
 
-    // Рисуем изображение
-    ctx.drawImage(img, 0, 0);
+    // Рисуем изображение (масштабированное если нужно)
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
     // Получаем данные пикселей для черно-белой конвертации
     const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);

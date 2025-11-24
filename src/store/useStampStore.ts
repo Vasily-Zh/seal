@@ -15,25 +15,6 @@ const initialElements: StampElement[] = [
     stroke: '#0000ff',
     visible: true,
   },
-  // Текст по кругу (верхний)
-  {
-    id: 'text-default-1',
-    type: 'text',
-    text: 'ПРИМЕР ТЕКСТА ПО КРУГУ',
-    x: 50,
-    y: 50,
-    fontSize: 6,
-    fontFamily: 'Arial, sans-serif',
-    curved: true,
-    curveRadius: 33.5,
-    startAngle: 270,
-    letterSpacing: 0,
-    color: '#0000ff',
-    flipped: true,
-    bold: false,
-    italic: false,
-    visible: true,
-  },
   // Текст по кругу (нижний)
   {
     id: 'text-default-2',
@@ -49,6 +30,25 @@ const initialElements: StampElement[] = [
     letterSpacing: 0,
     color: '#0000ff',
     flipped: false,
+    bold: false,
+    italic: false,
+    visible: true,
+  },
+  // Текст по кругу (верхний)
+  {
+    id: 'text-default-1',
+    type: 'text',
+    text: 'ПРИМЕР ТЕКСТА ПО КРУГУ',
+    x: 50,
+    y: 50,
+    fontSize: 6,
+    fontFamily: 'Arial, sans-serif',
+    curved: true,
+    curveRadius: 33.5,
+    startAngle: 270,
+    letterSpacing: 0,
+    color: '#0000ff',
+    flipped: true,
     bold: false,
     italic: false,
     visible: true,
@@ -94,6 +94,30 @@ export const useStampStore = create<StampStore>((set, get) => ({
       elements: state.elements.filter((el) => el.id !== id),
       selectedElementId: state.selectedElementId === id ? null : state.selectedElementId,
     }));
+    get().saveToHistory();
+  },
+
+  // Дублирование элемента
+  duplicateElement: (id: string) => {
+    set((state) => {
+      const element = state.elements.find((el) => el.id === id);
+      if (!element) return state;
+
+      // Создаём копию с новым id и небольшим смещением
+      const duplicatedElement: StampElement = {
+        ...element,
+        id: `${element.type}-${Date.now()}`,
+        x: element.x + 2,
+        y: element.y + 2,
+        // Если это группа, не копируем children (дублируем только простые элементы)
+        ...(element.type === 'group' ? { children: [] } : {}),
+      };
+
+      return {
+        elements: [...state.elements, duplicatedElement],
+        selectedElementId: duplicatedElement.id,
+      };
+    });
     get().saveToHistory();
   },
 

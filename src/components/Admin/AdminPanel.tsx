@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  loadCustomCategories,
   addCategory,
   updateCategory,
   deleteCategory,
@@ -17,10 +16,8 @@ import {
   hideBuiltinIcon,
   addIconToBuiltinCategory,
   deleteIconFromBuiltinCategory,
-  type CustomCategory,
 } from '../../utils/customIcons';
-import { getAllCategories, type IconInfo } from '../../data/iconCollections';
-import { extractSvgFromIcon } from '../../utils/extractSvgFromIcon';
+import { getAllCategories } from '../../data/iconCollections';
 import * as LucideIcons from 'lucide-react';
 import * as HeroIcons from '@heroicons/react/24/solid';
 import { changeCredentials, logout, getCurrentAdminLogin } from '../../utils/auth';
@@ -86,7 +83,7 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
     const displayCategories: DisplayCategory[] = allCategories.map((cat) => {
       const icons = cat.icons.map((icon) => {
         return {
-          id: icon.name || icon.id || '', // Для библиотечных иконок используем name как id
+          id: icon.name || '', // Для библиотечных иконок используем name как id
           name: icon.name || '',
           displayName: icon.displayName || '',
           svgContent: icon.svgContent || '',
@@ -120,7 +117,7 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
     }
 
     const newCategory = addCategory(categoryNameInput.trim());
-    setCategories(prev => [...prev, newCategory]);
+    setCategories(prev => [{ ...newCategory, isCustom: true }, ...prev]);
     setSelectedCategoryId(newCategory.id);
     setIsCreatingCategory(false);
     setCategoryNameInput('');

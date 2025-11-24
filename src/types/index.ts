@@ -126,6 +126,7 @@ export interface StampStore {
   // Методы
   addElement: (element: StampElement) => void;
   removeElement: (id: string) => void;
+  duplicateElement: (id: string) => void;
   updateElement: (id: string, updates: Partial<StampElement>) => void;
   selectElement: (id: string | null) => void;
   getSelectedElement: () => StampElement | null;
@@ -167,9 +168,10 @@ export interface StampStore {
 
 // Конфигурация шрифтов
 export interface FontConfig {
-  name: string;
-  family: string;
+  name: string; // базовое имя шрифта
+  family: string; // базовое CSS family значение
   category: 'serif' | 'sans-serif';
+  isPrintingFont?: boolean; // флаг для полиграфических шрифтов
 }
 
 // Параметры по умолчанию

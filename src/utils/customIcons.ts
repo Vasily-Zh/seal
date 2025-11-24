@@ -105,7 +105,7 @@ export function addCategory(name: string): CustomCategory {
     updatedAt: Date.now(),
   };
 
-  categories.push(newCategory);
+  categories.unshift(newCategory);
   saveCustomCategories(categories);
 
   return newCategory;

@@ -223,6 +223,7 @@ export const IconSearchModal = ({ isOpen, onClose }: IconSearchModalProps) => {
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               onKeyDown={handleKeyDown}
+              onMouseDown={(e) => e.stopPropagation()}
               onFocus={() => setShowAutocomplete(searchQuery.trim().length > 0)}
               onBlur={() => {
                 // Задержка, чтобы клик по подсказке успел сработать

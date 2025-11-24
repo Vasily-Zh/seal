@@ -871,6 +871,6 @@ export const getAllCategories = (): { id: string; name: string; icons: IconInfo[
       };
     });
 
-  // Объединяем библиотечные и кастомные категории
-  return [...visibleBuiltinCategories, ...customCategoriesFormatted];
+  // Объединяем библиотечные и кастомные категории (кастомные в начале)
+  return [...customCategoriesFormatted, ...visibleBuiltinCategories];
 };

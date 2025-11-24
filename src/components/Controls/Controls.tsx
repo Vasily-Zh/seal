@@ -1,8 +1,8 @@
-import { Trash2, Eye, EyeOff, GripVertical, Target, Settings as SettingsIcon, Layers, Download } from 'lucide-react';
+import { Trash2, Eye, EyeOff, GripVertical, Target, Settings as SettingsIcon, Layers, Download, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
-import { ALL_FONTS } from '../../utils/fonts';
+import { FontSelector } from './FontSelector';
 import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, ImageElement as ImageElementType, IconElement as IconElementType } from '../../types';
 import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
 import { LayersPanel } from './LayersPanel';
@@ -19,6 +19,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const updateElement = useStampStore((state) => state.updateElement);
   const removeElement = useStampStore((state) => state.removeElement);
+  const duplicateElement = useStampStore((state) => state.duplicateElement);
   const selectElement = useStampStore((state) => state.selectElement);
 
   const selectedElement = elements.find((el) => el.id === selectedElementId);
@@ -71,8 +72,24 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                       background: 'transparent',
                       cursor: 'pointer',
                     }}
+                    title={element.visible ? 'Скрыть' : 'Показать'}
                   >
                     {element.visible ? <Eye size={16} color="#6b7280" /> : <EyeOff size={16} color="#9ca3af" />}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateElement(element.id);
+                    }}
+                    style={{
+                      padding: '4px',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                    }}
+                    title="Дублировать"
+                  >
+                    <Copy size={16} color="#6b7280" />
                   </button>
                   <button
                     onClick={(e) => {
@@ -85,6 +102,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                       background: 'transparent',
                       cursor: 'pointer',
                     }}
+                    title="Удалить"
                   >
                     <Trash2 size={16} color="#ef4444" />
                   </button>
@@ -212,8 +230,24 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                       background: 'transparent',
                       cursor: 'pointer',
                     }}
+                    title={element.visible ? 'Скрыть' : 'Показать'}
                   >
                     {element.visible ? <Eye size={16} color="#6b7280" /> : <EyeOff size={16} color="#9ca3af" />}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateElement(element.id);
+                    }}
+                    style={{
+                      padding: '4px',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                    }}
+                    title="Дублировать"
+                  >
+                    <Copy size={16} color="#6b7280" />
                   </button>
                   <button
                     onClick={(e) => {
@@ -226,6 +260,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                       background: 'transparent',
                       cursor: 'pointer',
                     }}
+                    title="Удалить"
                   >
                     <Trash2 size={16} color="#ef4444" />
                   </button>
@@ -261,7 +296,6 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
 function ElementSettings({ element }: { element: any }) {
   const updateElement = useStampStore((state) => state.updateElement);
   const centerElement = useStampStore((state) => state.centerElement);
-  const canvasSize = useStampStore((state) => state.canvasSize);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
 
   if (element.type === 'circle') {
@@ -392,28 +426,10 @@ function ElementSettings({ element }: { element: any }) {
           />
         </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-            Шрифт
-          </label>
-          <select
-            value={(element as TextElementType).fontFamily}
-            onChange={(e) => updateElement(element.id, { fontFamily: e.target.value })}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '14px',
-            }}
-          >
-            {ALL_FONTS.map((font) => (
-              <option key={font.family} value={font.family}>
-                {font.name} ({font.category})
-              </option>
-            ))}
-          </select>
-        </div>
+        <FontSelector
+          value={(element as TextElementType).fontFamily}
+          onChange={(fontFamily) => updateElement(element.id, { fontFamily })}
+        />
 
         <SliderInput
           label="Размер текста"
@@ -533,28 +549,10 @@ function ElementSettings({ element }: { element: any }) {
           />
         </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-            Шрифт
-          </label>
-          <select
-            value={(element as TextCenteredElementType).fontFamily}
-            onChange={(e) => updateElement(element.id, { fontFamily: e.target.value })}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '14px',
-            }}
-          >
-            {ALL_FONTS.map((font) => (
-              <option key={font.family} value={font.family}>
-                {font.name} ({font.category})
-              </option>
-            ))}
-          </select>
-        </div>
+        <FontSelector
+          value={(element as TextCenteredElementType).fontFamily}
+          onChange={(fontFamily) => updateElement(element.id, { fontFamily })}
+        />
 
         <SliderInput
           label="Размер текста"

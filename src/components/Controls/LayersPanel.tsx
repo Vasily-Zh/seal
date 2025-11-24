@@ -29,10 +29,7 @@ import {
   Square,
   Image as ImageIcon,
   Layers,
-  ArrowUp,
-  ArrowDown,
-  ChevronsUp,
-  ChevronsDown,
+  Copy,
 } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
 import type { StampElement } from '../../types';
@@ -45,11 +42,8 @@ interface LayerItemProps {
   onSelect: () => void;
   onToggleVisibility: () => void;
   onToggleLock: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  onMoveToTop: () => void;
-  onMoveToBottom: () => void;
   onToggleExpand?: () => void;
   isExpanded?: boolean;
 }
@@ -84,11 +78,8 @@ const LayerItem = ({
   onSelect,
   onToggleVisibility,
   onToggleLock,
+  onDuplicate,
   onDelete,
-  onMoveUp,
-  onMoveDown,
-  onMoveToTop,
-  onMoveToBottom,
   onToggleExpand,
   isExpanded,
   dragHandleProps,
@@ -183,83 +174,6 @@ const LayerItem = ({
 
       {/* Кнопки управления */}
       <div style={{ display: 'flex', gap: '4px' }}>
-        {/* Кнопки перемещения по слоям */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onMoveToTop();
-          }}
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: '4px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            color: '#6b7280',
-          }}
-          title="На передний план"
-        >
-          <ChevronsUp size={16} />
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onMoveUp();
-          }}
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: '4px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            color: '#6b7280',
-          }}
-          title="Выше"
-        >
-          <ArrowUp size={16} />
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onMoveDown();
-          }}
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: '4px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            color: '#6b7280',
-          }}
-          title="Ниже"
-        >
-          <ArrowDown size={16} />
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onMoveToBottom();
-          }}
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: '4px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            color: '#6b7280',
-          }}
-          title="На задний план"
-        >
-          <ChevronsDown size={16} />
-        </button>
-
         {/* Блокировка */}
         <button
           onClick={(e) => {
@@ -278,6 +192,26 @@ const LayerItem = ({
           title={element.locked ? 'Разблокировать' : 'Заблокировать'}
         >
           {element.locked ? <Lock size={16} /> : <Unlock size={16} />}
+        </button>
+
+        {/* Дублирование */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate();
+          }}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '4px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            color: '#6b7280',
+          }}
+          title="Дублировать"
+        >
+          <Copy size={16} />
         </button>
 
         {/* Видимость */}
@@ -330,11 +264,8 @@ export const LayersPanel = () => {
   const selectElement = useStampStore((state) => state.selectElement);
   const updateElement = useStampStore((state) => state.updateElement);
   const removeElement = useStampStore((state) => state.removeElement);
+  const duplicateElement = useStampStore((state) => state.duplicateElement);
   const toggleElementLock = useStampStore((state) => state.toggleElementLock);
-  const moveElementUp = useStampStore((state) => state.moveElementUp);
-  const moveElementDown = useStampStore((state) => state.moveElementDown);
-  const moveToTop = useStampStore((state) => state.moveToTop);
-  const moveToBottom = useStampStore((state) => state.moveToBottom);
   const reorderElements = useStampStore((state) => state.reorderElements);
   const expandGroup = useStampStore((state) => state.expandGroup);
   const createGroup = useStampStore((state) => state.createGroup);
@@ -426,6 +357,7 @@ export const LayersPanel = () => {
                     onSelect={() => selectElement(element.id)}
                     onToggleVisibility={() => updateElement(element.id, { visible: !element.visible })}
                     onToggleLock={() => toggleElementLock(element.id)}
+                    onDuplicate={() => duplicateElement(element.id)}
                     onDelete={() => {
                       if (element.type === 'group') {
                         if (confirm('Удалить группу? Дочерние элементы останутся.')) {
@@ -435,10 +367,6 @@ export const LayersPanel = () => {
                         removeElement(element.id);
                       }
                     }}
-                    onMoveUp={() => moveElementUp(element.id)}
-                    onMoveDown={() => moveElementDown(element.id)}
-                    onMoveToTop={() => moveToTop(element.id)}
-                    onMoveToBottom={() => moveToBottom(element.id)}
                     onToggleExpand={
                       element.type === 'group'
                         ? () => expandGroup(element.id, !element.expanded)
@@ -459,11 +387,8 @@ export const LayersPanel = () => {
                           onSelect={() => selectElement(child.id)}
                           onToggleVisibility={() => updateElement(child.id, { visible: !child.visible })}
                           onToggleLock={() => toggleElementLock(child.id)}
+                          onDuplicate={() => duplicateElement(child.id)}
                           onDelete={() => removeElement(child.id)}
-                          onMoveUp={() => moveElementUp(child.id)}
-                          onMoveDown={() => moveElementDown(child.id)}
-                          onMoveToTop={() => moveToTop(child.id)}
-                          onMoveToBottom={() => moveToBottom(child.id)}
                         />
                       ))}
                     </div>
