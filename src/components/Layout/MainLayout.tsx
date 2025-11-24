@@ -1,6 +1,7 @@
 import { Header } from '../Header/Header';
 import { Toolbar } from '../Toolbar/Toolbar';
 import { Controls } from '../Controls/Controls';
+import { LayersPanel } from '../Controls/LayersPanel';
 import { Canvas } from '../Canvas/Canvas';
 
 export const MainLayout = () => {
@@ -31,24 +32,18 @@ export const MainLayout = () => {
           <Toolbar />
         </div>
 
-        {/* Блок 2: Список элементов - 25% */}
+        {/* Блок 2: Слои - 25% */}
         <div
           style={{
             width: '25%',
             borderRight: '1px solid #e5e7eb',
             backgroundColor: '#fff',
-            overflow: 'auto',
-            padding: '16px',
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
           }}
         >
-          <h4 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', marginTop: 0, color: '#111827' }}>
-            Список элементов
-          </h4>
-          <div style={{ flex: 1, overflow: 'auto' }}>
-            <Controls showOnlyElements={true} />
-          </div>
+          <LayersPanel />
         </div>
 
         {/* Блок 3: Настройки элемента - 25% */}

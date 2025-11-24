@@ -1,4 +1,4 @@
-import { Trash2, Eye, EyeOff, GripVertical, Target, Settings as SettingsIcon, Layers, Download } from 'lucide-react';
+import { Trash2, Eye, EyeOff, GripVertical, Target, Settings as SettingsIcon, Layers, Download, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
@@ -19,6 +19,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const updateElement = useStampStore((state) => state.updateElement);
   const removeElement = useStampStore((state) => state.removeElement);
+  const duplicateElement = useStampStore((state) => state.duplicateElement);
   const selectElement = useStampStore((state) => state.selectElement);
 
   const selectedElement = elements.find((el) => el.id === selectedElementId);
@@ -71,8 +72,24 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                       background: 'transparent',
                       cursor: 'pointer',
                     }}
+                    title={element.visible ? 'Скрыть' : 'Показать'}
                   >
                     {element.visible ? <Eye size={16} color="#6b7280" /> : <EyeOff size={16} color="#9ca3af" />}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateElement(element.id);
+                    }}
+                    style={{
+                      padding: '4px',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                    }}
+                    title="Дублировать"
+                  >
+                    <Copy size={16} color="#6b7280" />
                   </button>
                   <button
                     onClick={(e) => {
@@ -85,6 +102,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                       background: 'transparent',
                       cursor: 'pointer',
                     }}
+                    title="Удалить"
                   >
                     <Trash2 size={16} color="#ef4444" />
                   </button>
@@ -212,8 +230,24 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                       background: 'transparent',
                       cursor: 'pointer',
                     }}
+                    title={element.visible ? 'Скрыть' : 'Показать'}
                   >
                     {element.visible ? <Eye size={16} color="#6b7280" /> : <EyeOff size={16} color="#9ca3af" />}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateElement(element.id);
+                    }}
+                    style={{
+                      padding: '4px',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                    }}
+                    title="Дублировать"
+                  >
+                    <Copy size={16} color="#6b7280" />
                   </button>
                   <button
                     onClick={(e) => {
@@ -226,6 +260,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                       background: 'transparent',
                       cursor: 'pointer',
                     }}
+                    title="Удалить"
                   >
                     <Trash2 size={16} color="#ef4444" />
                   </button>
