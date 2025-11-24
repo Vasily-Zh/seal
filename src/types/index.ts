@@ -167,19 +167,10 @@ export interface StampStore {
 }
 
 // Конфигурация шрифтов
-export interface FontVariant {
-  name: string; // например "Regular", "Bold", "Italic", "Narrow"
-  family: string; // полное CSS family значение
-  weight?: number | string; // font-weight (400, 700, "bold" и т.д.)
-  style?: 'normal' | 'italic'; // font-style
-  stretch?: string; // font-stretch для narrow/condensed
-}
-
 export interface FontConfig {
   name: string; // базовое имя шрифта
   family: string; // базовое CSS family значение
   category: 'serif' | 'sans-serif';
-  variants?: FontVariant[]; // варианты шрифта (bold, italic, narrow и т.д.)
   isPrintingFont?: boolean; // флаг для полиграфических шрифтов
 }
 
