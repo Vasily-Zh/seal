@@ -133,23 +133,84 @@ export async function convertCurvedTextToPath(
     const font = await loadFont(fontFamily, fontWeight, fontStyle);
     const paths: string[] = [];
 
-    let currentAngle = (startAngle * Math.PI) / 180; // Начальный угол в радианах
+    // Рассчитываем общую ширину текста
+    let totalWidth = 0;
+    const charData = [];
 
-    // Для каждой буквы создаем отдельный path
     for (let i = 0; i < text.length; i++) {
       const char = text[i];
 
-      // Получаем advance width (ширина глифа)
+      // Получаем ширину глифа
       const advance = font.getAdvanceWidth(char, fontSize);
 
       if (char === ' ') {
-        // Для пробела просто сдвигаем угол
-        currentAngle += advance / radius;
+        charData.push({ char, advance, isSpace: true });
+        totalWidth += advance;
+      } else {
+        const glyphPath = font.getPath(char, 0, 0, fontSize);
+        charData.push({
+          char,
+          advance,
+          isSpace: false,
+          glyphPath
+        });
+        totalWidth += advance;
+      }
+    }
+
+    // Проверяем, не превышает ли текст длину окружности
+    const circumference = 2 * Math.PI * radius;
+    if (totalWidth > circumference * 0.9) { // 90% окружности для безопасности
+      // Уменьшаем размер шрифта пропорционально
+      const scale = (circumference * 0.9) / totalWidth;
+      fontSize = fontSize * scale;
+
+      // Пересчитываем данные с новым размером шрифта
+      totalWidth = 0;
+      charData.length = 0;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const advance = font.getAdvanceWidth(char, fontSize);
+
+        if (char === ' ') {
+          charData.push({ char, advance, isSpace: true });
+          totalWidth += advance;
+        } else {
+          const glyphPath = font.getPath(char, 0, 0, fontSize);
+          charData.push({
+            char,
+            advance,
+            isSpace: false,
+            glyphPath
+          });
+          totalWidth += advance;
+        }
+      }
+    }
+
+    // Рассчитываем начальный угол для центрирования текста
+    // Длина дуги = угол (в радианах) * радиус
+    const textArcLength = totalWidth;
+    const textArcAngle = textArcLength / radius; // в радианах
+    const startAngleRad = (startAngle * Math.PI) / 180;
+
+    // Центрируем текст относительно startAngle, при этом направление размещения
+    // символов остается постоянным (по часовой стрелке), изменяется только поворот самих глифов
+    // startAngle: 90° = низ круга, 270° = верх круга (в системе координат SVG)
+    let currentAngle = startAngleRad - textArcAngle / 2;
+
+    // Для каждой буквы создаем отдельный path
+    for (let i = 0; i < charData.length; i++) {
+      const data = charData[i];
+
+      if (data.isSpace) {
+        // Для пробела перемещаемся на расстояние advance в обычном направлении
+        currentAngle += data.advance / radius;
         continue;
       }
 
-      // Создаем путь для символа
-      const glyphPath = font.getPath(char, 0, 0, fontSize);
+      const { char, advance, glyphPath } = data;
 
       // Формируем строку пути из команд
       let pathData = '';
@@ -172,30 +233,34 @@ export async function convertCurvedTextToPath(
         continue;
       }
 
-      // Получаем реальный bounding box глифа
+      // Получаем реальный bounding box глифа для правильного центрирования
       const bbox = glyphPath.getBoundingBox();
       const centerX = (bbox.x1 + bbox.x2) / 2;
       const centerY = (bbox.y1 + bbox.y2) / 2;
 
-      // Сдвигаем угол на половину advance width (межсимвольное расстояние)
+      // Сдвигаем угол на половину advance width для позиционирования символа
       currentAngle += (advance / 2) / radius;
 
       // Позиция центра глифа на окружности
       const charX = cx + Math.cos(currentAngle) * radius;
       const charY = cy + Math.sin(currentAngle) * radius;
 
-      // Угол поворота глифа: перпендикулярно радиусу
-      // currentAngle в радианах, добавляем π/2 (90°)
-      const rotationRad = isFlipped ? currentAngle - Math.PI / 2 : currentAngle + Math.PI / 2;
+      // Угол поворота глифа:
+      // - для обычного текста: касательная к окружности (перпендикулярно радиусу)
+      // - для перевернутого текста: дополнительный поворот на 180 градусов
+      let rotationRad = currentAngle - Math.PI / 2;
+
+      // Для перевернутого текста применяем дополнительный поворот на 180 градусов
+      if (isFlipped) {
+        rotationRad += Math.PI; // Добавляем 180 градусов для "переворота" текста
+      }
+
       const rotationDeg = (rotationRad * 180) / Math.PI;
 
-      // Применяем трансформацию в ПРАВИЛЬНОМ порядке:
-      // 1) Центрируем глиф относительно его реальной геометрии (bbox)
-      // 2) Поворачиваем
-      // 3) Перемещаем на позицию на круге
+      // Применяем трансформацию
       const transformedPath = svgpath(pathData)
         .translate(-centerX, -centerY)
-        .rotate(rotationDeg)
+        .rotate(rotationDeg, 0, 0)
         .translate(charX, charY)
         .toString();
 
