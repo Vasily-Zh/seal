@@ -66,10 +66,26 @@ export const Canvas = () => {
               <path
                 d={`M ${5 * scale} 0 L 0 0 0 ${5 * scale}`}
                 fill="none"
-                stroke="#d1d5db"
+                stroke="#6b7280"
                 strokeWidth="0.5"
               />
             </pattern>
+
+             <pattern
+                id="fine-grid-pattern"
+                width={1 * scale}
+                height={1 * scale}
+                patternUnits="userSpaceOnUse"
+                data-export-exclude="true"
+              >
+                <path
+                  d={`M ${1 * scale} 0 L 0 0 0 ${1 * scale}`}
+                  fill="none"
+                  stroke="#000000ff"
+                  strokeWidth="0.1"
+                />
+              </pattern>
+
           </defs>
 
           {/* Белый фон (экспортируется) */}
@@ -82,6 +98,14 @@ export const Canvas = () => {
             fill="url(#grid-pattern)"
             data-export-exclude="true"
           />
+
+                    <rect
+            width={svgSize}
+            height={svgSize}
+            fill="url(#fine-grid-pattern)"
+            data-export-exclude="true"
+          />
+
 
           {/* Линейки - только для редактора */}
           <g data-export-exclude="true">
@@ -104,7 +128,7 @@ export const Canvas = () => {
                   x1={pos}
                   y1={0}
                   x2={pos}
-                  y2={isMajor ? 10 : 5}
+                  y2={isMajor ? 10 : 10}
                   stroke="#9ca3af"
                   strokeWidth="1"
                 />
@@ -153,7 +177,7 @@ export const Canvas = () => {
                 <line
                   x1={0}
                   y1={pos}
-                  x2={isMajor ? 10 : 5}
+                  x2={isMajor ? 10 : 10}
                   y2={pos}
                   stroke="#9ca3af"
                   strokeWidth="1"
