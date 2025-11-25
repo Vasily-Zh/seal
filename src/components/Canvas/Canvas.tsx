@@ -29,7 +29,7 @@ export const Canvas = () => {
       maxRadius = Math.max(maxRadius, el.radius);
     }
   });
-  const clicheSize = Math.ceil(maxRadius * 2);
+  const clicheSize = Math.ceil(maxRadius);
 
   return (
     <div
