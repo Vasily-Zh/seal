@@ -103,12 +103,10 @@ export const useStampStore = create<StampStore>((set, get) => ({
       const element = state.elements.find((el) => el.id === id);
       if (!element) return state;
 
-      // Создаём копию с новым id и небольшим смещением
+      // Создаём копию с новым id, оставляя координаты без изменений
       const duplicatedElement: StampElement = {
         ...element,
         id: `${element.type}-${Date.now()}`,
-        x: element.x + 2,
-        y: element.y + 2,
         // Если это группа, не копируем children (дублируем только простые элементы)
         ...(element.type === 'group' ? { children: [] } : {}),
       };
