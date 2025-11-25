@@ -195,9 +195,10 @@ export async function convertCurvedTextToPath(
     const textArcAngle = textArcLength / radius; // в радианах
     const startAngleRad = (startAngle * Math.PI) / 180;
 
-    // Центрируем текст относительно startAngle, при этом направление размещения
-    // символов остается постоянным (по часовой стрелке), изменяется только поворот самих глифов
+    // Центрируем текст относительно startAngle
     // startAngle: 90° = низ круга, 270° = верх круга (в системе координат SVG)
+    // Для flipped текста буквы идут в том же направлении (по часовой),
+    // но сами глифы повернуты на 180° для читаемости
     let currentAngle = startAngleRad - textArcAngle / 2;
 
     // Для каждой буквы создаем отдельный path
@@ -205,7 +206,7 @@ export async function convertCurvedTextToPath(
       const data = charData[i];
 
       if (data.isSpace) {
-        // Для пробела перемещаемся на расстояние advance в обычном направлении
+        // Для пробела перемещаемся на расстояние advance (всегда по часовой)
         currentAngle += data.advance / radius;
         continue;
       }
@@ -229,6 +230,7 @@ export async function convertCurvedTextToPath(
       });
 
       if (!pathData || pathData === '') {
+        // Для пустого пути перемещаемся на расстояние advance (всегда по часовой)
         currentAngle += advance / radius;
         continue;
       }
@@ -238,7 +240,7 @@ export async function convertCurvedTextToPath(
       const centerX = (bbox.x1 + bbox.x2) / 2;
       const centerY = (bbox.y1 + bbox.y2) / 2;
 
-      // Сдвигаем угол на половину advance width для позиционирования символа
+      // Сдвигаем угол на половину advance width для позиционирования символа (всегда по часовой)
       currentAngle += (advance / 2) / radius;
 
       // Позиция центра глифа на окружности
@@ -266,7 +268,7 @@ export async function convertCurvedTextToPath(
 
       paths.push(`<path d="${transformedPath}" fill="${color}"/>`);
 
-      // Сдвигаем угол на вторую половину advance width
+      // Сдвигаем угол на вторую половину advance width (всегда по часовой)
       currentAngle += (advance / 2) / radius;
     }
 

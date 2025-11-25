@@ -29,7 +29,7 @@ const initialElements: StampElement[] = [
     startAngle: 90,
     letterSpacing: 0,
     color: '#0000ff',
-    flipped: false,
+    flipped: true,
     bold: false,
     italic: false,
     visible: true,
