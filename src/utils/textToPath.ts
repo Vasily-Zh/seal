@@ -197,17 +197,27 @@ export async function convertCurvedTextToPath(
 
     // Центрируем текст относительно startAngle
     // startAngle: 90° = низ круга, 270° = верх круга (в системе координат SVG)
-    // Для flipped текста буквы идут в том же направлении (по часовой),
-    // но сами глифы повернуты на 180° для читаемости
-    let currentAngle = startAngleRad - textArcAngle / 2;
+    // Для flipped текста меняется направление движения по кругу
+    let currentAngle;
+    if (isFlipped) {
+      // Для flipped=true: начинаем справа от центра, идем против часовой
+      currentAngle = startAngleRad + textArcAngle / 2;
+    } else {
+      // Для flipped=false: начинаем слева от центра, идем по часовой
+      currentAngle = startAngleRad - textArcAngle / 2;
+    }
 
     // Для каждой буквы создаем отдельный path
     for (let i = 0; i < charData.length; i++) {
       const data = charData[i];
 
       if (data.isSpace) {
-        // Для пробела перемещаемся на расстояние advance (всегда по часовой)
-        currentAngle += data.advance / radius;
+        // Для пробела перемещаемся на расстояние advance
+        if (isFlipped) {
+          currentAngle -= data.advance / radius; // против часовой
+        } else {
+          currentAngle += data.advance / radius; // по часовой
+        }
         continue;
       }
 
@@ -230,8 +240,12 @@ export async function convertCurvedTextToPath(
       });
 
       if (!pathData || pathData === '') {
-        // Для пустого пути перемещаемся на расстояние advance (всегда по часовой)
-        currentAngle += advance / radius;
+        // Для пустого пути перемещаемся на расстояние advance
+        if (isFlipped) {
+          currentAngle -= advance / radius; // против часовой
+        } else {
+          currentAngle += advance / radius; // по часовой
+        }
         continue;
       }
 
@@ -240,21 +254,25 @@ export async function convertCurvedTextToPath(
       const centerX = (bbox.x1 + bbox.x2) / 2;
       const centerY = (bbox.y1 + bbox.y2) / 2;
 
-      // Сдвигаем угол на половину advance width для позиционирования символа (всегда по часовой)
-      currentAngle += (advance / 2) / radius;
+      // Сдвигаем угол на половину advance width для позиционирования символа
+      if (isFlipped) {
+        currentAngle -= (advance / 2) / radius; // против часовой
+      } else {
+        currentAngle += (advance / 2) / radius; // по часовой
+      }
 
       // Позиция центра глифа на окружности
       const charX = cx + Math.cos(currentAngle) * radius;
       const charY = cy + Math.sin(currentAngle) * radius;
 
       // Угол поворота глифа:
-      // - для обычного текста: касательная к окружности (перпендикулярно радиусу)
-      // - для перевернутого текста: дополнительный поворот на 180 градусов
-      let rotationRad = currentAngle - Math.PI / 2;
+      // - для обычного текста (flipped=false): буквы читаемые, поворот на 90° (перпендикулярно радиусу) + 180° для читаемости
+      // - для перевернутого текста (flipped=true): буквы "вверх ногами", только 90° поворот
+      let rotationRad = currentAngle + Math.PI / 2; // базовый поворот (касательная + 180°)
 
-      // Для перевернутого текста применяем дополнительный поворот на 180 градусов
+      // Для перевернутого текста УБИРАЕМ дополнительный поворот на 180 градусов
       if (isFlipped) {
-        rotationRad += Math.PI; // Добавляем 180 градусов для "переворота" текста
+        rotationRad -= Math.PI; // Убираем 180 градусов - текст будет "вверх ногами"
       }
 
       const rotationDeg = (rotationRad * 180) / Math.PI;
@@ -268,8 +286,12 @@ export async function convertCurvedTextToPath(
 
       paths.push(`<path d="${transformedPath}" fill="${color}"/>`);
 
-      // Сдвигаем угол на вторую половину advance width (всегда по часовой)
-      currentAngle += (advance / 2) / radius;
+      // Сдвигаем угол на вторую половину advance width
+      if (isFlipped) {
+        currentAngle -= (advance / 2) / radius; // против часовой
+      } else {
+        currentAngle += (advance / 2) / radius; // по часовой
+      }
     }
 
     return paths.join('\n');
