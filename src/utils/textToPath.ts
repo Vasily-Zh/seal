@@ -7,7 +7,73 @@ import svgpath from 'svgpath';
 const fontCache = new Map<string, opentype.Font>();
 
 /**
- * Загружает шрифт из Google Fonts
+ * URLs для системных шрифтов (используем эквиваленты от Google или других источников)
+ */
+const systemFontUrls: Record<string, Record<string, string>> = {
+  'Arial': { 'normal-normal': 'https://fonts.gstatic.com/s/arimo/v30/P5SfzZ-pYmxS-6hx1TzI7Lq-Hk_e.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/arimo/v30/P5SdzZ-pYmxS-6hx1TzI7Lq-DlC0H9Iy.ttf' },
+  'Georgia': { 'normal-normal': 'https://fonts.gstatic.com/s/crimsonpro/v16/wlpvgwz74akmdF-2YdqnjW37oG9X8W1oHAq1AHDw.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/crimsonpro/v16/wlp3gwz74akmdF-2YdqnjW37oG9X8W1oHAq1AHNZPvw.ttf' },
+  'Times New Roman': { 'normal-normal': 'https://fonts.gstatic.com/s/notoserif/v21/ga6iaw1J5X0T9RW6j9bKVlk-fUDv-fVtMzLgXf_mFLI.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/notoserif/v21/ga6iaw1J5X0T9RW6j9bKVlk-fUDv_bhj74T0XwfsFJI.ttf' },
+  'Verdana': { 'normal-normal': 'https://fonts.gstatic.com/s/notoans/v26/o-0mIpQlx3QUlC5A4PNr5DA_Yggg0VQtEOEJ.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/notosans/v21/o-0bIpQlx3QUlC5A4PNr5DA_aV7jFLZpvjCL-v4.ttf' },
+  'Courier New': { 'normal-normal': 'https://fonts.gstatic.com/s/firacode/v22/uU9CPJZE5FC0zXVQUslM_-9SFj-PJ8PzFAKGPxnxVvE.ttf' },
+  'Comic Sans MS': { 'normal-normal': 'https://fonts.gstatic.com/s/comicneue/v9/4UaZrEtFpH4LFDXo8Al1t34P5dJ8YWE.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/comicneue/v9/4UaWrEtFpH4LFDXo8Al1t34P5eQQ2YgV.ttf' },
+  'Impact': { 'normal-normal': 'https://fonts.gstatic.com/s/leaguegothic/v6/qFdH35WCmmt5eweSuJpVY3gW3n0.ttf' },
+  'Tahoma': { 'normal-normal': 'https://fonts.gstatic.com/s/ptsans/v17/jizYREtUiDQIkxj0Y2RjGEFWRdw.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/ptsans/v17/jizfREtUiDQIkxj0Y2RjEE3lEhU.ttf' },
+};
+
+/**
+ * Известные Google Fonts URLs для получения шрифтов напрямую
+ * Используем постоянные ссылки на шрифты от Google Fonts
+ */
+const googleFontUrls: Record<string, Record<string, string>> = {
+  'Alex Brush': { 'normal-normal': 'https://fonts.gstatic.com/s/alexbrush/v24/SZc83IfNMtRHj8cJxDhtHOlfkOdz5wE.ttf' },
+  'Anton': { 'normal-normal': 'https://fonts.gstatic.com/s/anton/v20/1Ptgg87LROyAm0CVWQrZV4edvMelDN_Ky7n-JTWp.ttf' },
+  'Archivo': { 'normal-normal': 'https://fonts.gstatic.com/s/archivo/v21/k3k702ZOKiLJrEUMS4A7LRJQbMtW_M-OurPrJvP8xbEHqxQUU3M.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/archivo/v21/k3k702ZOKiLJrEUMS4A7LRJQbMtW_M-OurPrJvP8xbEHqxQUU6M.ttf' },
+  'Baloo 2': { 'normal-normal': 'https://fonts.gstatic.com/s/baloo2/v24/wXK1E30W1osJwUyqTtR3yC4P5MCk.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/baloo2/v24/wXK-E30W1osJwUyqTtR3yC3f7fhJ2Q.ttf' },
+  'Bebas Neue': { 'normal-normal': 'https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gIhQaZWVFBCUBln0inGvE_.ttf' },
+  'Bodoni Moda': { 'normal-normal': 'https://fonts.gstatic.com/s/bodonimoda/v20/4UaWrENHsxJlGDuGo1OIW7BIUmZ8Z5A3fVJr1TE.ttf' },
+  'Caveat': { 'normal-normal': 'https://fonts.gstatic.com/s/caveat/v22/473ahrMHYa5O7m9mxaLaAqN7yG9e.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/caveat/v22/473QhrMHYa5O7m9mxaLaAqN5dHdhAg.ttf' },
+  'Commissioner': { 'normal-normal': 'https://fonts.gstatic.com/s/commissioner/v21/r4kxrLJyydQ4bhzVm1sQ2T5L7g32mEIJLPD3AKOqo-GcZ4WVqG0.ttf' },
+  'Comic Neue': { 'normal-normal': 'https://fonts.gstatic.com/s/comicneue/v9/4UaZrEtFpH4LFDXo8Al1t34P5dJ8YWE.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/comicneue/v9/4UaWrEtFpH4LFDXo8Al1t34P5eQQ2YgV.ttf' },
+  'Cormorant Garamond': { 'normal-normal': 'https://fonts.gstatic.com/s/cormorantgaramond/v11/co3YmX5slCNuVQc8V7m-xLB55uWKcdCnDHmWPIr0.ttf' },
+  'Crimson Pro': { 'normal-normal': 'https://fonts.gstatic.com/s/crimsonpro/v16/wlpvgwz74akmdF-2YdqnjW37oG9X8W1oHAq1AHDw.ttf' },
+  'Dancing Script': { 'normal-normal': 'https://fonts.gstatic.com/s/dancingscript/v17/If2pR6TJj3GH850Ty5DRveWN4xzF3p.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/dancingscript/v17/If2tR6TJj3GH850Ty5DRzGqZR-XBRYvbZg.ttf' },
+  'EB Garamond': { 'normal-normal': 'https://fonts.gstatic.com/s/ebgaramond/v28/ga6iaw1J5X0T9RW6j9bKVlk-cU03qzH0Z5dUdYuN7OFr.ttf' },
+  'Fira Code': { 'normal-normal': 'https://fonts.gstatic.com/s/firacode/v22/uU9CPJZE5FC0zXVQUslM_-9SFj-PJ8PzFAKGPxnxVvE.ttf' },
+  'Fira Sans': { 'normal-normal': 'https://fonts.gstatic.com/s/firasans/v11/va9E4kDNxMZdL-6FOSo-2m0GRsz6d_3TBrQAQdHPVFZjwg.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/firasans/v11/va9E4kDNxMZdL-6FOSo-2m0GRsz6d_3TBrQAQdHPN1BjwgNq.ttf' },
+  'Fredoka': { 'normal-normal': 'https://fonts.gstatic.com/s/fredoka/v17/k3k702ZOKiLJrEUMS4A7LRJYb3qXYBb4roPdzHbI.ttf' },
+  'Great Vibes': { 'normal-normal': 'https://fonts.gstatic.com/s/greatvibes/v22/gok-H7xwcPzw7K0A_HupCIFs.ttf' },
+  'IBM Plex Sans': { 'normal-normal': 'https://fonts.gstatic.com/s/ibmplexsans/v20/zYXgKVr_E4xch6A3Y5LJXo93RA9d.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/ibmplexsans/v20/zYX9KVr_E4xch6A3Y5LJXm4aOjKUDTxXgzZKM-Tq.ttf' },
+  'IBM Plex Serif': { 'normal-normal': 'https://fonts.gstatic.com/s/ibmplexserif/v20/jizGREVNn1dOx-zrZ2X3pZvkTi3N4HIdrMg.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/ibmplexserif/v20/jizAREVNn1dOx-zrZ2X3pZvkTi0N0mZB6NgL0Q.ttf' },
+  'Inter': { 'normal-normal': 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.ttf' },
+  'Karla': { 'normal-normal': 'https://fonts.gstatic.com/s/karla/v31/qkBWXvsO6M3qgeIBoDlMsx5aVOPgTQLTr7PU4qNP.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/karla/v31/qkBSXvsO6M3qgeIBoDlMsx5aVOPgy_RVt7NWrD0.ttf' },
+  'Kaushan Script': { 'normal-normal': 'https://fonts.gstatic.com/s/kaushanscript/v16/OZpEg_ltAWEr2cbYe0-_xMHT3wU.ttf' },
+  'League Gothic': { 'normal-normal': 'https://fonts.gstatic.com/s/leaguegothic/v6/qFdH35WCmmt5eweSuJpVY3gW3n0.ttf' },
+  'Libre Baskerville': { 'normal-normal': 'https://fonts.gstatic.com/s/librebaskerville/v17/kJEjBvqX7dAtaw1Z6hsCIdUYFqTAjF1nCGGDVF4-b9s.ttf' },
+  'Literata': { 'normal-normal': 'https://fonts.gstatic.com/s/literata/v42/buEspuHjgIloVQdaVMcxWZkc9ItVbDNNbfCMYG5rAQGcf3v2.ttf' },
+  'Manrope': { 'normal-normal': 'https://fonts.gstatic.com/s/manrope/v14/xn7gD6nlqKc5NUf_rXW8uKBWCsFAZzHnz0UQD.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/manrope/v14/xn7iD6nlqKc5NUf_rXW8uKBWCsFAQahk3EcDD_Y.ttf' },
+  'Merriweather': { 'normal-normal': 'https://fonts.gstatic.com/s/merriweather/v30/u-440qyriQwlOrhSvowK_l5-eISZ6ZVDgwHrFWf9RfE.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/merriweather/v30/u-460qyriQwlOrhSvowK_l521gwi8AxGX_8aFS3r_Fo.ttf' },
+  'Mulish': { 'normal-normal': 'https://fonts.gstatic.com/s/mulish/v13/c4md4jHE-CJo0tDM4ChEAuBCCsFAZzHnz0UQD.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/mulish/v13/c4mf4jHE-CJo0tDM4ChEAuBCCsFAQahk3EcDD_Y.ttf' },
+  'Noto Sans': { 'normal-normal': 'https://fonts.gstatic.com/s/notosans/v21/o-0mIpQlx3QUlC5A4PNr5DA_Yggg0VQtEOEJ.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/notosans/v21/o-0bIpQlx3QUlC5A4PNr5DA_aV7jFLZpvjCL-v4.ttf' },
+  'Noto Serif': { 'normal-normal': 'https://fonts.gstatic.com/s/notoserif/v21/ga6iaw1J5X0T9RW6j9bKVlk-fUDv-fVtMzLgXf_mFLI.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/notoserif/v21/ga6jaw1J5X0T9RW6j9bKVlk-fUDv_bhj74T0XwfsFJI.ttf' },
+  'Nunito': { 'normal-normal': 'https://fonts.gstatic.com/s/nunito/v26/XRXV3I6Li01BKofINeaB_5VzZzStUHkkbJtAd-bxAg.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/nunito/v26/XRXW3I6Li01BKofINeaB_6VpZaRAUd0m2x1KJ5dkAggv8Q.ttf' },
+  'Open Sans': { 'normal-normal': 'https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0C4nY1M2xLER.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1y4nY1M2xLER.ttf' },
+  'Oswald': { 'normal-normal': 'https://fonts.gstatic.com/s/oswald/v54/TK3iWkUHHAIjg752DT8-WIFjXHUFJNsbWvn0r1wLVkU.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/oswald/v54/TK3iWkUHHAIjg752DT8-WIFjXHUF7ORXf_yS3F5RMG0.ttf' },
+  'Parisienne': { 'normal-normal': 'https://fonts.gstatic.com/s/parisienne/v14/E21i_d1Hpmg5M9VzIGQPP-4.ttf' },
+  'Playfair Display': { 'normal-normal': 'https://fonts.gstatic.com/s/playfairdisplay/v31/nuFvD-vgS5LKvZrNeySMLFKPW6lo8jdHKfVVLdOxVkw.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/playfairdisplay/v31/nuFvD-vgS5LKvZrNeySMLFKPW6lo8jdHKfVVIe1-D_w.ttf' },
+  'Poppins': { 'normal-normal': 'https://fonts.gstatic.com/s/poppins/v20/pxiGypp5QBcF6DBJMtw6iKI.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/poppins/v20/pxiGiop3Ql6BLRF1M05FS6BZf4I.ttf' },
+  'PT Sans': { 'normal-normal': 'https://fonts.gstatic.com/s/ptsans/v17/jizYREtUiDQIkxj0Y2RjGEFWRdw.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/ptsans/v17/jizfREtUiDQIkxj0Y2RjEE3lEhU.ttf' },
+  'PT Serif': { 'normal-normal': 'https://fonts.gstatic.com/s/ptserif/v17/ga6iaw1J5X0T9RW6j9bKVlk-e_2dWJXrYfCTyFJ7.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/ptserif/v17/ga6iaw1J5X0T9RW6j9bKVlk-e_2d5sXnYfCTyFJ7.ttf' },
+  'Public Sans': { 'normal-normal': 'https://fonts.gstatic.com/s/publicsans/v15/HI_diYsKILxRpQaDDfHyB53I6lz46C3wIqKHJ4l6zcg.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/publicsans/v15/HI_ciYsKILxRpQaDDfHyB53I6sNIqKHJ4l6zcuohWfCN.ttf' },
+  'Roboto': { 'normal-normal': 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf' },
+  'Sacramento': { 'normal-normal': 'https://fonts.gstatic.com/s/sacramento/v13/buEzpo6gcdhsMq7DHkjR4pAZa_J9.ttf' },
+  'Satisfy': { 'normal-normal': 'https://fonts.gstatic.com/s/satisfy/v15/rFirNHYz-N4dohgKA4sLw3p3v4aF.ttf' },
+  'Source Serif 4': { 'normal-normal': 'https://fonts.gstatic.com/s/sourceserif4/v15/jizBREFyuQ-nE-Z1g-p0r0o0Nzftz0E.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/sourceserif4/v15/jizCREFyuQ-nE-Z1g-p0r0o0N89XtkxHd34.ttf' },
+  'Tangerine': { 'normal-normal': 'https://fonts.gstatic.com/s/tangerine/v18/IurY6YF4yw9NP2HvFZluCKN90NYs.ttf' },
+  'Ubuntu': { 'normal-normal': 'https://fonts.gstatic.com/s/ubuntu/v20/4iCpES-bOA8FYYnPKd3dBQ.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/ubuntu/v20/4iC9ES-bOA8FYYnPKd3d-0UZbr1b.ttf' },
+};
+
+/**
+ * Загружает шрифт из Google Fonts или эквивалентов
  */
 async function loadFont(fontFamily: string, fontWeight: string, fontStyle: string): Promise<opentype.Font> {
   const cacheKey = `${fontFamily}-${fontWeight}-${fontStyle}`;
@@ -17,34 +83,26 @@ async function loadFont(fontFamily: string, fontWeight: string, fontStyle: strin
   }
 
   try {
-    // Мапинг шрифтов на Google Fonts URLs
-    const fontUrls: Record<string, Record<string, string>> = {
-      'Roboto': {
-        'normal-normal': 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf',
-        'bold-normal': 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf',
-        'normal-italic': 'https://fonts.gstatic.com/s/roboto/v30/KFOkCnqEu92Fr1Mu52xPKTM1K9nz.ttf',
-        'bold-italic': 'https://fonts.gstatic.com/s/roboto/v30/KFOjCnqEu92Fr1Mu51TzBhc9AMX6lJBP.ttf',
-      },
-      'Open Sans': {
-        'normal-normal': 'https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0C4nY1M2xLER.ttf',
-        'bold-normal': 'https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1y4nY1M2xLER.ttf',
-      },
-      'Inter': {
-        'normal-normal': 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.ttf',
-        'bold-normal': 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuI6fAZ9hiA.ttf',
-      },
-      'Arial': {
-        // Arial не доступен напрямую в Google Fonts, используем fallback
-        'normal-normal': 'https://fonts.gstatic.com/s/arial/v21/AMJLvwbL6qy8KqI46Y6RXqLl13aU.woff2',
-      },
-      'Times New Roman': {
-        // Times New Roman не доступен напрямую в Google Fonts, используем fallback
-        'normal-normal': 'https://fonts.gstatic.com/s/times/v27/0Xx-4I0ngrVpRwPgY-GJpKqp.woff2',
-      },
-    };
+    // Получаем URL для этого шрифта
+    const weightKey = fontWeight === 'bold' ? 'bold-normal' : 'normal-normal';
 
-    const weightStyle = `${fontWeight}-${fontStyle}`;
-    const fontUrl = fontUrls[fontFamily]?.[weightStyle] || fontUrls['Roboto']['normal-normal'];
+    // Сначала проверяем системные шрифты
+    let fontUrl = systemFontUrls[fontFamily]?.[weightKey];
+
+    if (!fontUrl) {
+      // Если это не системный шрифт, ищем в Google Fonts
+      fontUrl = googleFontUrls[fontFamily]?.[weightKey];
+    }
+
+    if (!fontUrl) {
+      // Если нет точного совпадения, пробуем найти normal-normal вариант
+      fontUrl = systemFontUrls[fontFamily]?.['normal-normal'] || googleFontUrls[fontFamily]?.['normal-normal'];
+    }
+
+    if (!fontUrl) {
+      console.warn(`No URL found for font "${fontFamily}", falling back to Roboto`);
+      fontUrl = googleFontUrls['Roboto']['normal-normal'];
+    }
 
     const response = await fetch(fontUrl);
     const arrayBuffer = await response.arrayBuffer();
@@ -53,9 +111,18 @@ async function loadFont(fontFamily: string, fontWeight: string, fontStyle: strin
     fontCache.set(cacheKey, font);
     return font;
   } catch (error) {
-    console.error('Font loading failed:', error);
-    // Fallback - создаём простой font (заглушка)
-    throw new Error(`Failed to load font: ${fontFamily}`);
+    console.error(`Font loading failed for ${fontFamily}:`, error);
+    // Fallback на Roboto
+    try {
+      const response = await fetch(googleFontUrls['Roboto']['normal-normal']);
+      const arrayBuffer = await response.arrayBuffer();
+      const font = opentype.parse(arrayBuffer);
+      fontCache.set(`${fontFamily}-${fontWeight}-${fontStyle}`, font);
+      return font;
+    } catch (fallbackError) {
+      console.error('Fallback font loading also failed:', fallbackError);
+      throw new Error(`Failed to load font: ${fontFamily}`);
+    }
   }
 }
 
@@ -221,7 +288,7 @@ export async function convertCurvedTextToPath(
         continue;
       }
 
-      const { char, advance, glyphPath } = data;
+      const { advance, glyphPath } = data;
 
       // Формируем строку пути из команд
       let pathData = '';
