@@ -86,9 +86,9 @@ export const Canvas = () => {
           {/* Линейки - только для редактора */}
           <g data-export-exclude="true">
             {/* Метка 0 на верхней линейке */}
-            <text x={0} y={12} fontSize="10" fill="#ef4444" textAnchor="start" fontWeight="bold">
+            {/* <text x={0} y={12} fontSize="10" fill="#ef4444" textAnchor="start" fontWeight="bold">
               0
-            </text>
+            </text> */}
 
           {/* Верхняя линейка */}
           {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
@@ -108,7 +108,7 @@ export const Canvas = () => {
                   stroke="#9ca3af"
                   strokeWidth="1"
                 />
-                {isMajor && (
+                {/* {isMajor && (
                   <text
                     x={pos}
                     y={20}
@@ -118,13 +118,13 @@ export const Canvas = () => {
                   >
                     {mmValue}
                   </text>
-                )}
+                )} */}
               </g>
             );
           })}
 
           {/* Метка canvasSize на верхней линейке справа */}
-          <text
+          {/* <text
             x={svgSize - 2}
             y={12}
             fontSize="10"
@@ -133,12 +133,12 @@ export const Canvas = () => {
             fontWeight="bold"
           >
             {canvasSize}мм
-          </text>
+          </text> */}
 
           {/* Метка 0 на левой линейке */}
-          <text x={12} y={10} fontSize="10" fill="#ef4444" textAnchor="start" fontWeight="bold">
+          {/* <text x={12} y={10} fontSize="10" fill="#ef4444" textAnchor="start" fontWeight="bold">
             0
-          </text>
+          </text> */}
 
           {/* Левая линейка */}
           {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
@@ -158,7 +158,7 @@ export const Canvas = () => {
                   stroke="#9ca3af"
                   strokeWidth="1"
                 />
-                {isMajor && (
+                {/* {isMajor && (
                   <text
                     x={20}
                     y={pos + 4}
@@ -168,13 +168,13 @@ export const Canvas = () => {
                   >
                     {mmValue}
                   </text>
-                )}
+                )} */}
               </g>
             );
           })}
 
             {/* Метка canvasSize на левой линейке снизу */}
-            <text
+            {/* <text
               x={12}
               y={svgSize - 2}
               fontSize="10"
@@ -183,7 +183,7 @@ export const Canvas = () => {
               fontWeight="bold"
             >
               {canvasSize}мм
-            </text>
+            </text> */}
           </g>
 
           {/* Рендеринг элементов */}
