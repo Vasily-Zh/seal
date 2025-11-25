@@ -98,7 +98,7 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
                   fontSize: '14px',
                   fontFamily: font.family,
                   borderBottom: '1px solid #f3f4f6',
-                  backgroundColor: isSelected ? '#dbeafe' : (font.isPrintingFont ? '#f0f9ff' : 'white'),
+                  backgroundColor: isSelected ? '#dbeafe' : 'white',
                 }}
                 onMouseEnter={(e) => {
                   if (!isSelected) {
@@ -107,23 +107,11 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
                 }}
                 onMouseLeave={(e) => {
                   if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = font.isPrintingFont ? '#f0f9ff' : 'white';
+                    e.currentTarget.style.backgroundColor = 'white';
                   }
                 }}
               >
                 {font.name}
-                {font.isPrintingFont && (
-                  <span
-                    style={{
-                      marginLeft: '8px',
-                      fontSize: '11px',
-                      color: '#3b82f6',
-                      fontWeight: '600',
-                    }}
-                  >
-                    [Полиграфия]
-                  </span>
-                )}
               </div>
             );
           })}
