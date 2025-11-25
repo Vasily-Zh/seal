@@ -4,6 +4,17 @@ import { optimizeSVG } from './svgOptimizer';
 import { jsPDF } from 'jspdf';
 import JSZip from 'jszip';
 
+// Helper для подготовки SVG к экспорту - удаляет элементы редактора
+const prepareExportSvg = (svgElement: SVGSVGElement): SVGSVGElement => {
+  const clone = svgElement.cloneNode(true) as SVGSVGElement;
+
+  // Удаляем все элементы с меткой data-export-exclude
+  const editorOnlyElements = clone.querySelectorAll('[data-export-exclude="true"]');
+  editorOnlyElements.forEach(el => el.remove());
+
+  return clone;
+};
+
 // Экспорт в PNG
 export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string = 'stamp.png') => {
   if (!svgElement) {
@@ -11,8 +22,8 @@ export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string =
     return;
   }
 
-  // Клонируем SVG
-  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  // Клонируем SVG и удаляем элементы редактора
+  const svgClone = prepareExportSvg(svgElement);
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
   // Создаем Blob из SVG
@@ -66,8 +77,8 @@ export const exportToPNGTransparent = (svgElement: SVGSVGElement | null, filenam
     return;
   }
 
-  // Клонируем SVG
-  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  // Клонируем SVG и удаляем элементы редактора
+  const svgClone = prepareExportSvg(svgElement);
 
   // Удаляем белый фон из SVG (первый rect элемент)
   const firstRect = svgClone.querySelector('rect[fill="white"]');
@@ -126,8 +137,8 @@ export const exportToSVG = (svgElement: SVGSVGElement | null, filename: string =
     return;
   }
 
-  // Клонируем SVG
-  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  // Клонируем SVG и удаляем элементы редактора
+  const svgClone = prepareExportSvg(svgElement);
 
   // Добавляем XML namespace если его нет
   if (!svgClone.getAttribute('xmlns')) {
@@ -298,8 +309,8 @@ export const exportToPDF = (svgElement: SVGSVGElement | null, filename: string =
     return;
   }
 
-  // Клонируем SVG
-  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  // Клонируем SVG и удаляем элементы редактора
+  const svgClone = prepareExportSvg(svgElement);
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
   // Создаем Blob из SVG
@@ -364,8 +375,8 @@ export const exportToZIP = async (svgElement: SVGSVGElement | null, filename: st
 
   const zip = new JSZip();
 
-  // Клонируем SVG для разных экспортов
-  const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+  // Клонируем SVG для разных экспортов и удаляем элементы редактора
+  const svgClone = prepareExportSvg(svgElement);
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
   // Создаем Blob из SVG
@@ -403,7 +414,7 @@ export const exportToZIP = async (svgElement: SVGSVGElement | null, filename: st
         zip.file('stamp.png', pngBlob);
 
         // 2. PNG без фона (прозрачный)
-        const svgCloneTransparent = svgElement.cloneNode(true) as SVGSVGElement;
+        const svgCloneTransparent = prepareExportSvg(svgElement);
         const firstRect = svgCloneTransparent.querySelector('rect[fill="white"]');
         if (firstRect) firstRect.remove();
         const svgStringTransparent = new XMLSerializer().serializeToString(svgCloneTransparent);
@@ -454,7 +465,7 @@ export const exportToZIP = async (svgElement: SVGSVGElement | null, filename: st
         }
 
         // 4. SVG
-        const svgCloneFinal = svgElement.cloneNode(true) as SVGSVGElement;
+        const svgCloneFinal = prepareExportSvg(svgElement);
         if (!svgCloneFinal.getAttribute('xmlns')) {
           svgCloneFinal.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
         }

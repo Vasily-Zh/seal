@@ -54,14 +54,41 @@ export const Canvas = () => {
           style={{ display: 'block' }}
           id="stamp-canvas"
         >
-          {/* Фон белый без сетки */}
+          {/* Определение паттерна сетки - 5x5мм клетки */}
+          <defs>
+            <pattern
+              id="grid-pattern"
+              width={5 * scale}
+              height={5 * scale}
+              patternUnits="userSpaceOnUse"
+              data-export-exclude="true"
+            >
+              <path
+                d={`M ${5 * scale} 0 L 0 0 0 ${5 * scale}`}
+                fill="none"
+                stroke="#d1d5db"
+                strokeWidth="0.5"
+              />
+            </pattern>
+          </defs>
+
+          {/* Белый фон (экспортируется) */}
           <rect width={svgSize} height={svgSize} fill="white" />
 
-          {/* Линейки */}
-          {/* Метка 0 на верхней линейке */}
-          <text x={0} y={12} fontSize="10" fill="#ef4444" textAnchor="start" fontWeight="bold">
-            0
-          </text>
+          {/* Фоновая сетка (только для редактора) */}
+          <rect
+            width={svgSize}
+            height={svgSize}
+            fill="url(#grid-pattern)"
+            data-export-exclude="true"
+          />
+
+          {/* Линейки - только для редактора */}
+          <g data-export-exclude="true">
+            {/* Метка 0 на верхней линейке */}
+            <text x={0} y={12} fontSize="10" fill="#ef4444" textAnchor="start" fontWeight="bold">
+              0
+            </text>
 
           {/* Верхняя линейка */}
           {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
@@ -146,17 +173,18 @@ export const Canvas = () => {
             );
           })}
 
-          {/* Метка canvasSize на левой линейке снизу */}
-          <text
-            x={12}
-            y={svgSize - 2}
-            fontSize="10"
-            fill="#ef4444"
-            textAnchor="start"
-            fontWeight="bold"
-          >
-            {canvasSize}мм
-          </text>
+            {/* Метка canvasSize на левой линейке снизу */}
+            <text
+              x={12}
+              y={svgSize - 2}
+              fontSize="10"
+              fill="#ef4444"
+              textAnchor="start"
+              fontWeight="bold"
+            >
+              {canvasSize}мм
+            </text>
+          </g>
 
           {/* Рендеринг элементов */}
           {elements
