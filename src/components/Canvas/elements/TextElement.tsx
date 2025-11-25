@@ -1,4 +1,5 @@
 import type { TextElement as TextType } from '../../../types';
+import { useCurvedTextVectorization } from '../../../hooks/useCurvedTextVectorization';
 
 interface TextElementProps {
   element: TextType;
@@ -13,49 +14,44 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
   const isFlipped = element.flipped || false;
 
   if (element.curved && element.curveRadius) {
-    // Текст по кругу
-    const pathId = `text-path-${element.id}`;
-    const radius = element.curveRadius * scale;
-    const startAngle = element.startAngle || 0;
-    const cx = element.x * scale;
-    const cy = element.y * scale;
+    // Текст по кругу - используем векторизованные пути для корректного экспорта в CorelDRAW
+    const curvedTextProps = {
+      text: element.text,
+      cx: element.x,
+      cy: element.y,
+      radius: element.curveRadius,
+      fontSize: element.fontSize,
+      fontFamily: element.fontFamily,
+      color: element.color,
+      startAngle: element.startAngle || 0,
+      isFlipped,
+      fontWeight,
+      fontStyle,
+    };
 
-    // Создаём полный круг вместо полукруга, чтобы текст не обрезался
-    // Начинаем с startAngle и рисуем полный круг
-    const x1 = cx + radius * Math.cos((startAngle * Math.PI) / 180);
-    const y1 = cy + radius * Math.sin((startAngle * Math.PI) / 180);
-    const x2 = cx + radius * Math.cos(((startAngle + 180) * Math.PI) / 180);
-    const y2 = cy + radius * Math.sin(((startAngle + 180) * Math.PI) / 180);
+    const { svgContent, loading } = useCurvedTextVectorization(curvedTextProps, scale);
 
-    // Если текст перевернут, меняем направление дуги
-    const sweepFlag = isFlipped ? 0 : 1;
-
-    // Полный круг: две дуги по 180 градусов
-    const pathD = `M ${x1},${y1} A ${radius},${radius} 0 0,${sweepFlag} ${x2},${y2} A ${radius},${radius} 0 0,${sweepFlag} ${x1},${y1}`;
-
-    return (
-      <g>
-        <defs>
-          <path
-            id={pathId}
-            d={pathD}
-            fill="none"
-          />
-        </defs>
+    if (loading) {
+      // Пока грузится, показываем временное сообщение
+      return (
         <text
+          x={element.x * scale}
+          y={element.y * scale}
           fill={element.color}
           fontSize={element.fontSize * scale}
           fontFamily={element.fontFamily}
           fontWeight={fontWeight}
           fontStyle={fontStyle}
-          letterSpacing={element.letterSpacing || 0}
+          textAnchor="middle"
+          dominantBaseline="middle"
         >
-          <textPath href={`#${pathId}`} startOffset="50%" textAnchor="middle">
-            {element.text}
-          </textPath>
+          [Loading...]
         </text>
-      </g>
-    );
+      );
+    }
+
+    // Возвращаем векторизованные пути как SVG разметку
+    return <g dangerouslySetInnerHTML={{ __html: svgContent }} />;
   }
 
   // Обычный текст
