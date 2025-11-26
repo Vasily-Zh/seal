@@ -15,60 +15,188 @@ const fontUrlCache = new Map<string, string>();
  * Маппинг системных шрифтов на Google Fonts эквиваленты
  */
 const systemToGoogleFont: Record<string, string> = {
-  'Arial': 'Arimo',
-  'Georgia': 'Tinos',
-  'Times New Roman': 'Tinos',
+  'Arial': 'Roboto',
+  'Georgia': 'Noto Serif',
+  'Times New Roman': 'Noto Serif',
   'Verdana': 'Open Sans',
-  'Courier New': 'Cousine',
+  'Courier New': 'Fira Code',
   'Impact': 'Oswald',
-  'Tahoma': 'Open Sans',
-  'Helvetica': 'Open Sans',
+  'Tahoma': 'Roboto',
+  'Helvetica': 'Roboto',
 };
 
 /**
- * TTF URL через jsDelivr CDN (CORS-совместимые)
- * jsDelivr проксирует GitHub с правильными заголовками
+ * ПРОВЕРЕННЫЕ TTF URL через jsDelivr CDN
+ * Только шрифты с гарантированно рабочими ссылками
+ * Оптимизировано для конструктора печатей и штампов
  */
 const directTtfUrls: Record<string, Record<string, string>> = {
+  // ============================================
+  // ОСНОВНЫЕ ШРИФТЫ ДЛЯ ПЕЧАТЕЙ (чёткие, строгие)
+  // ============================================
+  
+  // Roboto — универсальный, отлично читается на печатях
   'Roboto': {
     '400': 'https://cdn.jsdelivr.net/gh/googlefonts/roboto@main/src/hinted/Roboto-Regular.ttf',
     '700': 'https://cdn.jsdelivr.net/gh/googlefonts/roboto@main/src/hinted/Roboto-Bold.ttf',
   },
+  
+  // Open Sans — чистый, профессиональный
   'Open Sans': {
     '400': 'https://cdn.jsdelivr.net/gh/googlefonts/opensans@main/fonts/ttf/OpenSans-Regular.ttf',
     '700': 'https://cdn.jsdelivr.net/gh/googlefonts/opensans@main/fonts/ttf/OpenSans-Bold.ttf',
   },
-  'Arimo': {
-    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/Arimo@main/fonts/ttf/Arimo-Regular.ttf',
-    '700': 'https://cdn.jsdelivr.net/gh/googlefonts/Arimo@main/fonts/ttf/Arimo-Bold.ttf',
-  },
-  'Tinos': {
-    '400': 'https://cdn.jsdelivr.net/gh/AnonTabu/fonts@main/tinos/Tinos-Regular.ttf',
-    '700': 'https://cdn.jsdelivr.net/gh/AnonTabu/fonts@main/tinos/Tinos-Bold.ttf',
-  },
-  'Cousine': {
-    '400': 'https://cdn.jsdelivr.net/gh/AnonTabu/fonts@main/cousine/Cousine-Regular.ttf',
-    '700': 'https://cdn.jsdelivr.net/gh/AnonTabu/fonts@main/cousine/Cousine-Bold.ttf',
-  },
-  'Oswald': {
-    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/OswaldFont@main/fonts/ttf/Oswald-Regular.ttf',
-    '700': 'https://cdn.jsdelivr.net/gh/googlefonts/OswaldFont@main/fonts/ttf/Oswald-Bold.ttf',
-  },
+  
+  // Noto Sans — поддержка кириллицы отличная
   'Noto Sans': {
     '400': 'https://cdn.jsdelivr.net/gh/notofonts/latin@main/fonts/NotoSans/hinted/ttf/NotoSans-Regular.ttf',
     '700': 'https://cdn.jsdelivr.net/gh/notofonts/latin@main/fonts/NotoSans/hinted/ttf/NotoSans-Bold.ttf',
   },
-  'Lato': {
-    '400': 'https://cdn.jsdelivr.net/gh/betsol/lato-font@master/fonts/lato-regular/lato-regular.ttf',
-    '700': 'https://cdn.jsdelivr.net/gh/betsol/lato-font@master/fonts/lato-bold/lato-bold.ttf',
+  
+  // Noto Serif — классический serif для официальных печатей
+  'Noto Serif': {
+    '400': 'https://cdn.jsdelivr.net/gh/notofonts/latin@main/fonts/NotoSerif/hinted/ttf/NotoSerif-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/notofonts/latin@main/fonts/NotoSerif/hinted/ttf/NotoSerif-Bold.ttf',
   },
+  
+  // Oswald — узкий, отлично для круговых надписей
+  'Oswald': {
+    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/OswaldFont@main/fonts/ttf/Oswald-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/googlefonts/OswaldFont@main/fonts/ttf/Oswald-Bold.ttf',
+  },
+  
+  // Montserrat — современный, геометричный
   'Montserrat': {
     '400': 'https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Regular.ttf',
     '700': 'https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Bold.ttf',
   },
+  
+  // Inter — современный, чёткий
+  'Inter': {
+    '400': 'https://cdn.jsdelivr.net/gh/rsms/inter@master/docs/font-files/Inter-Regular.otf',
+    '700': 'https://cdn.jsdelivr.net/gh/rsms/inter@master/docs/font-files/Inter-Bold.otf',
+  },
+  
+  // Ubuntu — дружелюбный, читаемый
+  'Ubuntu': {
+    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/ubuntu@main/fonts/ttf/Ubuntu-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/googlefonts/ubuntu@main/fonts/ttf/Ubuntu-Bold.ttf',
+  },
+  
+  // Nunito — мягкий, округлый
+  'Nunito': {
+    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/nunito@main/fonts/ttf/Nunito-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/googlefonts/nunito@main/fonts/ttf/Nunito-Bold.ttf',
+  },
+  
+  // Poppins — геометричный, современный
   'Poppins': {
-    '400': 'https://cdn.jsdelivr.net/gh/nickshanks/poppins@main/fonts/ttf/Poppins-Regular.ttf',
-    '700': 'https://cdn.jsdelivr.net/gh/nickshanks/poppins@main/fonts/ttf/Poppins-Bold.ttf',
+    '400': 'https://cdn.jsdelivr.net/gh/itfoundry/poppins@master/products/Poppins-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/itfoundry/poppins@master/products/Poppins-Bold.ttf',
+  },
+
+  // ============================================
+  // SERIF ШРИФТЫ (для официальных документов)
+  // ============================================
+  
+  // Playfair Display — элегантный, для премиум печатей
+  'Playfair Display': {
+    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/Playfair@main/fonts/ttf/PlayfairDisplay-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/googlefonts/Playfair@main/fonts/ttf/PlayfairDisplay-Bold.ttf',
+  },
+  
+  // Merriweather — отличная читаемость
+  'Merriweather': {
+    '400': 'https://cdn.jsdelivr.net/gh/SorkinType/Merriweather@master/fonts/ttf/Merriweather-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/SorkinType/Merriweather@master/fonts/ttf/Merriweather-Bold.ttf',
+  },
+  
+  // Libre Baskerville — классический книжный
+  'Libre Baskerville': {
+    '400': 'https://cdn.jsdelivr.net/gh/impallari/Libre-Baskerville@master/src/LibreBaskerville-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/impallari/Libre-Baskerville@master/src/LibreBaskerville-Bold.ttf',
+  },
+  
+  // IBM Plex Sans — корпоративный
+  'IBM Plex Sans': {
+    '400': 'https://cdn.jsdelivr.net/gh/IBM/plex@master/IBM-Plex-Sans/fonts/complete/ttf/IBMPlexSans-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/IBM/plex@master/IBM-Plex-Sans/fonts/complete/ttf/IBMPlexSans-Bold.ttf',
+  },
+  
+  // IBM Plex Serif — корпоративный serif
+  'IBM Plex Serif': {
+    '400': 'https://cdn.jsdelivr.net/gh/IBM/plex@master/IBM-Plex-Serif/fonts/complete/ttf/IBMPlexSerif-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/IBM/plex@master/IBM-Plex-Serif/fonts/complete/ttf/IBMPlexSerif-Bold.ttf',
+  },
+  
+  // Source Serif — Adobe, качественный
+  'Source Serif': {
+    '400': 'https://cdn.jsdelivr.net/gh/adobe-fonts/source-serif@release/TTF/SourceSerif4-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/adobe-fonts/source-serif@release/TTF/SourceSerif4-Bold.ttf',
+  },
+  
+  // Fira Sans — Mozilla, чёткий
+  'Fira Sans': {
+    '400': 'https://cdn.jsdelivr.net/gh/mozilla/Fira@master/ttf/FiraSans-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/mozilla/Fira@master/ttf/FiraSans-Bold.ttf',
+  },
+
+  // ============================================
+  // DISPLAY ШРИФТЫ (для заголовков на печатях)
+  // ============================================
+  
+  // Anton — жирный, заметный
+  'Anton': {
+    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/Anton@main/fonts/Anton-Regular.ttf',
+  },
+  
+  // Raleway — элегантный thin/bold
+  'Raleway': {
+    '400': 'https://cdn.jsdelivr.net/gh/impallari/Raleway@master/fonts/v4020/Raleway-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/impallari/Raleway@master/fonts/v4020/Raleway-Bold.ttf',
+  },
+
+  // ============================================
+  // МОНОШИРИННЫЕ (для номеров, кодов на печатях)
+  // ============================================
+  
+  // Fira Code — для номеров документов
+  'Fira Code': {
+    '400': 'https://cdn.jsdelivr.net/gh/tonsky/FiraCode@master/distr/ttf/FiraCode-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/tonsky/FiraCode@master/distr/ttf/FiraCode-Bold.ttf',
+  },
+  
+  // JetBrains Mono — чёткий моноширинный
+  'JetBrains Mono': {
+    '400': 'https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@master/fonts/ttf/JetBrainsMono-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@master/fonts/ttf/JetBrainsMono-Bold.ttf',
+  },
+  
+  // Source Code Pro — Adobe моноширинный
+  'Source Code Pro': {
+    '400': 'https://cdn.jsdelivr.net/gh/adobe-fonts/source-code-pro@release/TTF/SourceCodePro-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/adobe-fonts/source-code-pro@release/TTF/SourceCodePro-Bold.ttf',
+  },
+
+  // ============================================
+  // РУКОПИСНЫЕ (для подписей, декоративных печатей)
+  // ============================================
+  
+  // Dancing Script — элегантный рукописный
+  'Dancing Script': {
+    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/DancingScript@main/fonts/ttf/DancingScript-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/googlefonts/DancingScript@main/fonts/ttf/DancingScript-Bold.ttf',
+  },
+  
+  // Caveat — естественный почерк
+  'Caveat': {
+    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/caveat@main/fonts/ttf/Caveat-Regular.ttf',
+    '700': 'https://cdn.jsdelivr.net/gh/googlefonts/caveat@main/fonts/ttf/Caveat-Bold.ttf',
+  },
+  
+  // Pacifico — дружелюбный script
+  'Pacifico': {
+    '400': 'https://cdn.jsdelivr.net/gh/googlefonts/Pacifico@main/fonts/ttf/Pacifico-Regular.ttf',
   },
 };
 
@@ -109,7 +237,6 @@ async function loadFont(fontFamily: string, fontWeight: string, fontStyle: strin
 
   const fontsToTry = [fontFamily];
   if (fontFamily !== 'Roboto') fontsToTry.push('Roboto');
-  if (fontFamily !== 'Open Sans') fontsToTry.push('Open Sans');
 
   let lastError: Error | null = null;
 
