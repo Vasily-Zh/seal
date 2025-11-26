@@ -184,5 +184,5 @@ export const DEFAULT_CONFIG = {
   strokeColor: '#0000ff',
   textColor: '#0000ff',
   iconFill: '#0000ff', // цвет заливки иконок по умолчанию
-  fontFamily: 'Arial, sans-serif', // шрифт по умолчанию
+  fontFamily: 'Arial', // шрифт по умолчанию
 };

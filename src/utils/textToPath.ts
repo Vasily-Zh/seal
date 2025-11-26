@@ -10,12 +10,11 @@ const fontCache = new Map<string, opentype.Font>();
  * URLs для системных шрифтов (используем эквиваленты от Google или других источников)
  */
 const systemFontUrls: Record<string, Record<string, string>> = {
-  'Arial': { 'normal-normal': 'https://fonts.gstatic.com/s/arimo/v30/P5SfzZ-pYmxS-6hx1TzI7Lq-Hk_e.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/arimo/v30/P5SdzZ-pYmxS-6hx1TzI7Lq-DlC0H9Iy.ttf' },
-  'Georgia': { 'normal-normal': 'https://fonts.gstatic.com/s/crimsonpro/v16/wlpvgwz74akmdF-2YdqnjW37oG9X8W1oHAq1AHDw.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/crimsonpro/v16/wlp3gwz74akmdF-2YdqnjW37oG9X8W1oHAq1AHNZPvw.ttf' },
-  'Times New Roman': { 'normal-normal': 'https://fonts.gstatic.com/s/notoserif/v21/ga6iaw1J5X0T9RW6j9bKVlk-fUDv-fVtMzLgXf_mFLI.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/notoserif/v21/ga6iaw1J5X0T9RW6j9bKVlk-fUDv_bhj74T0XwfsFJI.ttf' },
-  'Verdana': { 'normal-normal': 'https://fonts.gstatic.com/s/notoans/v26/o-0mIpQlx3QUlC5A4PNr5DA_Yggg0VQtEOEJ.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/notosans/v21/o-0bIpQlx3QUlC5A4PNr5DA_aV7jFLZpvjCL-v4.ttf' },
+  'Arial': { 'normal-normal': 'https://fonts.gstatic.com/s/arimo/v22/W4wuEQX8qVCe-awz49Jlvv-_HvHLjgvP.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/arimo/v22/W4wvEQX8qVCe-awz49Jlvr96Iv_ZjgtjVA.ttf' },
+  'Georgia': { 'normal-normal': 'https://fonts.gstatic.com/s/crimsonpro/v13/wlpvgwz74akmdF-2YdqnjW37oG9X.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/crimsonpro/v13/wlpogwz74akmdF-2YdqnQa0Y_X9X9Kk.ttf' },
+  'Times New Roman': { 'normal-normal': 'https://fonts.gstatic.com/s/notoserif/v21/ga6iaw1J5X0T9RW6j9bKVlk-fUDv-fVtMzLgXf_mFLI.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/notoserif/v21/ga6jaw1J5X0T9RW6j9bKVlk-fUDv_bhj74T0XwfsFJI.ttf' },
+  'Verdana': { 'normal-normal': 'https://fonts.gstatic.com/s/notosans/v21/o-0mIpQlx3QUlC5A4PNr5DA_Yggg0VQtEOEJ.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/notosans/v21/o-0bIpQlx3QUlC5A4PNr5DA_aV7jFLZpvjCL-v4.ttf' },
   'Courier New': { 'normal-normal': 'https://fonts.gstatic.com/s/firacode/v22/uU9CPJZE5FC0zXVQUslM_-9SFj-PJ8PzFAKGPxnxVvE.ttf' },
-  'Comic Sans MS': { 'normal-normal': 'https://fonts.gstatic.com/s/comicneue/v9/4UaZrEtFpH4LFDXo8Al1t34P5dJ8YWE.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/comicneue/v9/4UaWrEtFpH4LFDXo8Al1t34P5eQQ2YgV.ttf' },
   'Impact': { 'normal-normal': 'https://fonts.gstatic.com/s/leaguegothic/v6/qFdH35WCmmt5eweSuJpVY3gW3n0.ttf' },
   'Tahoma': { 'normal-normal': 'https://fonts.gstatic.com/s/ptsans/v17/jizYREtUiDQIkxj0Y2RjGEFWRdw.ttf', 'bold-normal': 'https://fonts.gstatic.com/s/ptsans/v17/jizfREtUiDQIkxj0Y2RjEE3lEhU.ttf' },
 };
@@ -100,28 +99,39 @@ async function loadFont(fontFamily: string, fontWeight: string, fontStyle: strin
     }
 
     if (!fontUrl) {
-      console.warn(`No URL found for font "${fontFamily}", falling back to Roboto`);
       fontUrl = googleFontUrls['Roboto']['normal-normal'];
     }
 
     const response = await fetch(fontUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: Failed to fetch font from ${fontUrl}`);
+    }
     const arrayBuffer = await response.arrayBuffer();
     const font = opentype.parse(arrayBuffer);
 
     fontCache.set(cacheKey, font);
     return font;
   } catch (error) {
-    console.error(`Font loading failed for ${fontFamily}:`, error);
-    // Fallback на Roboto
+    // Fallback на Roboto - это нормальное поведение для недостающих шрифтов
+    const errorMsg = error instanceof Error ? error.message : String(error);
+
+    // Только логируем для редких ошибок парсинга (не для 404)
+    if (!errorMsg.includes('HTTP 404')) {
+      console.debug(`Font loading failed for ${fontFamily}: ${errorMsg}, using Roboto`);
+    }
+
     try {
       const response = await fetch(googleFontUrls['Roboto']['normal-normal']);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to fetch Roboto fallback`);
+      }
       const arrayBuffer = await response.arrayBuffer();
       const font = opentype.parse(arrayBuffer);
       fontCache.set(`${fontFamily}-${fontWeight}-${fontStyle}`, font);
       return font;
     } catch (fallbackError) {
-      console.error('Fallback font loading also failed:', fallbackError);
-      throw new Error(`Failed to load font: ${fontFamily}`);
+      console.error('Critical: Fallback font loading also failed:', fallbackError);
+      throw new Error(`Failed to load any font (attempted ${fontFamily} and Roboto)`);
     }
   }
 }

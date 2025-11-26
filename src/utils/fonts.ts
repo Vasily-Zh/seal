@@ -1,126 +1,51 @@
 import type { FontConfig } from '../types';
 
-// Все шрифты отсортированы по алфавиту
-// Включая системные шрифты, Google Fonts и рукописные шрифты для печатей
+// Только шрифты с поддержкой векторизации через Google Fonts CDN
+// Синхронизировано с textToPath.ts (52 шрифта)
 export const ALL_FONTS: FontConfig[] = [
-  // Системные шрифты (встроенные, всегда доступны)
+  // Системные шрифты с Google Fonts эквивалентами (8 шрифтов)
   {
     name: 'Arial',
-    family: 'Arial, sans-serif',
+    family: 'Arial',
     category: 'sans-serif',
   },
   {
-    name: 'Arial Narrow',
-    family: 'Arial Narrow, Arial, sans-serif',
+    name: 'Comic Neue',
+    family: 'Comic Neue',
     category: 'sans-serif',
   },
   {
-    name: 'Baskerville',
-    family: 'Baskerville, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Bodoni',
-    family: 'Bodoni MT, Bodoni, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Calibri',
-    family: 'Calibri, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Cambria',
-    family: 'Cambria, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Candara',
-    family: 'Candara, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Carlito',
-    family: 'Carlito',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Comic Sans MS',
-    family: 'Comic Sans MS, cursive, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'DejaVu Sans',
-    family: 'DejaVu Sans, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Didot',
-    family: 'Didot, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Franklin Gothic',
-    family: 'Franklin Gothic Medium, Franklin Gothic, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Garamond',
-    family: 'Garamond, serif',
-    category: 'serif',
+    name: 'Courier New',
+    family: 'Courier New',
+    category: 'monospace',
   },
   {
     name: 'Georgia',
-    family: 'Georgia, serif',
+    family: 'Georgia',
     category: 'serif',
-  },
-  {
-    name: 'Helvetica',
-    family: 'Helvetica, Arial, sans-serif',
-    category: 'sans-serif',
   },
   {
     name: 'Impact',
-    family: 'Impact, sans-serif',
+    family: 'Impact',
     category: 'sans-serif',
-  },
-  {
-    name: 'Microsoft Sans Serif',
-    family: 'Microsoft Sans Serif, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Monotype Corsiva',
-    family: 'Monotype Corsiva, cursive',
-    category: 'serif',
-  },
-  {
-    name: 'Sylfaen',
-    family: 'Sylfaen, serif',
-    category: 'serif',
   },
   {
     name: 'Tahoma',
-    family: 'Tahoma, sans-serif',
+    family: 'Tahoma',
     category: 'sans-serif',
   },
   {
     name: 'Times New Roman',
-    family: 'Times New Roman, serif',
+    family: 'Times New Roman',
     category: 'serif',
   },
   {
-    name: 'Ubuntu',
-    family: 'Ubuntu',
-    category: 'sans-serif',
-  },
-  {
     name: 'Verdana',
-    family: 'Verdana, sans-serif',
+    family: 'Verdana',
     category: 'sans-serif',
   },
 
-  // Google Fonts (открытые, бесплатные, OFL лицензия)
+  // Google Fonts (44 шрифта)
   {
     name: 'Alex Brush',
     family: 'Alex Brush',
@@ -162,11 +87,6 @@ export const ALL_FONTS: FontConfig[] = [
     category: 'sans-serif',
   },
   {
-    name: 'Comic Neue',
-    family: 'Comic Neue',
-    category: 'sans-serif',
-  },
-  {
     name: 'Cormorant Garamond',
     family: 'Cormorant Garamond',
     category: 'serif',
@@ -189,7 +109,7 @@ export const ALL_FONTS: FontConfig[] = [
   {
     name: 'Fira Code',
     family: 'Fira Code',
-    category: 'sans-serif',
+    category: 'monospace',
   },
   {
     name: 'Fira Sans',
@@ -341,62 +261,9 @@ export const ALL_FONTS: FontConfig[] = [
     family: 'Tangerine',
     category: 'serif',
   },
+  {
+    name: 'Ubuntu',
+    family: 'Ubuntu',
+    category: 'sans-serif',
+  },
 ];
-
-// Генерация ссылки для подключения шрифтов через Google Fonts API
-export const getGoogleFontsUrl = (): string => {
-  // Google Fonts для загрузки (исключаем системные шрифты)
-  const googleFontNames = [
-    'Alex Brush',
-    'Anton',
-    'Archivo',
-    'Baloo 2',
-    'Bebas Neue',
-    'Bodoni Moda',
-    'Caveat',
-    'Commissioner',
-    'Comic Neue',
-    'Cormorant Garamond',
-    'Crimson Pro',
-    'Dancing Script',
-    'EB Garamond',
-    'Fira Code',
-    'Fira Sans',
-    'Fredoka',
-    'Great Vibes',
-    'IBM Plex Sans',
-    'IBM Plex Serif',
-    'Inter',
-    'Karla',
-    'Kaushan Script',
-    'League Gothic',
-    'Libre Baskerville',
-    'Literata',
-    'Manrope',
-    'Merriweather',
-    'Mulish',
-    'Noto Sans',
-    'Noto Serif',
-    'Nunito',
-    'Open Sans',
-    'Oswald',
-    'Parisienne',
-    'Playfair Display',
-    'Poppins',
-    'PT Sans',
-    'PT Serif',
-    'Public Sans',
-    'Roboto',
-    'Sacramento',
-    'Satisfy',
-    'Source Serif 4',
-    'Tangerine',
-  ];
-
-  const families = googleFontNames.map(font => {
-    const base = font.replace(/ /g, '+');
-    // Подключаем несколько начертаний
-    return `${base}:ital,wght@0,400;0,700;1,400;1,700`;
-  }).join('&family=');
-  return `https://fonts.googleapis.com/css2?family=${families}&display=swap`;
-};
