@@ -5,18 +5,30 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Конструктор печатей и штампов</title>
+    
     <!--
       Google Fonts для конструктора печатей
-      Вставить в <head> секцию index.html
-      25 проверенных шрифтов, синхронизировано с textToPath.ts и fonts.ts
+      100 шрифтов, синхронизировано с textToPath.ts и fonts.ts
     -->
 
     <!-- Preconnect для ускорения загрузки -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Google Fonts - 25 шрифтов для печатей -->
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@400;700&family=Dancing+Script:wght@400;700&family=Fira+Code:wght@400;700&family=Fira+Sans:wght@400;700&family=IBM+Plex+Sans:wght@400;700&family=IBM+Plex+Serif:wght@400;700&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;700&family=Noto+Sans:wght@400;700&family=Noto+Serif:wght@400;700&family=Nunito:wght@400;700&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=Pacifico&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Roboto:wght@400;700&family=Source+Code+Pro:wght@400;700&family=Source+Serif+4:wght@400;700&family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Sans-serif (40 шрифтов) -->
+    <link href="https://fonts.googleapis.com/css2?family=Abel&family=Anton&family=Archivo:wght@400;700&family=Asap:wght@400;700&family=Barlow:wght@400;700&family=Cabin:wght@400;700&family=DM+Sans:wght@400;700&family=Dosis:wght@400;700&family=Exo+2:wght@400;700&family=Fira+Sans:wght@400;700&family=Hind:wght@400;700&family=IBM+Plex+Sans:wght@400;700&family=Inter:wght@400;700&family=Josefin+Sans:wght@400;700&family=Kanit:wght@400;700&family=Karla:wght@400;700&family=Lato:wght@400;700&family=Maven+Pro:wght@400;700&family=Montserrat:wght@400;700&family=Mukta:wght@400;700&family=Noto+Sans:wght@400;700&family=Nunito:wght@400;700&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=Overpass:wght@400;700&family=Oxygen:wght@400;700&family=Poppins:wght@400;700&family=Prompt:wght@400;700&family=Questrial&family=Quicksand:wght@400;700&family=Raleway:wght@400;700&family=Roboto:wght@400;700&family=Rubik:wght@400;700&family=Sarabun:wght@400;700&family=Signika:wght@400;700&family=Source+Sans+3:wght@400;700&family=Titillium+Web:wght@400;700&family=Ubuntu:wght@400;700&family=Varela+Round&family=Work+Sans:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Serif (25 шрифтов) -->
+    <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Cardo:wght@400;700&family=Copse&family=Cormorant:wght@400;700&family=Crimson+Text:wght@400;700&family=Domine:wght@400;700&family=IBM+Plex+Serif:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Libre+Caslon+Text:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Neuton:wght@400;700&family=Noticia+Text:wght@400;700&family=Noto+Serif:wght@400;700&family=Old+Standard+TT:wght@400;700&family=Playfair+Display:wght@400;700&family=PT+Serif:wght@400;700&family=Rokkitt:wght@400;700&family=Source+Serif+4:wght@400;700&family=Spectral:wght@400;700&family=Tinos:wght@400;700&family=Vollkorn:wght@400;700&family=Zilla+Slab:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Script / Handwriting (25 шрифтов) -->
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Amatic+SC:wght@400;700&family=Architects+Daughter&family=Caveat:wght@400;700&family=Cookie&family=Courgette&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Handlee&family=Indie+Flower&family=Kaushan+Script&family=Lobster&family=Lobster+Two:wght@400;700&family=Marck+Script&family=Pacifico&family=Parisienne&family=Patrick+Hand&family=Permanent+Marker&family=Playball&family=Sacramento&family=Satisfy&family=Shadows+Into+Light&family=Tangerine:wght@400;700&family=Yellowtail&display=swap" rel="stylesheet">
+
+    <!-- Monospace (5 шрифтов) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Roboto+Mono:wght@400;700&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Display (5 шрифтов) -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bebas+Neue&family=Black+Ops+One&family=Righteous&family=Russo+One&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="root"></div>
