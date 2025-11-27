@@ -10,53 +10,128 @@ const fontCache = new Map<string, opentype.Font>();
  * Загружает шрифт из Google Fonts
  */
 async function loadFont(fontFamily: string, fontWeight: string, fontStyle: string): Promise<opentype.Font> {
-  const cacheKey = `${fontFamily}-${fontWeight}-${fontStyle}`;
+  // Извлекаем первое название шрифта из строки (убираем fallback'и)
+  const primaryFontFamily = fontFamily.split(',')[0].trim();
+  const cacheKey = `${primaryFontFamily}-${fontWeight}-${fontStyle}`;
 
   if (fontCache.has(cacheKey)) {
     return fontCache.get(cacheKey)!;
   }
 
   try {
-    // Мапинг шрифтов на Google Fonts URLs
-    const fontUrls: Record<string, Record<string, string>> = {
-      'Roboto': {
-        'normal-normal': 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf',
-        'bold-normal': 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf',
-        'normal-italic': 'https://fonts.gstatic.com/s/roboto/v30/KFOkCnqEu92Fr1Mu52xPKTM1K9nz.ttf',
-        'bold-italic': 'https://fonts.gstatic.com/s/roboto/v30/KFOjCnqEu92Fr1Mu51TzBhc9AMX6lJBP.ttf',
-      },
-      'Open Sans': {
-        'normal-normal': 'https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0C4nY1M2xLER.ttf',
-        'bold-normal': 'https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1y4nY1M2xLER.ttf',
-      },
-      'Inter': {
-        'normal-normal': 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.ttf',
-        'bold-normal': 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuI6fAZ9hiA.ttf',
-      },
-      'Arial': {
-        // Arial не доступен напрямую в Google Fonts, используем fallback
-        'normal-normal': 'https://fonts.gstatic.com/s/arial/v21/AMJLvwbL6qy8KqI46Y6RXqLl13aU.woff2',
-      },
-      'Times New Roman': {
-        // Times New Roman не доступен напрямую в Google Fonts, используем fallback
-        'normal-normal': 'https://fonts.gstatic.com/s/times/v27/0Xx-4I0ngrVpRwPgY-GJpKqp.woff2',
-      },
-    };
+    // Системные шрифты (используем fallback на Roboto)
+    const systemFonts = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Verdana', 'Tahoma', 'Trebuchet MS'];
+    
+    // Проверяем, является ли шрифт системным
+    if (systemFonts.some(sysFont => primaryFontFamily.includes(sysFont))) {
+      // Для системных шрифтов используем Roboto как похожий fallback
+      const fallbackFont = await loadGoogleFont('Roboto', fontWeight, fontStyle);
+      fontCache.set(cacheKey, fallbackFont);
+      return fallbackFont;
+    }
 
-    const weightStyle = `${fontWeight}-${fontStyle}`;
-    const fontUrl = fontUrls[fontFamily]?.[weightStyle] || fontUrls['Roboto']['normal-normal'];
-
-    const response = await fetch(fontUrl);
-    const arrayBuffer = await response.arrayBuffer();
-    const font = opentype.parse(arrayBuffer);
-
+    // Загружаем шрифт из Google Fonts
+    const font = await loadGoogleFont(primaryFontFamily, fontWeight, fontStyle);
     fontCache.set(cacheKey, font);
     return font;
   } catch (error) {
     console.error('Font loading failed:', error);
-    // Fallback - создаём простой font (заглушка)
-    throw new Error(`Failed to load font: ${fontFamily}`);
+    // Fallback на Roboto
+    try {
+      const fallbackFont = await loadGoogleFont('Roboto', fontWeight, fontStyle);
+      fontCache.set(cacheKey, fallbackFont);
+      return fallbackFont;
+    } catch (fallbackError) {
+      console.error('Fallback font loading failed:', fallbackError);
+      throw new Error(`Failed to load font: ${fontFamily}`);
+    }
   }
+}
+
+/**
+ * Загружает шрифт из Google Fonts API
+ */
+async function loadGoogleFont(fontFamily: string, fontWeight: string, fontStyle: string): Promise<opentype.Font> {
+  const weightStyle = `${fontWeight}-${fontStyle}`;
+  
+  // Генерируем Google Fonts URL
+  const googleFontsUrl = generateGoogleFontUrl(fontFamily, fontWeight, fontStyle);
+  
+  const response = await fetch(googleFontsUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch font: ${response.statusText}`);
+  }
+  
+  const arrayBuffer = await response.arrayBuffer();
+  return opentype.parse(arrayBuffer);
+}
+
+/**
+ * Генерирует URL для Google Fonts
+ */
+function generateGoogleFontUrl(fontFamily: string, fontWeight: string, fontStyle: string): string {
+  // Мапинг шрифтов на Google Fonts family names
+  const fontFamilyMap: Record<string, string> = {
+    'Roboto': 'Roboto',
+    'Open Sans': 'Open+Sans',
+    'Inter': 'Inter',
+    'Alex Brush': 'Alex+Brush',
+    'Anton': 'Anton',
+    'Archivo': 'Archivo',
+    'Baloo 2': 'Baloo+2',
+    'Bebas Neue': 'Bebas+Neue',
+    'Bodoni Moda': 'Bodoni+Moda',
+    'Caveat': 'Caveat',
+    'Commissioner': 'Commissioner',
+    'Comic Neue': 'Comic+Neue',
+    'Cormorant Garamond': 'Cormorant+Garamond',
+    'Crimson Pro': 'Crimson+Pro',
+    'Dancing Script': 'Dancing+Script',
+    'EB Garamond': 'EB+Garamond',
+    'Fira Code': 'Fira+Code',
+    'Fira Sans': 'Fira+Sans',
+    'Fredoka': 'Fredoka',
+    'Great Vibes': 'Great+Vibes',
+    'IBM Plex Sans': 'IBM+Plex+Sans',
+    'IBM Plex Serif': 'IBM+Plex+Serif',
+    'Karla': 'Karla',
+    'Kaushan Script': 'Kaushan+Script',
+    'League Gothic': 'League+Gothic',
+    'Libre Baskerville': 'Libre+Baskerville',
+    'Literata': 'Literata',
+    'Manrope': 'Manrope',
+    'Merriweather': 'Merriweather',
+    'Mulish': 'Mulish',
+    'Noto Sans': 'Noto+Sans',
+    'Noto Serif': 'Noto+Serif',
+    'Nunito': 'Nunito',
+    'Oswald': 'Oswald',
+    'Parisienne': 'Parisienne',
+    'Playfair Display': 'Playfair+Display',
+    'Poppins': 'Poppins',
+    'PT Sans': 'PT+Sans',
+    'PT Serif': 'PT+Serif',
+    'Public Sans': 'Public+Sans',
+    'Sacramento': 'Sacramento',
+    'Satisfy': 'Satisfy',
+    'Source Serif 4': 'Source+Serif+4',
+    'Tangerine': 'Tangerine',
+  };
+
+  const googleFamilyName = fontFamilyMap[fontFamily] || 'Roboto';
+  
+  // Определяем начертания
+  const weights = ['400', '700'];
+  const hasItalic = fontStyle === 'italic';
+  
+  let axis = '';
+  if (hasItalic) {
+    axis = `ital,wght@0,${weights[0]};0,${weights[1]};1,${weights[0]};1,${weights[1]}`;
+  } else {
+    axis = `wght@${weights[0]};${weights[1]}`;
+  }
+  
+  return `https://fonts.googleapis.com/css2?family=${googleFamilyName}:${axis}&display=swap`;
 }
 
 /**
@@ -152,7 +227,7 @@ export async function convertCurvedTextToPath(
           char,
           advance,
           isSpace: false,
-          glyphPath
+          glyphPath: glyphPath || null
         });
         totalWidth += advance;
       }
@@ -182,7 +257,7 @@ export async function convertCurvedTextToPath(
             char,
             advance,
             isSpace: false,
-            glyphPath
+            glyphPath: glyphPath || null
           });
           totalWidth += advance;
         }
@@ -222,6 +297,17 @@ export async function convertCurvedTextToPath(
       }
 
       const { char, advance, glyphPath } = data;
+
+      // Проверяем, что glyphPath существует
+      if (!glyphPath) {
+        // Для пустого пути перемещаемся на расстояние advance
+        if (isFlipped) {
+          currentAngle -= advance / radius; // против часовой
+        } else {
+          currentAngle += advance / radius; // по часовой
+        }
+        continue;
+      }
 
       // Формируем строку пути из команд
       let pathData = '';
