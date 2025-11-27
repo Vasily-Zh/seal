@@ -22,7 +22,8 @@ src/
 │   ├── Controls/             # Панель настроек
 │   │   ├── Controls.tsx      # Табы: Настройки / Слои
 │   │   ├── LayersPanel.tsx   # Панель слоёв с DnD, группировкой, блокировкой
-│   │   └── SliderInput.tsx   # Ползунок с числовым полем
+│   │   ├── SliderInput.tsx   # Ползунок с числовым полем
+│   │   └── FontSelector.tsx  # Компонент выбора шрифтов с группировкой вариантов
 │   ├── Canvas/               # Рабочая область
 │   │   ├── Canvas.tsx        # SVG canvas с сеткой + GroupElement
 │   │   └── elements/         # Рендеринг элементов
@@ -36,18 +37,28 @@ src/
 ├── utils/                     # Утилиты
 │   ├── export.ts             # Экспорт PNG/SVG + exportElementToSVG
 │   ├── projectStorage.ts     # Сохранение/загрузка проектов в localStorage
-│   ├── svgOptimizer.ts       # SVGO оптимизация SVG
-│   └── fonts.ts              # Конфигурация шрифтов
+│   ├── svgOptimizer.ts       # Оптимизация SVG (встроенный алгоритм)
+│   ├── svgValidator.ts       # Валидация SVG
+│   ├── vectorize.ts          # Векторизация изображений (только Potrace WASM)
+│   ├── textToPath.ts         # Конвертация текста в SVG path через fontkit
+│   ├── fonts.ts              # Конфигурация шрифтов (все доступные шрифты)
+│   ├── extractSvgFromIcon.ts # Извлечение SVG из иконок
+│   └── auth.ts               # Аутентификация
 └── styles/                    # Стили
     └── globals.css           # Глобальные стили
 
 public/
-└── fonts/                     # Шрифты
+└── fonts/                     # Шрифты (устаревшая директория, не используется)
 
 map/
 ├── main.md                    # Главная навигация проекта
 └── log/                       # Логи изменений
-    └── update-20250123-1430.md # Лог реализации ТЗ
+    ├── update-20250123-1430.md # Лог реализации ТЗ
+    ├── update-20250124-final.md # Экспорт элементов, Potrace векторизация
+    ├── update-20251123-1944.md # Удаление локальных шрифтов
+    ├── update-20251123-1945.md # Обновление шрифтов
+    ├── update-20251124-2258.md # Расширенный выбор шрифтов
+    └── update-20251124-remove-imagetracer.md # Удаление ImageTracer
 ```
 
 ## Ключевые файлы по функционалу
@@ -59,6 +70,7 @@ map/
 - `GroupElement` - группа: `name`, `children[]`, `expanded?`, `rotation?`, `scaleX?`, `scaleY?`
 - `StampStore` - тип store
 - `StampProject` - интерфейс проекта (id, name, elements, canvasSize, timestamps, thumbnail)
+- `FontConfig` - интерфейс конфигурации шрифта (name, family, category, isPrintingFont)
 
 ### 2. Store (store/useStampStore.ts)
 **Управление элементами:**
@@ -100,6 +112,7 @@ map/
   - Блокировка/видимость элементов
   - Множественный выбор для группировки
 - **SliderInput** - ползунок + поле ввода + стрелочки
+- **FontSelector** - компонент выбора шрифтов с группировкой и вариантами
 - **Canvas** - SVG рендеринг с сеткой, фильтрация элементов без parentId
 - **GroupElement** - рендеринг групп:
   - Рекурсивное отображение вложенных групп
@@ -120,11 +133,14 @@ map/
 
 **export.ts:**
 - `exportToPNG()` - сохранение всего холста в PNG
+- `exportToPNGTransparent()` - сохранение в PNG с прозрачным фоном
 - `exportToSVG()` - сохранение всего холста в SVG
 - `exportElementToSVG(element, filename?)` - экспорт отдельного элемента:
   - Поддержка типов: icon, circle, rectangle
   - Применение стилей (fill, stroke)
-  - Автоматическая оптимизация через SVGO
+  - Автоматическая оптимизация через встроенный алгоритм
+- `exportToPDF()` - сохранение в PDF
+- `exportToZIP()` - экспорт всех форматов в ZIP архив
 
 **projectStorage.ts:**
 - `saveProject(name, elements, canvasSize, id?, thumbnail?)` - сохранить проект
@@ -137,23 +153,40 @@ map/
 - `getStorageSize()`, `checkStorageAvailable()` - утилиты хранилища
 
 **svgOptimizer.ts:**
-- `optimizeSVG(svgString, options)` - оптимизация SVG через SVGO:
-  - Параметры: precision, removeComments, removeMetadata
-  - Плагины: preset-default, cleanupNumericValues, mergePaths, convertShapeToPath
-  - Сохранение viewBox и ID
+- `optimizeSVG(svgString, options)` - оптимизация SVG через встроенный алгоритм:
+  - Параметры: precision, removeComments
+  - Удаление комментариев
+  - Округление чисел до заданной точности
+  - Удаление лишних пробелов и переносов строк
 - `getOptimizationStats(original, optimized)` - статистика оптимизации
 - `optimizeSVGWithStats(svgString, options)` - оптимизация + статистика
+
+**vectorize.ts:**
+- `vectorizeWithPotrace(imageData, options)` - векторизация через Potrace WASM:
+  - Параметры: threshold, turdSize, optCurve, color
+- `isImageSuitableForPotrace(imageData)` - определение подходящести изображения для Potrace
+- `loadImageAsBase64(file)` - загрузка изображения в base64
+- `getImageDimensions(imageSrc)` - получение размеров изображения
+
+**textToPath.ts:**
+- `convertTextToPath(text, x, y, fontSize, fontFamily, color, fontWeight, fontStyle)` - конвертация текста в SVG path через fontkit
+- `convertCurvedTextToPath(text, cx, cy, radius, fontSize, fontFamily, color, ...)` - конвертация кривого текста в SVG path
+- `preloadFont(fontFamily, fontWeight, fontStyle)` - предзагрузка шрифта
+- `clearFontCache()` - очистка кэша шрифтов
 
 ## Используемые библиотеки
 
 - React 19 + TypeScript
 - Vite - сборщик
 - Zustand - state management
-- lucide-react - иконки
+- lucide-react, @heroicons/react - иконки
 - Google Fonts API - шрифты
 - **@dnd-kit/core**, **@dnd-kit/sortable**, **@dnd-kit/utilities** - drag-and-drop для слоёв
-- **svgo** - оптимизация SVG
-- **potrace-wasm** - векторизация растровых изображений (установлена, не реализована)
+- **fontkit** - обработка шрифтов и конвертация текста в path (заменен opentype.js)
+- **svgpath** - преобразование SVG path
+- **esm-potrace-wasm** - векторизация растровых изображений (Potrace только)
+- **jsPDF** - генерация PDF
+- **jszip** - создание ZIP архивов
 
 ## Параметры по умолчанию
 
@@ -164,18 +197,30 @@ map/
 
 ## Шрифты
 
-### С засечками (Serif):
-1. Times New Roman
+### Системные шрифты:
+- Arial, Arial Narrow, Helvetica, Times New Roman, Georgia, Verdana, Tahoma,
+- Trebuchet MS, Impact, Comic Sans MS, Calibri, Cambria, Candara, Carlito,
+- DejaVu Sans, Baskerville, Bodoni, Didot, Franklin Gothic, Garamond,
+- Microsoft Sans Serif, Monotype Corsiva, Sylfaen, Ubuntu
 
-### Без засечек (Sans-serif):
-1. Arial
-2. Roboto
-3. Open Sans
-4. Ubuntu
+### Google Fonts:
+- Alex Brush, Anton, Archivo, Baloo 2, Bebas Neue, Bodoni Moda, Caveat, Commissioner,
+- Comic Neue, Cormorant Garamond, Crimson Pro, Dancing Script, EB Garamond,
+- Fira Code, Fira Sans, Fredoka, Great Vibes, IBM Plex Sans, IBM Plex Serif,
+- Inter, Karla, Kaushan Script, League Gothic, Libre Baskerville, Literata,
+- Manrope, Merriweather, Mulish, Noto Sans, Noto Serif, Nunito, Open Sans,
+- Oswald, Parisienne, Playfair Display, Poppins, PT Sans, PT Serif, Public Sans,
+- Roboto, Sacramento, Satisfy, Source Serif 4, Tangerine
+
+### Используемая технология:
+- fontkit для конвертации текста в SVG path
+- Прямая загрузка шрифтов из Google Fonts API с поддержкой кириллицы
+- Кэширование загруженных шрифтов для производительности
+- Система fallback-шрифтов для обработки системных шрифтов
 
 ---
 
-## Новые возможности (январь 2025)
+## Новые возможности (2025)
 
 ### ✅ Слои и группировка элементов
 - Drag-and-drop переупорядочивание элементов
@@ -193,27 +238,38 @@ map/
 - Информация о размере и дате последнего изменения
 
 ### ✅ SVG оптимизация
-- Автоматическая оптимизация при экспорте через SVGO
+- Автоматическая оптимизация при экспорте через встроенный алгоритм
 - Настройки точности округления
-- Удаление метаданных и комментариев
+- Удаление комментариев
 - Оптимизация путей и форм
 - Статистика оптимизации (размер до/после)
 
 ### ✅ Экспорт отдельных элементов
 - Экспорт индивидуальных элементов в SVG
 - Поддержка иконок (lucide, heroicons, custom)
-- Поддержка примитивов (круг, прямоугольник)
+- Поддержка примитивов (круг, прямоугольник, текст)
 - Применение стилей (fill, stroke, strokeWidth)
 - Автоматическая оптимизация экспортируемых файлов
 - **UI кнопка "Экспорт SVG" в Controls для IconElement**
 
 ### ✅ Potrace векторизация (январь 2025)
-- Диалоговое окно VectorizationDialog с выбором метода
-- **ImageTracer** - для цветных изображений (настройки: качество, количество цветов)
+- Диалоговое окно VectorizationDialog с настройками Potrace
 - **Potrace WASM** - для черно-белых логотипов (настройки: порог, фильтр деталей, цвет)
-- Автоопределение подходящего метода по содержимому изображения
+- Автоопределение подходящести изображения для Potrace
 - Превью загруженного изображения
-- Рекомендации по выбору метода векторизации
+
+### ✅ Обновленная система шрифтов (ноябрь 2025)
+- Заменен opentype.js на fontkit для лучшей обработки шрифтов
+- Поддержка кириллических символов
+- 50+ доступных шрифтов (системные + Google Fonts)
+- Расширенный компонент FontSelector с группировкой
+- Кэширование загруженных шрифтов
+- Система fallback-шрифтов
+
+### ✅ Удаление ImageTracer (ноябрь 2025)
+- Полное удаление библиотеки imagetracerjs
+- Оставлен только Potrace WASM как метод векторизации
+- Упрощение интерфейса векторизации
 
 ---
 
@@ -223,3 +279,7 @@ map/
 
 - **update-20250123-1430.md** - Реализация слоёв, групп, сохранения проектов, SVG оптимизации
 - **update-20250124-final.md** - Кнопка экспорта элементов, Potrace векторизация, VectorizationDialog
+- **update-20251123-1944.md** - Удаление локальных шрифтов, переход на fontkit
+- **update-20251123-1945.md** - Обновление шрифтов в документации
+- **update-20251124-2258.md** - Расширенный выбор шрифтов с группировкой
+- **update-20251124-remove-imagetracer.md** - Удаление ImageTracer из проекта
