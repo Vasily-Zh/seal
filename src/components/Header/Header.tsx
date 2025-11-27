@@ -1,4 +1,4 @@
-import { Undo2, Redo2, Download, Settings, Save, FolderOpen } from 'lucide-react';
+import { Undo2, Redo2, Download, Settings, Save, FolderOpen, Package } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
 import { exportToZIP } from '../../utils/export';
 import { useState } from 'react';
@@ -7,6 +7,7 @@ import { AdminPanel } from '../Admin/AdminPanel';
 import { isAdminLoggedIn } from '../../utils/auth';
 import { ProjectManager } from '../ProjectManager/ProjectManager';
 import { saveProject, generateThumbnail } from '../../utils/projectStorage';
+import { AutoExportDialog } from './AutoExportDialog';
 
 export const Header = () => {
   const undo = useStampStore((state) => state.undo);
@@ -23,6 +24,7 @@ export const Header = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showProjectManager, setShowProjectManager] = useState(false);
+  const [showAutoExportDialog, setShowAutoExportDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
@@ -212,6 +214,27 @@ export const Header = () => {
           {isExporting ? 'Скачивание...' : 'Скачать'}
         </button>
 
+        {/* Кнопка Автоэкспорт */}
+        <button
+          onClick={() => setShowAutoExportDialog(true)}
+          style={{
+            padding: '8px 16px',
+            border: '1px solid #8b5cf6',
+            borderRadius: '6px',
+            backgroundColor: '#8b5cf6',
+            color: 'white',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+          }}
+        >
+          <Package size={16} />
+          Автоэкспорт
+        </button>
+
         {/* Кнопка Настройки */}
         <button
           onClick={handleSettingsClick}
@@ -255,6 +278,12 @@ export const Header = () => {
         onLoadProject={(project) => {
           loadProjectData(project);
         }}
+      />
+
+      {/* Auto Export Dialog */}
+      <AutoExportDialog
+        isOpen={showAutoExportDialog}
+        onClose={() => setShowAutoExportDialog(false)}
       />
     </header>
   );
