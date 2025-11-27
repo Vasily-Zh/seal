@@ -224,9 +224,9 @@ export const autoExportToZIP = async (
 
     // Этап 3: Векторизация PNG → SVG через Potrace
     onProgress('Векторизация PNG → SVG', 50);
-    // Конвертируем Blob в Canvas с уменьшением размера для Potrace
+    // Конвертируем прозрачный PNG в Canvas с уменьшением размера для Potrace
     // Potrace WASM имеет ограничения на размер буфера, используем 1000px
-    const pngCanvas = await blobToCanvas(pngWithBg, 1000);
+    const pngCanvas = await blobToCanvas(pngTransparent, 1000);
     const vectorizedSVG = await vectorizeColoredPNG(pngCanvas, vectorizeConfig);
 
     // Сохраняем векторизованный SVG
