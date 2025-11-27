@@ -97,6 +97,7 @@ function extractFontName(fontFamily: string): string {
 
 /**
  * Получает URL шрифта из Google Fonts CSS API
+ * Запрашиваем с subset для кириллицы
  */
 async function getGoogleFontUrl(
   fontName: string,
@@ -107,12 +108,12 @@ async function getGoogleFontUrl(
     const weightNum = weight === 'bold' ? '700' : '400';
     const encodedName = encodeURIComponent(fontName);
     
-    // CSS2 API для современных браузеров
+    // Добавляем subset=cyrillic,latin для поддержки кириллицы
     let cssUrl: string;
     if (style === 'italic') {
-      cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:ital,wght@1,${weightNum}&display=swap`;
+      cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:ital,wght@1,${weightNum}&subset=cyrillic,latin&display=swap`;
     } else {
-      cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:wght@${weightNum}&display=swap`;
+      cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:wght@${weightNum}&subset=cyrillic,latin&display=swap`;
     }
 
     const response = await fetch(cssUrl);
@@ -123,9 +124,18 @@ async function getGoogleFontUrl(
     
     const css = await response.text();
     
-    // Ищем URL в CSS - fontkit поддерживает все форматы
+    // Ищем URL для cyrillic subset (он идёт первым если доступен)
+    // Формат: /* cyrillic */ @font-face { ... src: url(...) }
+    const cyrillicMatch = css.match(/\/\*\s*cyrillic\s*\*\/[^}]*url\(([^)]+)\)/);
+    if (cyrillicMatch) {
+      console.log(`Found cyrillic subset for ${fontName}`);
+      return cyrillicMatch[1];
+    }
+    
+    // Если кириллицы нет, берём первый доступный URL (latin)
     const urlMatch = css.match(/url\(([^)]+)\)/);
     if (urlMatch) {
+      console.log(`Using latin subset for ${fontName} (no cyrillic available)`);
       return urlMatch[1];
     }
     
@@ -178,10 +188,7 @@ async function loadFont(
       const arrayBuffer = await response.arrayBuffer();
       const buffer = new Uint8Array(arrayBuffer);
       
-      // fontkit.create принимает Buffer или Uint8Array
       const fontResult = fontkit.create(buffer as any);
-      
-      // Если это коллекция шрифтов, берём первый
       const font = 'fonts' in fontResult ? fontResult.fonts[0] : fontResult;
       
       fontCache.set(cacheKey, font);
@@ -196,67 +203,80 @@ async function loadFont(
 }
 
 /**
- * Конвертирует path из fontkit в SVG path string
+ * Конвертирует path глифа fontkit в SVG path string
+ * Fontkit использует систему координат шрифта (Y вверх), нужно инвертировать
  */
-function pathToSvgString(path: any): string {
-  let pathData = '';
+function glyphPathToSvg(glyph: any, fontSize: number, unitsPerEm: number): string {
+  const scale = fontSize / unitsPerEm;
+  const path = glyph.path;
   
-  // fontkit path имеет метод toSVG()
-  if (path && typeof path.toSVG === 'function') {
-    return path.toSVG();
-  }
+  if (!path) return '';
   
-  // Fallback - ручная конвертация команд
-  if (path && path.commands) {
+  // Fontkit path.toSVG() возвращает SVG path string
+  let svgString = '';
+  
+  if (typeof path.toSVG === 'function') {
+    svgString = path.toSVG();
+  } else if (path.commands) {
+    // Ручная конвертация если toSVG недоступен
     for (const cmd of path.commands) {
-      switch (cmd.command) {
+      switch (cmd.type) {
         case 'moveTo':
-          pathData += `M ${cmd.args[0]} ${cmd.args[1]} `;
+          svgString += `M${cmd.x} ${cmd.y}`;
           break;
         case 'lineTo':
-          pathData += `L ${cmd.args[0]} ${cmd.args[1]} `;
+          svgString += `L${cmd.x} ${cmd.y}`;
           break;
         case 'curveTo':
-        case 'bezierCurveTo':
-          pathData += `C ${cmd.args[0]} ${cmd.args[1]} ${cmd.args[2]} ${cmd.args[3]} ${cmd.args[4]} ${cmd.args[5]} `;
+          svgString += `C${cmd.cp1x} ${cmd.cp1y} ${cmd.cp2x} ${cmd.cp2y} ${cmd.x} ${cmd.y}`;
           break;
         case 'quadraticCurveTo':
-          pathData += `Q ${cmd.args[0]} ${cmd.args[1]} ${cmd.args[2]} ${cmd.args[3]} `;
+          svgString += `Q${cmd.cp1x} ${cmd.cp1y} ${cmd.x} ${cmd.y}`;
           break;
         case 'closePath':
-          pathData += 'Z ';
+          svgString += 'Z';
           break;
       }
     }
   }
   
-  return pathData;
+  if (!svgString) return '';
+  
+  // Применяем масштаб и инвертируем Y (шрифты имеют Y вверх, SVG - Y вниз)
+  const transformed = svgpath(svgString)
+    .scale(scale, -scale)
+    .toString();
+  
+  return transformed;
 }
 
 /**
- * Получает path глифа с учётом размера шрифта
+ * Получает данные глифа
  */
-function getGlyphPath(font: fontkit.Font, char: string, fontSize: number): { path: string; advance: number } {
-  const glyph = font.glyphForCodePoint(char.codePointAt(0) || 0);
-  
-  // Масштаб: fontSize / unitsPerEm
+function getGlyphData(font: fontkit.Font, char: string, fontSize: number): { 
+  path: string; 
+  advance: number;
+  bbox: { minX: number; minY: number; maxX: number; maxY: number } | null;
+} {
+  const codePoint = char.codePointAt(0) || 0;
+  const glyph = font.glyphForCodePoint(codePoint);
   const scale = fontSize / font.unitsPerEm;
   
-  // Получаем advance width
   const advance = (glyph.advanceWidth || 0) * scale;
+  const path = glyphPathToSvg(glyph, fontSize, font.unitsPerEm);
   
-  // Получаем path глифа
-  const glyphPath = glyph.path;
-  let pathString = pathToSvgString(glyphPath);
-  
-  // Применяем масштаб к path
-  if (pathString) {
-    pathString = svgpath(pathString)
-      .scale(scale, -scale) // Инвертируем Y для SVG координат
-      .toString();
+  // Получаем bounding box если доступен
+  let bbox = null;
+  if (glyph.bbox) {
+    bbox = {
+      minX: glyph.bbox.minX * scale,
+      minY: -glyph.bbox.maxY * scale, // Инвертируем Y
+      maxX: glyph.bbox.maxX * scale,
+      maxY: -glyph.bbox.minY * scale, // Инвертируем Y
+    };
   }
   
-  return { path: pathString, advance };
+  return { path, advance, bbox };
 }
 
 /**
@@ -275,45 +295,61 @@ export async function convertTextToPath(
   try {
     const font = await loadFont(fontFamily, fontWeight, fontStyle);
     
-    // Собираем все глифы
     const paths: string[] = [];
     let currentX = 0;
+    let minY = 0;
+    let maxY = 0;
+    
+    // Собираем все глифы и вычисляем размеры
+    const glyphsData: Array<{ path: string; x: number; advance: number }> = [];
     
     for (const char of text) {
       if (char === ' ') {
         const spaceGlyph = font.glyphForCodePoint(32);
         const scale = fontSize / font.unitsPerEm;
-        currentX += (spaceGlyph.advanceWidth || fontSize * 0.3) * scale;
+        const spaceWidth = (spaceGlyph.advanceWidth || fontSize * 0.25) * scale;
+        currentX += spaceWidth;
         continue;
       }
       
-      const { path, advance } = getGlyphPath(font, char, fontSize);
+      const { path, advance, bbox } = getGlyphData(font, char, fontSize);
       
       if (path) {
-        const transformedPath = svgpath(path)
-          .translate(currentX, 0)
-          .toString();
-        paths.push(transformedPath);
+        glyphsData.push({ path, x: currentX, advance });
+        
+        if (bbox) {
+          minY = Math.min(minY, bbox.minY);
+          maxY = Math.max(maxY, bbox.maxY);
+        }
       }
       
       currentX += advance;
     }
     
-    // Объединяем все пути
-    const combinedPath = paths.join(' ');
-    
-    // Вычисляем центр для позиционирования
-    // Парсим bbox из пути (упрощённо - используем currentX как ширину)
+    // Общая ширина текста
     const totalWidth = currentX;
-    const height = fontSize;
     
-    // Центрируем по x и y
-    const finalPath = svgpath(combinedPath)
-      .translate(-totalWidth / 2, height * 0.35) // 0.35 - примерная базовая линия
-      .translate(x, y)
-      .toString();
+    // Базовая линия
+    const baselineOffset = maxY || fontSize * 0.75;
+    
+    // Собираем финальные пути с позиционированием
+    for (const glyph of glyphsData) {
+      const transformedPath = svgpath(glyph.path)
+        .translate(glyph.x - totalWidth / 2, baselineOffset)
+        .translate(x, y)
+        .toString();
+      
+      paths.push(transformedPath);
+    }
+    
+    if (paths.length === 0) {
+      throw new Error('No paths generated');
+    }
+    
+    // Объединяем все пути в один
+    const combinedPath = paths.join(' ');
 
-    return `<path d="${finalPath}" fill="${color}"/>`;
+    return `<path d="${combinedPath}" fill="${color}"/>`;
   } catch (error) {
     console.error('Error converting text to path:', error);
     return `<text x="${x}" y="${y}" fill="${color}" font-size="${fontSize}" font-family="${fontFamily}" font-weight="${fontWeight}" font-style="${fontStyle}" text-anchor="middle" dominant-baseline="middle">${text}</text>`;
@@ -342,23 +378,26 @@ export async function convertCurvedTextToPath(
     const scale = fontSize / font.unitsPerEm;
 
     // Собираем данные о символах
-    let totalWidth = 0;
-    const charData: Array<{
+    interface CharData {
       char: string;
       advance: number;
       isSpace: boolean;
       path?: string;
-    }> = [];
+      bbox?: { minX: number; minY: number; maxX: number; maxY: number } | null;
+    }
+    
+    let totalWidth = 0;
+    const charData: CharData[] = [];
 
     for (const char of text) {
       if (char === ' ') {
         const spaceGlyph = font.glyphForCodePoint(32);
-        const advance = (spaceGlyph.advanceWidth || fontSize * 0.3) * scale;
+        const advance = (spaceGlyph.advanceWidth || fontSize * 0.25) * scale;
         charData.push({ char, advance, isSpace: true });
         totalWidth += advance;
       } else {
-        const { path, advance } = getGlyphPath(font, char, fontSize);
-        charData.push({ char, advance, isSpace: false, path });
+        const { path, advance, bbox } = getGlyphData(font, char, fontSize);
+        charData.push({ char, advance, isSpace: false, path, bbox });
         totalWidth += advance;
       }
     }
@@ -366,35 +405,36 @@ export async function convertCurvedTextToPath(
     // Проверяем, не превышает ли текст длину окружности
     const circumference = 2 * Math.PI * radius;
     let actualFontSize = fontSize;
+    let actualScale = scale;
     
     if (totalWidth > circumference * 0.9) {
       const scaleFactor = (circumference * 0.9) / totalWidth;
       actualFontSize = fontSize * scaleFactor;
+      actualScale = actualFontSize / font.unitsPerEm;
       
       // Пересчитываем с новым размером
       totalWidth = 0;
       charData.length = 0;
-      const newScale = actualFontSize / font.unitsPerEm;
 
       for (const char of text) {
         if (char === ' ') {
           const spaceGlyph = font.glyphForCodePoint(32);
-          const advance = (spaceGlyph.advanceWidth || actualFontSize * 0.3) * newScale;
+          const advance = (spaceGlyph.advanceWidth || actualFontSize * 0.25) * actualScale;
           charData.push({ char, advance, isSpace: true });
           totalWidth += advance;
         } else {
-          const { path, advance } = getGlyphPath(font, char, actualFontSize);
-          charData.push({ char, advance, isSpace: false, path });
+          const { path, advance, bbox } = getGlyphData(font, char, actualFontSize);
+          charData.push({ char, advance, isSpace: false, path, bbox });
           totalWidth += advance;
         }
       }
     }
 
-    // Рассчитываем начальный угол
+    // Рассчитываем начальный угол для центрирования
     const textArcAngle = totalWidth / radius;
     const startAngleRad = (startAngle * Math.PI) / 180;
 
-    let currentAngle;
+    let currentAngle: number;
     if (isFlipped) {
       currentAngle = startAngleRad + textArcAngle / 2;
     } else {
@@ -412,7 +452,7 @@ export async function convertCurvedTextToPath(
         continue;
       }
 
-      const { advance, path } = data;
+      const { advance, path, bbox } = data;
 
       if (!path) {
         if (isFlipped) {
@@ -430,20 +470,28 @@ export async function convertCurvedTextToPath(
         currentAngle += (advance / 2) / radius;
       }
 
+      // Позиция на окружности
       const charX = cx + Math.cos(currentAngle) * radius;
       const charY = cy + Math.sin(currentAngle) * radius;
 
-      // Угол поворота
+      // Угол поворота глифа
       let rotationRad = currentAngle + Math.PI / 2;
       if (isFlipped) {
         rotationRad -= Math.PI;
       }
       const rotationDeg = (rotationRad * 180) / Math.PI;
 
-      // Центрируем глиф (примерно)
-      const glyphCenterX = advance / 2;
-      const glyphCenterY = actualFontSize * 0.35;
+      // Центр глифа для трансформации
+      // bbox уже в масштабированных координатах с инвертированным Y
+      let glyphCenterX = advance / 2;
+      let glyphCenterY = 0;
+      
+      if (bbox) {
+        glyphCenterX = (bbox.minX + bbox.maxX) / 2;
+        glyphCenterY = (bbox.minY + bbox.maxY) / 2;
+      }
 
+      // Применяем трансформации
       const transformedPath = svgpath(path)
         .translate(-glyphCenterX, -glyphCenterY)
         .rotate(rotationDeg, 0, 0)
@@ -460,11 +508,15 @@ export async function convertCurvedTextToPath(
       }
     }
 
+    if (paths.length === 0) {
+      throw new Error('No paths generated for curved text');
+    }
+
     return paths.join('\n');
   } catch (error) {
     console.error('Error converting curved text to path:', error);
     
-    // Fallback
+    // Fallback на textPath
     const pathId = `fallback-path-${Date.now()}`;
     const x1 = cx + radius * Math.cos((startAngle * Math.PI) / 180);
     const y1 = cy + radius * Math.sin((startAngle * Math.PI) / 180);
