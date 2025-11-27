@@ -1,0 +1,419 @@
+{
+  "project_structure": {
+    "frontend_frameworks": [
+      "React 19.2.0",
+      "TypeScript 5.9.3",
+      "Vite 7.2.4"
+    ],
+    "backend_frameworks": [
+      "Client-side only application",
+      "No dedicated backend server"
+    ],
+    "file_storage_scheme": {
+      "local_storage": {
+        "enabled": true,
+        "max_size": "10MB",
+        "purpose": "Project storage with thumbnails and metadata"
+      },
+      "cloud_storage": {
+        "enabled": false
+      },
+      "fonts_storage": {
+        "local": {
+          "total_count": "200+ TTF/OTC/FON files",
+          "main_fonts": [
+            "ComicSansMS.ttf",
+            "Impact.ttf",
+            "DejaVuSans.ttf",
+            "DejaVuSerif.ttf",
+            "DejaVuSansMono.ttf",
+            "Candara.ttf",
+            "Corbel.ttf",
+            "Century Gothic variants",
+            "Franklin Gothic variants",
+            "Futura variants",
+            "Helvetica Cyrillic variants",
+            "OCR-A BT.ttf",
+            "OCR-B 10 BT.ttf",
+            "Gabriola.ttf",
+            "GOST family (Russian)",
+            "Cascadia Code/Mono",
+            "Carlito family",
+            "Georgia variants",
+            "Trebuchet MS variants",
+            "System UI fonts",
+            "Decorative script fonts"
+          ],
+          "categories": {
+            "serif": "Century, Garamond, DejaVu Serif, Times variants",
+            "sans_serif": "Arial, Helvetica, Candara, Corbel, Franklin Gothic",
+            "monospace": "Cascadia Mono, DejaVu Sans Mono, Consolas variants",
+            "decorative": "Gabriola, OCR fonts, Engravers Gothic",
+            "cyrillic_support": "GOST, Helvetica Cyrillic, many system fonts",
+            "script_cursive": "Comic Sans variants, Inkfree, Monbaiti"
+          },
+          "file_types": ["TTF", "OTC", "FON"],
+          "google_fonts": "Dynamic loading via Google Fonts API",
+          "location": "public/fonts/"
+        }
+      },
+      "generated_files": {
+        "client_side": true,
+        "immediate_download": true,
+        "server_storage": false
+      }
+    },
+    "database_structure": {
+      "type": "localStorage",
+      "projects_table": {
+        "id": "string",
+        "name": "string", 
+        "elements": "array",
+        "canvasSize": "number",
+        "timestamp": "number",
+        "thumbnail": "string"
+      }
+    }
+  },
+
+  "input_data": {
+    "supported_formats": [
+      "PNG",
+      "JPG", 
+      "JPEG",
+      "SVG"
+    ],
+    "image_dimensions": {
+      "max_processing": "1000x1000px (automatic scaling for large images)",
+      "recommended": "< 1000px per side",
+      "canvas_size": "100mm square field"
+    },
+    "fonts": {
+      "local_fonts": {
+        "total_count": "200+ font files",
+        "formats": ["TTF", "OTC", "FON"],
+        "key_fonts": [
+          {
+            "name": "Comic Sans MS",
+            "files": ["ComicSansMS.ttf", "comic.ttf", "comicbd.ttf", "comici.ttf", "comicz.ttf"],
+            "category": "cursive/sans-serif",
+            "location": "public/fonts/"
+          },
+          {
+            "name": "Impact",
+            "file": "Impact.ttf", 
+            "category": "sans-serif",
+            "location": "public/fonts/"
+          },
+          {
+            "name": "DejaVu Sans",
+            "files": ["DejaVuSans.ttf", "DejaVuSans-Bold.ttf", "DejaVuSans-Oblique.ttf", "DejaVuSans-BoldOblique.ttf", "DejaVuSans-ExtraLight.ttf"],
+            "category": "sans-serif",
+            "location": "public/fonts/"
+          },
+          {
+            "name": "Candara",
+            "files": ["Candarai.ttf", "Candaraz.ttf", "Candaral.ttf"],
+            "category": "sans-serif",
+            "location": "public/fonts/"
+          },
+          {
+            "name": "Corbel",
+            "files": ["corbel.ttf", "corbelb.ttf", "corbeli.ttf", "corbell.ttf", "corbelli.ttf", "corbelz.ttf"],
+            "category": "sans-serif",
+            "location": "public/fonts/"
+          },
+          {
+            "name": "GOST (Russian)",
+            "files": ["GOST.TTF", "GOST_AU.TTF", "GOST_BU.TTF"],
+            "category": "cyrillic/serif",
+            "location": "public/fonts/"
+          },
+          {
+            "name": "Cascadia",
+            "files": ["CascadiaCode.ttf", "CascadiaMono.ttf"],
+            "category": "monospace",
+            "location": "public/fonts/"
+          },
+          {
+            "name": "Georgia",
+            "files": ["georgia.ttf", "georgiab.ttf", "georgiai.ttf", "georgiaz.ttf"],
+            "category": "serif",
+            "location": "public/fonts/"
+          }
+        ],
+        "special_collections": [
+          "Complete DejaVu family (Serif, Sans, Mono with all variants)",
+          "Complete Century family (No2, Blk, Lt, Cn)",
+          "Complete Franklin Gothic family (Book, Medium, Bold)",
+          "Complete Futura family (Bk, Md, Heavy variants)",
+          "Complete News family (701, 706, Goth variants)",
+          "Complete humanist fonts (Humanst, Humnst variants)",
+          "OCR specialized fonts (OCR-A BT, OCR-B 10 BT)",
+          "Russian GOST standard fonts",
+          "Chinese font files (mingliub.ttc, msgothic.ttc)"
+        ]
+      },
+      "google_fonts": [
+        "Alex Brush", "Anton", "Archivo", "Baloo 2", "Bebas Neue",
+        "Bodoni Moda", "Caveat", "Commissioner", "Comic Neue",
+        "Cormorant Garamond", "Crimson Pro", "Dancing Script",
+        "EB Garamond", "Fira Code", "Fira Sans", "Fredoka",
+        "Great Vibes", "IBM Plex Sans", "IBM Plex Serif", "Inter",
+        "Karla", "Kaushan Script", "League Gothic", "Libre Baskerville",
+        "Literata", "Manrope", "Merriweather", "Mulish", "Noto Sans",
+        "Noto Serif", "Nunito", "Open Sans", "Oswald", "Parisienne",
+        "Playfair Display", "Poppins", "PT Sans", "PT Serif",
+        "Public Sans", "Roboto", "Sacramento", "Satisfy",
+        "Source Serif 4", "Tangerine"
+      ],
+      "system_fallbacks": [
+        "Arial", "Times New Roman", "Georgia", "Helvetica", "Verdana",
+        "Tahoma", "Trebuchet MS", "Impact", "Comic Sans MS"
+      ],
+      "native_font_support": {
+        "description": "Many system fonts now available as local TTF files",
+        "advantages": [
+          "Consistent rendering across platforms",
+          "No dependency on user system fonts",
+          "Support for bold, italic, regular variants",
+          "Cyrillic character support",
+          "Professional typography quality"
+        ],
+        "preloaded_families": [
+          "DejaVu (Sans, Serif, Mono)",
+          "Candara variants",
+          "Corbel variants", 
+          "Constantia variants",
+          "Consolas variants",
+          "Georgia variants",
+          "Franklin Gothic variants"
+        ]
+      },
+      "google_fonts_api": "https://fonts.googleapis.com/css2"
+    },
+    "text_features": {
+      "curved_text": true,
+      "circle_text": true,
+      "letter_spacing": true,
+      "bold_italic": true,
+      "flipped_text": true,
+      "separate_letters": true,
+      "centered_text": true,
+      "font_size_range": "1-100mm"
+    },
+    "layer_support": {
+      "png_layers": false,
+      "psd_layers": false,
+      "svg_groups": true,
+      "nested_groups": true,
+      "z_index_management": true,
+      "element_locking": true
+    }
+  },
+
+  "output_formats": {
+    "generated_formats": [
+      "SVG",
+      "PNG (with white background)",
+      "PNG (transparent)",
+      "PDF",
+      "ZIP (containing all formats)"
+    ],
+    "svg_features": {
+      "vector_text": true,
+      "preserve_transparency": true,
+      "preserve_colors": true,
+      "preserve_layers": true,
+      "font_vectorization": true,
+      "circle_text_vectorization": true,
+      "svg_optimization": true,
+      "standalone_svg": true
+    },
+    "vectorization_methods": [
+      {
+        "name": "Potrace WASM",
+        "purpose": "Black and white logos",
+        "features": [
+          "Monochrome vectorization",
+          "Threshold adjustment (0-255)",
+          "Detail filtering (turdSize 1-10)",
+          "Curve optimization",
+          "Color customization"
+        ]
+      }
+    ],
+    "text_vectorization": {
+      "opentype_js": true,
+      "real_glyph_paths": true,
+      "circular_text_paths": true,
+      "separate_letter_paths": true,
+      "transform_handling": true,
+      "enhanced_font_support": {
+        "local_font_parsing": true,
+        "font_weight_variants": true,
+        "italic_oblique_support": true,
+        "cyrillic_support": true,
+        "complex_font_families": true,
+        "multi_font_files": true,
+        "opentype_features": true
+      },
+      "performance_optimizations": {
+        "font_caching": "Map-based font cache",
+        "lazy_loading": "Fonts loaded on demand",
+        "fallback_strategy": "Google Fonts + System fonts"
+      }
+    }
+  },
+
+  "technical_constraints": {
+    "generation_location": "client/browser only",
+    "library_restrictions": [
+      "No restrictions mentioned",
+      "opentype.js is available",
+      "potrace-wasm is supported",
+      "All NPM packages allowed"
+    ],
+    "performance_limits": {
+      "max_image_size": "1000x1000px (automatic scaling)",
+      "localstorage_limit": "10MB",
+      "history_limit": "50 undo steps",
+      "canvas_max_dimension": "4000px for PNG export",
+      "font_loading": {
+        "total_fonts": "200+ local font files",
+        "loading_strategy": "Lazy loading / On-demand",
+        "fallback": "Google Fonts API for missing fonts",
+        "cache_strategy": "Font caching for repeated use"
+      }
+    },
+    "archiving_support": {
+      "jszip_integration": true,
+      "multiple_formats_per_export": true,
+      "zip_filename_customization": true
+    }
+  },
+
+  "additional_features": {
+    "color_support": {
+      "fill_colors": true,
+      "stroke_colors": true,
+      "stroke_width": true,
+      "custom_colors": true,
+      "hex_color_codes": true
+    },
+    "existing_generation_scripts": [
+      {
+        "file": "src/utils/textToPath.ts",
+        "purpose": "Text to SVG path conversion",
+        "features": [
+          "convertTextToPath()",
+          "convertCurvedTextToPath()",
+          "Google Fonts integration",
+          "Local font support"
+        ]
+      },
+      {
+        "file": "src/utils/vectorize.ts", 
+        "purpose": "Image vectorization",
+        "features": [
+          "Potrace WASM integration",
+          "Image analysis",
+          "Parameter customization"
+        ]
+      },
+      {
+        "file": "src/utils/export.ts",
+        "purpose": "Multi-format export",
+        "features": [
+          "PNG with/without background",
+          "SVG optimization",
+          "PDF generation", 
+          "ZIP archiving"
+        ]
+      }
+    ],
+    "svg_generation_capabilities": {
+      "text_to_path": true,
+      "curved_text_vectors": true,
+      "circle_text_vectors": true,
+      "image_vectorization": true,
+      "svg_optimization": true,
+      "layer_preservation": true,
+      "enhanced_font_support": {
+        "local_font_vectorization": true,
+        "font_weight_variants": true,
+        "italic_oblique_processing": true,
+        "cyrillic_text_support": true,
+        "complex_font_families": true,
+        "opentype_features": true,
+        "professional_typography": true
+      },
+      "font_collections": {
+        "dejavu_family": "Complete Sans, Serif, Mono families",
+        "system_fonts": "Arial, Georgia, Times variants",
+        "professional_fonts": "Candara, Constantia, Corbel families",
+        "monospace_fonts": "Cascadia, Consolas, DejaVu Mono",
+        "decorative_fonts": "Gabriola, OCR fonts, Engravers",
+        "cyrillic_fonts": "GOST standard, Cyrillic variants"
+      }
+    },
+    "archiving_capabilities": {
+      "multiple_formats": true,
+      "batch_export": true,
+      "custom_filenames": true,
+      "immediate_download": true
+    }
+  },
+
+  "key_libraries": {
+    "svg_processing": [
+      "opentype.js@1.3.4",
+      "svgpath@2.6.0"
+    ],
+    "vectorization": [
+      "esm-potrace-wasm@0.4.1"
+    ],
+    "export_formats": [
+      "jsPDF@3.0.4",
+      "JSZip@3.10.1"
+    ],
+    "ui_framework": [
+      "React@19.2.0",
+      "lucide-react@0.554.0",
+      "@heroicons/react@2.2.0"
+    ],
+    "state_management": [
+      "zustand@5.0.8"
+    ],
+    "build_tools": [
+      "vite@7.2.4",
+      "typescript@5.9.3"
+    ]
+  },
+  "recent_updates": {
+    "date": "2025-11-27",
+    "major_changes": [
+      "Added 200+ local font files",
+      "Enhanced font collection with complete families",
+      "Added Cyrillic and GOST standard fonts",
+      "Added monospace and decorative font collections",
+      "Implemented font caching strategy",
+      "Enhanced performance optimizations for large font sets"
+    ],
+    "font_collection_summary": {
+      "total_fonts": "200+",
+      "font_families": "Complete families with all variants (Regular, Bold, Italic, Oblique)",
+      "specialized_fonts": "OCR, Engravers, Humanist, Geometric",
+      "language_support": "Latin, Cyrillic, Chinese (TTC format)",
+      "file_formats": ["TTF", "OTC", "FON"],
+      "categories": {
+        "serif": "Georgia, Century, DejaVu Serif, Garamond variants",
+        "sans_serif": "Arial, Helvetica, Candara, Corbel, DejaVu Sans",
+        "monospace": "Cascadia, Consolas, DejaVu Sans Mono",
+        "decorative": "Gabriola, OCR fonts, Engravers Gothic",
+        "script": "Comic Sans variants, Handwriting fonts",
+        "cyrillic": "GOST family, Cyrillic variants of Latin fonts"
+      }
+    }
+  }
+}
