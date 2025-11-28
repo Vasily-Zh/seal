@@ -32,7 +32,7 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
   // Найти текущий выбранный шрифт
   const getCurrentFontDisplay = () => {
     const font = ALL_FONTS.find(f => f.family === value);
-    return font ? font.name : 'Arial'; // fallback
+    return font ? font.name : 'Roboto'; // fallback к Google Font
   };
 
   // Выбрать шрифт

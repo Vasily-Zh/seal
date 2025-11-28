@@ -57,37 +57,6 @@ const GOOGLE_FONTS = new Set([
 ]);
 
 /**
- * Fallback шрифты для системных шрифтов
- */
-const SYSTEM_FONT_FALLBACKS: Record<string, string> = {
-  'Arial': 'Roboto',
-  'Arial Narrow': 'Roboto',
-  'Helvetica': 'Roboto',
-  'Times New Roman': 'PT Serif',
-  'Georgia': 'Merriweather',
-  'Verdana': 'Open Sans',
-  'Tahoma': 'Open Sans',
-  'Trebuchet MS': 'Fira Sans',
-  'Impact': 'Anton',
-  'Comic Sans MS': 'Comic Neue',
-  'Courier New': 'Fira Code',
-  'Calibri': 'Open Sans',
-  'Cambria': 'Merriweather',
-  'Candara': 'Nunito',
-  'Garamond': 'EB Garamond',
-  'Baskerville': 'Libre Baskerville',
-  'Bodoni': 'Bodoni Moda',
-  'Didot': 'Bodoni Moda',
-  'Franklin Gothic': 'Oswald',
-  'Microsoft Sans Serif': 'Roboto',
-  'Monotype Corsiva': 'Dancing Script',
-  'Sylfaen': 'Noto Serif',
-  'Ubuntu': 'Roboto',
-  'DejaVu Sans': 'Noto Sans',
-  'Carlito': 'Open Sans',
-};
-
-/**
  * Извлекает базовое имя шрифта из CSS font-family строки
  */
 function extractFontName(fontFamily: string): string {
@@ -162,16 +131,12 @@ async function loadFont(
   }
 
   let targetFont = fontName;
-  
+
   if (!GOOGLE_FONTS.has(fontName)) {
-    const fallback = SYSTEM_FONT_FALLBACKS[fontName];
-    if (fallback) {
-      console.log(`Font "${fontName}" is system font, using fallback: ${fallback}`);
-      targetFont = fallback;
-    } else {
-      console.log(`Font "${fontName}" not found, using Roboto as fallback`);
-      targetFont = 'Roboto';
-    }
+    console.warn(`Font "${fontName}" not found in Google Fonts list, using Roboto as fallback`);
+    targetFont = 'Roboto';
+  } else {
+    console.log(`Loading font: ${fontName}`);
   }
 
   try {

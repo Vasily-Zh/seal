@@ -1,126 +1,8 @@
 import type { FontConfig } from '../types';
 
-// Все шрифты отсортированы по алфавиту
-// Включая системные шрифты, Google Fonts и рукописные шрифты для печатей
+// Все шрифты из Google Fonts (открытые, бесплатные, OFL лицензия)
 export const ALL_FONTS: FontConfig[] = [
-  // Системные шрифты (встроенные, всегда доступны)
-  {
-    name: 'Arial',
-    family: 'Arial, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Arial Narrow',
-    family: 'Arial Narrow, Arial, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Baskerville',
-    family: 'Baskerville, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Bodoni',
-    family: 'Bodoni MT, Bodoni, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Calibri',
-    family: 'Calibri, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Cambria',
-    family: 'Cambria, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Candara',
-    family: 'Candara, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Carlito',
-    family: 'Carlito',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Comic Sans MS',
-    family: 'Comic Sans MS, cursive, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'DejaVu Sans',
-    family: 'DejaVu Sans, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Didot',
-    family: 'Didot, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Franklin Gothic',
-    family: 'Franklin Gothic Medium, Franklin Gothic, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Garamond',
-    family: 'Garamond, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Georgia',
-    family: 'Georgia, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Helvetica',
-    family: 'Helvetica, Arial, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Impact',
-    family: 'Impact, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Microsoft Sans Serif',
-    family: 'Microsoft Sans Serif, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Monotype Corsiva',
-    family: 'Monotype Corsiva, cursive',
-    category: 'serif',
-  },
-  {
-    name: 'Sylfaen',
-    family: 'Sylfaen, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Tahoma',
-    family: 'Tahoma, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Times New Roman',
-    family: 'Times New Roman, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Ubuntu',
-    family: 'Ubuntu',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Verdana',
-    family: 'Verdana, sans-serif',
-    category: 'sans-serif',
-  },
-
-  // Google Fonts (открытые, бесплатные, OFL лицензия)
+  // Google Fonts
   {
     name: 'Alex Brush',
     family: 'Alex Brush',
@@ -343,58 +225,10 @@ export const ALL_FONTS: FontConfig[] = [
   },
 ];
 
-// Генерация ссылки для подключения шрифтов через Google Fonts API
+// Генерация ссылки для подключения всех Google Fonts
 export const getGoogleFontsUrl = (): string => {
-  // Google Fonts для загрузки (исключаем системные шрифты)
-  const googleFontNames = [
-    'Alex Brush',
-    'Anton',
-    'Archivo',
-    'Baloo 2',
-    'Bebas Neue',
-    'Bodoni Moda',
-    'Caveat',
-    'Commissioner',
-    'Comic Neue',
-    'Cormorant Garamond',
-    'Crimson Pro',
-    'Dancing Script',
-    'EB Garamond',
-    'Fira Code',
-    'Fira Sans',
-    'Fredoka',
-    'Great Vibes',
-    'IBM Plex Sans',
-    'IBM Plex Serif',
-    'Inter',
-    'Karla',
-    'Kaushan Script',
-    'League Gothic',
-    'Libre Baskerville',
-    'Literata',
-    'Manrope',
-    'Merriweather',
-    'Mulish',
-    'Noto Sans',
-    'Noto Serif',
-    'Nunito',
-    'Open Sans',
-    'Oswald',
-    'Parisienne',
-    'Playfair Display',
-    'Poppins',
-    'PT Sans',
-    'PT Serif',
-    'Public Sans',
-    'Roboto',
-    'Sacramento',
-    'Satisfy',
-    'Source Serif 4',
-    'Tangerine',
-  ];
-
-  const families = googleFontNames.map(font => {
-    const base = font.replace(/ /g, '+');
+  const families = ALL_FONTS.map(font => {
+    const base = font.name.replace(/ /g, '+');
     // Подключаем несколько начертаний
     return `${base}:ital,wght@0,400;0,700;1,400;1,700`;
   }).join('&family=');
