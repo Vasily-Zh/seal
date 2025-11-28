@@ -1,5 +1,6 @@
 import { ChevronUp, ChevronDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useStampStore } from '../../store/useStampStore';
 
 interface SliderInputProps {
   label: string;
@@ -23,15 +24,52 @@ export const SliderInput = ({
   // Защита от undefined/null значений
   const safeValue = value ?? min;
   const [inputValue, setInputValue] = useState(safeValue.toString());
+  const isDragging = useRef(false);
 
   useEffect(() => {
     setInputValue(safeValue.toString());
   }, [safeValue]);
 
+  const handleSliderMouseDown = () => {
+    isDragging.current = true;
+    useStampStore.getState().startBatch();
+  };
+
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
-    onChange(newValue);
+
+    if (isDragging.current) {
+      // Когда тянем слайдер, обновляем без сохранения в историю
+      onChange(newValue);
+    } else {
+      // Когда не тянем (например, кликаем), обновляем с сохранением в историю
+      onChange(newValue);
+    }
   };
+
+  const handleSliderMouseUp = () => {
+    if (isDragging.current) {
+      isDragging.current = false;
+      useStampStore.getState().endBatch();
+    }
+  };
+
+  // Отслеживаем, когда пользователь отпускает мышь вне элемента
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging.current) {
+        isDragging.current = false;
+        useStampStore.getState().endBatch();
+      }
+    };
+
+    if (isDragging.current) {
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      return () => {
+        document.removeEventListener('mouseup', handleGlobalMouseUp);
+      };
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -154,6 +192,8 @@ export const SliderInput = ({
           step={step}
           value={safeValue}
           onChange={handleSliderChange}
+          onMouseDown={handleSliderMouseDown}
+          onMouseUp={handleSliderMouseUp}
           style={{
             flex: 1,
             height: '6px',

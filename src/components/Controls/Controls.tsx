@@ -314,7 +314,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={1}
           max={50}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { radius: value })}
+          onChange={(value) => updateElement(element.id, { radius: value }, true)}
         />
 
         <SliderInput
@@ -323,7 +323,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={10}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { strokeWidth: value })}
+          onChange={(value) => updateElement(element.id, { strokeWidth: value }, true)}
         />
 
         <SliderInput
@@ -332,7 +332,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={20}
           step={1}
-          onChange={(value) => updateElement(element.id, { strokeDashArray: value || undefined })}
+          onChange={(value) => updateElement(element.id, { strokeDashArray: value || undefined }, true)}
         />
 
         <SliderInput
@@ -341,7 +341,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { x: value })}
+          onChange={(value) => updateElement(element.id, { x: value }, true)}
         />
 
         <SliderInput
@@ -350,7 +350,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { y: value })}
+          onChange={(value) => updateElement(element.id, { y: value }, true)}
         />
 
         {/* Кнопка центрирования */}
@@ -441,7 +441,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={1}
           max={20}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { fontSize: value })}
+          onChange={(value) => updateElement(element.id, { fontSize: value }, true)}
         />
 
         <SliderInput
@@ -450,7 +450,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={10}
           max={50}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { curveRadius: value })}
+          onChange={(value) => updateElement(element.id, { curveRadius: value }, true)}
         />
 
         <SliderInput
@@ -459,7 +459,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={360}
           step={5}
-          onChange={(value) => updateElement(element.id, { startAngle: value })}
+          onChange={(value) => updateElement(element.id, { startAngle: value }, true)}
           unit="°"
         />
 
@@ -469,7 +469,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={-5}
           max={15}
           step={0.25}
-          onChange={(value) => updateElement(element.id, { letterSpacing: value })}
+          onChange={(value) => updateElement(element.id, { letterSpacing: value }, true)}
         />
 
         <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
@@ -564,7 +564,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={1}
           max={30}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { fontSize: value })}
+          onChange={(value) => updateElement(element.id, { fontSize: value }, true)}
         />
 
         <SliderInput
@@ -573,7 +573,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={-5}
           max={15}
           step={0.25}
-          onChange={(value) => updateElement(element.id, { letterSpacing: value })}
+          onChange={(value) => updateElement(element.id, { letterSpacing: value }, true)}
         />
 
         <SliderInput
@@ -582,7 +582,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { x: value })}
+          onChange={(value) => updateElement(element.id, { x: value }, true)}
         />
 
         <SliderInput
@@ -591,7 +591,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { y: value })}
+          onChange={(value) => updateElement(element.id, { y: value }, true)}
         />
 
         <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
@@ -666,7 +666,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={1}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { width: value })}
+          onChange={(value) => updateElement(element.id, { width: value }, true)}
         />
 
         <SliderInput
@@ -675,7 +675,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={1}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { height: value })}
+          onChange={(value) => updateElement(element.id, { height: value }, true)}
         />
 
         <SliderInput
@@ -684,7 +684,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={10}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { strokeWidth: value })}
+          onChange={(value) => updateElement(element.id, { strokeWidth: value }, true)}
         />
 
         <SliderInput
@@ -693,7 +693,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { x: value })}
+          onChange={(value) => updateElement(element.id, { x: value }, true)}
         />
 
         <SliderInput
@@ -702,7 +702,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { y: value })}
+          onChange={(value) => updateElement(element.id, { y: value }, true)}
         />
 
         {/* Кнопка центрирования */}
@@ -774,7 +774,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={5}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { size: value })}
+          onChange={(value) => updateElement(element.id, { size: value }, true)}
         />
 
         <SliderInput
@@ -783,7 +783,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0.2}
           max={3}
           step={0.1}
-          onChange={(value) => updateElement(element.id, { heightRatio: value })}
+          onChange={(value) => updateElement(element.id, { heightRatio: value }, true)}
         />
 
         <SliderInput
@@ -792,7 +792,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={10}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { strokeWidth: value })}
+          onChange={(value) => updateElement(element.id, { strokeWidth: value }, true)}
         />
 
         <SliderInput
@@ -801,7 +801,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { x: value })}
+          onChange={(value) => updateElement(element.id, { x: value }, true)}
         />
 
         <SliderInput
@@ -810,7 +810,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { y: value })}
+          onChange={(value) => updateElement(element.id, { y: value }, true)}
         />
 
         {/* Кнопка центрирования */}
@@ -880,7 +880,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={5}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { width: value })}
+          onChange={(value) => updateElement(element.id, { width: value }, true)}
         />
 
         <SliderInput
@@ -889,7 +889,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={5}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { height: value })}
+          onChange={(value) => updateElement(element.id, { height: value }, true)}
         />
 
         <SliderInput
@@ -898,7 +898,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { x: value })}
+          onChange={(value) => updateElement(element.id, { x: value }, true)}
         />
 
         <SliderInput
@@ -907,7 +907,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { y: value })}
+          onChange={(value) => updateElement(element.id, { y: value }, true)}
         />
 
         {/* Кнопка центрирования */}
@@ -985,7 +985,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={5}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { width: value, height: value })}
+          onChange={(value) => updateElement(element.id, { width: value, height: value }, true)}
         />
 
         <SliderInput
@@ -994,7 +994,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { x: value })}
+          onChange={(value) => updateElement(element.id, { x: value }, true)}
         />
 
         <SliderInput
@@ -1003,7 +1003,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { y: value })}
+          onChange={(value) => updateElement(element.id, { y: value }, true)}
         />
 
         {/* Кнопка центрирования */}
@@ -1135,7 +1135,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0.5}
           max={10}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { strokeWidth: value })}
+          onChange={(value) => updateElement(element.id, { strokeWidth: value }, true)}
         />
 
         <SliderInput
@@ -1158,7 +1158,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
             const newX2 = element.x + dirX * value;
             const newY2 = element.y + dirY * value;
 
-            updateElement(element.id, { x2: newX2, y2: newY2 });
+            updateElement(element.id, { x2: newX2, y2: newY2 }, true);
           }}
         />
 
@@ -1168,7 +1168,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { x: value })}
+          onChange={(value) => updateElement(element.id, { x: value }, true)}
         />
 
         <SliderInput
@@ -1177,7 +1177,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { y: value })}
+          onChange={(value) => updateElement(element.id, { y: value }, true)}
         />
 
         <SliderInput
@@ -1186,7 +1186,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { x2: value })}
+          onChange={(value) => updateElement(element.id, { x2: value }, true)}
         />
 
         <SliderInput
@@ -1195,7 +1195,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={0.5}
-          onChange={(value) => updateElement(element.id, { y2: value })}
+          onChange={(value) => updateElement(element.id, { y2: value }, true)}
         />
 
         {/* Кнопка центрирования */}
@@ -1255,7 +1255,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { x: value })}
+          onChange={(value) => updateElement(element.id, { x: value }, true)}
         />
 
         <SliderInput
@@ -1264,7 +1264,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={100}
           step={1}
-          onChange={(value) => updateElement(element.id, { y: value })}
+          onChange={(value) => updateElement(element.id, { y: value }, true)}
         />
 
         <SliderInput
@@ -1273,7 +1273,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0}
           max={360}
           step={1}
-          onChange={(value) => updateElement(element.id, { rotation: value })}
+          onChange={(value) => updateElement(element.id, { rotation: value }, true)}
           unit="°"
         />
 
@@ -1283,7 +1283,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0.1}
           max={5}
           step={0.1}
-          onChange={(value) => updateElement(element.id, { scaleX: value })}
+          onChange={(value) => updateElement(element.id, { scaleX: value }, true)}
         />
 
         <SliderInput
@@ -1292,7 +1292,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           min={0.1}
           max={5}
           step={0.1}
-          onChange={(value) => updateElement(element.id, { scaleY: value })}
+          onChange={(value) => updateElement(element.id, { scaleY: value }, true)}
         />
 
         <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>

@@ -129,7 +129,7 @@ export interface StampStore {
   addElement: (element: StampElement) => void;
   removeElement: (id: string) => void;
   duplicateElement: (id: string) => void;
-  updateElement: (id: string, updates: Partial<StampElement>) => void;
+  updateElement: (id: string, updates: Partial<StampElement>, shouldSaveToHistory?: boolean) => void;
   selectElement: (id: string | null) => void;
   getSelectedElement: () => StampElement | null;
 
@@ -166,6 +166,12 @@ export interface StampStore {
   loadProjectData: (project: { elements: StampElement[]; canvasSize: number; id: string; name: string }) => void;
   setCurrentProject: (id: string | null, name: string | null) => void;
   clearCanvas: () => void;
+
+  // Группировка действий в истории
+  isActionInProgress: boolean;
+  initialActionState: StampElement[] | null;
+  startBatch: () => void;
+  endBatch: () => void;
 }
 
 // Конфигурация шрифтов Google Fonts

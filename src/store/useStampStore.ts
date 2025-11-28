@@ -86,6 +86,8 @@ export const useStampStore = create<StampStore>((set, get) => ({
   historyIndex: 0,
   currentProjectId: null,
   currentProjectName: null,
+  isActionInProgress: false,
+  initialActionState: null,
 
   // Добавление элемента
   addElement: (element: StampElement) => {
@@ -96,7 +98,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
         selectedElementId: element.id,
       };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   // Удаление элемента
@@ -105,7 +111,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
       elements: state.elements.filter((el) => el.id !== id),
       selectedElementId: state.selectedElementId === id ? null : state.selectedElementId,
     }));
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   // Дублирование элемента
@@ -127,17 +137,25 @@ export const useStampStore = create<StampStore>((set, get) => ({
         selectedElementId: duplicatedElement.id,
       };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   // Обновление элемента
-  updateElement: (id: string, updates: Partial<StampElement>) => {
+  updateElement: (id: string, updates: Partial<StampElement>, shouldSaveToHistory: boolean = true) => {
     set((state) => ({
       elements: state.elements.map((el) =>
         el.id === id ? ({ ...el, ...updates } as StampElement) : el
       ),
     }));
-    get().saveToHistory();
+
+    // Сохраняем в историю только если параметр true и действие не в процессе
+    if (shouldSaveToHistory && !get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   // Выбор элемента
@@ -154,19 +172,24 @@ export const useStampStore = create<StampStore>((set, get) => ({
 
   // Сохранение в историю
   saveToHistory: () => {
-    set((state) => {
-      const newHistory = state.history.slice(0, state.historyIndex + 1);
-      newHistory.push([...state.elements]);
+    const state = get();
 
-      // Ограничиваем историю до 50 шагов
-      if (newHistory.length > 50) {
-        newHistory.shift();
-      }
+    // Если действие в процессе, не сохраняем в историю
+    if (state.isActionInProgress) {
+      return;
+    }
 
-      return {
-        history: newHistory,
-        historyIndex: newHistory.length - 1,
-      };
+    const newHistory = state.history.slice(0, state.historyIndex + 1);
+    newHistory.push([...state.elements]);
+
+    // Ограничиваем историю до 50 шагов
+    if (newHistory.length > 50) {
+      newHistory.shift();
+    }
+
+    set({
+      history: newHistory,
+      historyIndex: newHistory.length - 1,
     });
   },
 
@@ -244,7 +267,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
         return el;
       }),
     }));
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   // Управление порядком элементов (z-index через позицию в массиве)
@@ -258,7 +285,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
 
       return { elements: newElements };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   moveElementDown: (id: string) => {
@@ -271,7 +302,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
 
       return { elements: newElements };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   moveToTop: (id: string) => {
@@ -284,7 +319,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
 
       return { elements: newElements };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   moveToBottom: (id: string) => {
@@ -297,7 +336,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
 
       return { elements: newElements };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   reorderElements: (elementIds: string[]) => {
@@ -315,7 +358,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
 
       return { elements: newElements };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   // Группировка элементов
@@ -356,7 +403,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
       ],
       selectedElementId: groupId,
     }));
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
 
     return groupId;
   },
@@ -379,7 +430,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
         selectedElementId: null,
       };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   addToGroup: (groupId: string, elementIds: string[]) => {
@@ -403,7 +458,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
         }),
       };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   removeFromGroup: (groupId: string, elementIds: string[]) => {
@@ -426,7 +485,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
         }),
       };
     });
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   expandGroup: (groupId: string, expanded: boolean) => {
@@ -447,7 +510,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
         el.id === id ? ({ ...el, locked: !el.locked } as StampElement) : el
       ),
     }));
-    get().saveToHistory();
+
+    // Если действие не в процессе, сохраняем в историю
+    if (!get().isActionInProgress) {
+      get().saveToHistory();
+    }
   },
 
   // Управление проектами
@@ -478,6 +545,41 @@ export const useStampStore = create<StampStore>((set, get) => ({
       currentProjectName: null,
       history: [[]],
       historyIndex: 0,
+    });
+  },
+
+  // Группировка действий в истории
+  startBatch: () => {
+    const state = get();
+    set({
+      isActionInProgress: true,
+      initialActionState: [...state.elements],
+    });
+  },
+
+  endBatch: () => {
+    const state = get();
+    if (!state.isActionInProgress) {
+      // Если не было начато действие, не делаем ничего
+      return;
+    }
+
+    set((state) => {
+      // Сохраняем изменения в истории
+      const newHistory = state.history.slice(0, state.historyIndex + 1);
+      newHistory.push([...state.elements]);
+
+      // Ограничиваем историю до 50 шагов
+      if (newHistory.length > 50) {
+        newHistory.shift();
+      }
+
+      return {
+        isActionInProgress: false,
+        initialActionState: null,
+        history: newHistory,
+        historyIndex: newHistory.length - 1,
+      };
     });
   },
 }));
