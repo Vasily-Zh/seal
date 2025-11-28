@@ -62,6 +62,7 @@ export interface TriangleElement extends BaseElement {
   fill?: string;
   stroke: string;
   strokeWidth: number;
+  heightRatio?: number; // коэффициент высоты треугольника
 }
 
 export interface LineElement extends BaseElement {

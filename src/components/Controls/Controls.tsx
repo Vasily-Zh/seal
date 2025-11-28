@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
 import { FontSelector } from './FontSelector';
-import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, TriangleElement as TriangleElementType, ImageElement as ImageElementType, IconElement as IconElementType, LineElement as LineElementType } from '../../types';
+import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, TriangleElement as TriangleElementType, ImageElement as ImageElementType, IconElement as IconElementType, LineElement as LineElementType, GroupElement as GroupElementType } from '../../types';
 import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
 import { LayersPanel } from './LayersPanel';
 import { exportElementToSVG } from '../../utils/export';
@@ -297,7 +297,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
 };
 
 // Компонент для редактирования параметров элемента
-function ElementSettings({ element }: { element: any }) {
+function ElementSettings({ element }: { element: CircleElementType | TextElementType | TextCenteredElementType | RectangleElementType | TriangleElementType | ImageElementType | IconElementType | LineElementType | GroupElementType }) {
   const updateElement = useStampStore((state) => state.updateElement);
   const centerElement = useStampStore((state) => state.centerElement);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
@@ -755,10 +755,7 @@ function ElementSettings({ element }: { element: any }) {
   if (element.type === 'triangle') {
     const triangleElement = element as TriangleElementType;
     const hasFill = triangleElement.fill && triangleElement.fill !== 'none';
-
-    // Использовать коэффициент высоты, который может быть сохранен в элементе как кастомное свойство
-    // или использовать значение по умолчанию 1 (для равностороннего)
-    const heightRatio = triangleElement['heightRatio'] !== undefined ? triangleElement['heightRatio'] : 1;
+    const heightRatio = triangleElement.heightRatio !== undefined ? triangleElement.heightRatio : 1;
 
     return (
       <>
@@ -1191,6 +1188,115 @@ function ElementSettings({ element }: { element: any }) {
           step={0.5}
           onChange={(value) => updateElement(element.id, { y2: value })}
         />
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  if (element.type === 'group') {
+    const groupElement = element as GroupElementType;
+
+    return (
+      <>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
+            Название группы
+          </label>
+          <input
+            type="text"
+            value={groupElement.name}
+            onChange={(e) => updateElement(element.id, { name: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              fontSize: '14px',
+            }}
+          />
+        </div>
+
+        <SliderInput
+          label="Смещение по X"
+          value={element.x}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { x: value })}
+        />
+
+        <SliderInput
+          label="Смещение по Y"
+          value={element.y}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { y: value })}
+        />
+
+        <SliderInput
+          label="Поворот"
+          value={groupElement.rotation || 0}
+          min={0}
+          max={360}
+          step={1}
+          onChange={(value) => updateElement(element.id, { rotation: value })}
+          unit="°"
+        />
+
+        <SliderInput
+          label="Масштаб по X"
+          value={groupElement.scaleX || 1}
+          min={0.1}
+          max={5}
+          step={0.1}
+          onChange={(value) => updateElement(element.id, { scaleX: value })}
+        />
+
+        <SliderInput
+          label="Масштаб по Y"
+          value={groupElement.scaleY || 1}
+          min={0.1}
+          max={5}
+          step={0.1}
+          onChange={(value) => updateElement(element.id, { scaleY: value })}
+        />
+
+        <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={groupElement.expanded || false}
+              onChange={(e) => updateElement(element.id, { expanded: e.target.checked })}
+              style={{ cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>Развернута в панели слоёв</span>
+          </label>
+        </div>
 
         {/* Кнопка центрирования */}
         <div style={{ marginTop: '16px' }}>
