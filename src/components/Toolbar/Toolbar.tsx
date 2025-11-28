@@ -86,6 +86,7 @@ export const Toolbar = () => {
       stroke: DEFAULT_CONFIG.strokeColor,
       strokeWidth: DEFAULT_CONFIG.strokeWidth,
       visible: true,
+      heightRatio: 1, // по умолчанию равносторонний треугольник
     });
   };
 

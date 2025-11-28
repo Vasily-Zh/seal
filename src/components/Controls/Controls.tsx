@@ -756,6 +756,10 @@ function ElementSettings({ element }: { element: any }) {
     const triangleElement = element as TriangleElementType;
     const hasFill = triangleElement.fill && triangleElement.fill !== 'none';
 
+    // Использовать коэффициент высоты, который может быть сохранен в элементе как кастомное свойство
+    // или использовать значение по умолчанию 1 (для равностороннего)
+    const heightRatio = triangleElement['heightRatio'] !== undefined ? triangleElement['heightRatio'] : 1;
+
     return (
       <>
         <SliderInput
@@ -765,6 +769,15 @@ function ElementSettings({ element }: { element: any }) {
           max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { size: value })}
+        />
+
+        <SliderInput
+          label={`Высота: ${(heightRatio * 100).toFixed(0)}%`}
+          value={heightRatio}
+          min={0.2}
+          max={2}
+          step={0.1}
+          onChange={(value) => updateElement(element.id, { heightRatio: value })}
         />
 
         <SliderInput

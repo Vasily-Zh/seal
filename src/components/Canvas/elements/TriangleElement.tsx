@@ -10,14 +10,19 @@ export const TriangleElement = ({ element, scale }: TriangleElementProps) => {
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const isSelected = selectedElementId === element.id;
 
-  // Рассчитываем координаты вершин равностороннего треугольника
+  // Рассчитываем координаты вершин треугольника
   // x, y - центр треугольника (центроид), а не одна из вершин
   const centerX = element.x * scale;
   const centerY = element.y * scale;
   const size = element.size * scale;
 
-  // Вычисляем высоту равностороннего треугольника
-  const height = (Math.sqrt(3) / 2) * size;
+  // Используем размер как ширину основания, а высоту делаем регулируемой
+  // Базовая высота для равностороннего треугольника: (sqrt(3)/2) * сторона
+  const baseHeight = (Math.sqrt(3) / 2) * size;
+
+  // Используем коэффициент высоты для растяжения
+  const heightRatio = (element as any)['heightRatio'] !== undefined ? (element as any)['heightRatio'] : 1;
+  const height = baseHeight * heightRatio;
 
   // Располагаем треугольник с вершиной вверх
   // Вершины треугольника:
