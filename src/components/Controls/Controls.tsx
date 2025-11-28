@@ -568,6 +568,15 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
         />
 
         <SliderInput
+          label="Межбуквенный интервал"
+          value={(element as TextCenteredElementType).letterSpacing || 0}
+          min={-2}
+          max={10}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { letterSpacing: value })}
+        />
+
+        <SliderInput
           label="Смещение по X"
           value={element.x}
           min={0}

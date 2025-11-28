@@ -42,6 +42,7 @@ export interface TextCenteredElement extends BaseElement {
   fontSize: number;
   fontFamily: string;
   color: string;
+  letterSpacing?: number;
   bold?: boolean;
   italic?: boolean;
   flipped?: boolean; // перевернуть текст

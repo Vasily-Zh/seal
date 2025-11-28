@@ -12,6 +12,7 @@ export const TextCenteredElement = ({ element, scale }: TextCenteredElementProps
   const fontStyle = element.italic ? 'italic' : 'normal';
   const isFlipped = element.flipped || false;
   const transform = isFlipped ? `rotate(180 ${element.x * scale} ${element.y * scale})` : undefined;
+  const letterSpacing = element.letterSpacing !== undefined ? element.letterSpacing : 0;
 
   return (
     <text
@@ -25,6 +26,7 @@ export const TextCenteredElement = ({ element, scale }: TextCenteredElementProps
       textAnchor="middle"
       dominantBaseline="middle"
       transform={transform}
+      letterSpacing={letterSpacing}
     >
       {element.text}
     </text>
