@@ -15,14 +15,25 @@ const initialElements: StampElement[] = [
     stroke: '#0000ff',
     visible: true,
   },
+    // Круг внутренний
+  {
+    id: 'circle-default-2',
+    type: 'circle',
+    x: 50,
+    y: 50,
+    radius: 37,
+    strokeWidth: 1,
+    stroke: '#0000ff',
+    visible: true,
+  },
   // Текст по кругу (верхний)
   {
     id: 'text-default-1',
     type: 'text',
-    text: 'ПРИМЕР ТЕКСТА ПО КРУГУ',
+    text: 'ПРИМЕР ТЕКСТА ПО КРУГУ ПРИМЕР ТЕКСТА ПО КРУГУ',
     x: 50,
     y: 50,
-    fontSize: 6,
+    fontSize: 5,
     fontFamily: 'Arial, sans-serif',
     curved: true,
     curveRadius: 33.5,
@@ -41,10 +52,10 @@ const initialElements: StampElement[] = [
     text: 'ПРИМЕР ТЕКСТА ПО КРУГУ',
     x: 50,
     y: 50,
-    fontSize: 6,
+    fontSize: 5,
     fontFamily: 'Arial, sans-serif',
     curved: true,
-    curveRadius: 30.5,
+    curveRadius: 33.5,
     startAngle: 90,
     letterSpacing: 0,
     color: '#0000ff',
@@ -53,17 +64,30 @@ const initialElements: StampElement[] = [
     italic: false,
     visible: true,
   },
-  // Круг внутренний
+    // Круг внутренний
   {
-    id: 'circle-default-2',
+    id: 'circle-default-3',
     type: 'circle',
     x: 50,
     y: 50,
-    radius: 37,
+    radius: 30,
     strokeWidth: 1,
     stroke: '#0000ff',
     visible: true,
   },
+    // Линия 
+  {
+     id: 'line-default',
+     type: 'line',  
+     x: 20,
+     y: 20,
+     x2: 80,
+     y2: 80,
+     stroke: '#0000ff',
+     strokeWidth: 1.5,
+     visible: true,
+}
+    
 ];
 
 export const useStampStore = create<StampStore>((set, get) => ({
