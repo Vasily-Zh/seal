@@ -466,9 +466,9 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
         <SliderInput
           label="Межбуквенный интервал"
           value={(element as TextElementType).letterSpacing || 0}
-          min={-2}
-          max={10}
-          step={0.5}
+          min={-5}
+          max={15}
+          step={0.25}
           onChange={(value) => updateElement(element.id, { letterSpacing: value })}
         />
 
@@ -570,9 +570,9 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
         <SliderInput
           label="Межбуквенный интервал"
           value={(element as TextCenteredElementType).letterSpacing || 0}
-          min={-2}
-          max={10}
-          step={0.5}
+          min={-5}
+          max={15}
+          step={0.25}
           onChange={(value) => updateElement(element.id, { letterSpacing: value })}
         />
 

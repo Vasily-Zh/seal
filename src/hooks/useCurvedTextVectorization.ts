@@ -13,6 +13,7 @@ interface CurvedTextProps {
   isFlipped: boolean;
   fontWeight: string;
   fontStyle: string;
+  letterSpacing?: number;
 }
 
 // Кэш для векторизованных путей кругового текста
@@ -25,16 +26,16 @@ export const clearCurvedTextCache = () => {
 
 // Генерирует уникальный ключ для кэширования на основе параметров
 const generateCacheKey = (props: CurvedTextProps, scale: number): string => {
-  return `${props.text}-${props.cx}-${props.cy}-${props.radius}-${props.fontSize}-${props.fontFamily}-${props.color}-${props.startAngle}-${props.isFlipped}-${props.fontWeight}-${props.fontStyle}-${scale}`;
+  return `${props.text}-${props.cx}-${props.cy}-${props.radius}-${props.fontSize}-${props.fontFamily}-${props.color}-${props.startAngle}-${props.isFlipped}-${props.fontWeight}-${props.fontStyle}-${props.letterSpacing || 0}-${scale}`;
 };
 
 export const useCurvedTextVectorization = (props: CurvedTextProps, scale: number = 1) => {
   // Деструктурируем props для правильной работы зависимостей
-  const { text, cx, cy, radius, fontSize, fontFamily, color, startAngle, isFlipped, fontWeight, fontStyle } = props;
+  const { text, cx, cy, radius, fontSize, fontFamily, color, startAngle, isFlipped, fontWeight, fontStyle, letterSpacing = 0 } = props;
 
   const cacheKey = useMemo(
     () => generateCacheKey(props, scale),
-    [text, cx, cy, radius, fontSize, fontFamily, color, startAngle, isFlipped, fontWeight, fontStyle, scale]
+    [text, cx, cy, radius, fontSize, fontFamily, color, startAngle, isFlipped, fontWeight, fontStyle, letterSpacing, scale]
   );
 
   const [svgContent, setSvgContent] = useState<string>('');
@@ -57,6 +58,7 @@ export const useCurvedTextVectorization = (props: CurvedTextProps, scale: number
       cy: props.cy * scale,
       radius: props.radius * scale,
       fontSize: props.fontSize * scale,
+      letterSpacing: props.letterSpacing,
     };
 
     const loadVectorizedText = async () => {
@@ -72,7 +74,8 @@ export const useCurvedTextVectorization = (props: CurvedTextProps, scale: number
           scaledProps.startAngle,
           scaledProps.isFlipped,
           scaledProps.fontWeight,
-          scaledProps.fontStyle
+          scaledProps.fontStyle,
+          scaledProps.letterSpacing
         );
 
         // Кэшируем результат

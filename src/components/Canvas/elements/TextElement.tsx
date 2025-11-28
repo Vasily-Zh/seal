@@ -13,6 +13,7 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
   const fontWeight = element.bold ? 'bold' : 'normal';
   const fontStyle = element.italic ? 'italic' : 'normal';
   const isFlipped = element.flipped || false;
+  const letterSpacing = element.letterSpacing || 0;
 
   if (element.curved && element.curveRadius) {
     // Текст по кругу - используем векторизованные пути для корректного экспорта в CorelDRAW
@@ -28,6 +29,7 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
       isFlipped,
       fontWeight,
       fontStyle,
+      letterSpacing,
     };
 
     const { svgContent, loading } = useCurvedTextVectorization(curvedTextProps, scale);
@@ -65,6 +67,7 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
     color: element.color,
     fontWeight,
     fontStyle,
+    letterSpacing,
   };
 
   const { svgContent: straightSvgContent, loading: straightLoading } = useCenteredTextVectorization(straightTextProps, scale);

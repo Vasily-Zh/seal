@@ -10,6 +10,7 @@ interface CenteredTextProps {
   color: string;
   fontWeight: string;
   fontStyle: string;
+  letterSpacing?: number;
 }
 
 // Кэш для векторизованных путей центрированного текста
@@ -22,16 +23,16 @@ export const clearCenteredTextCache = () => {
 
 // Генерирует уникальный ключ для кэширования на основе параметров
 const generateCacheKey = (props: CenteredTextProps, scale: number): string => {
-  return `${props.text}-${props.x}-${props.y}-${props.fontSize}-${props.fontFamily}-${props.color}-${props.fontWeight}-${props.fontStyle}-${scale}`;
+  return `${props.text}-${props.x}-${props.y}-${props.fontSize}-${props.fontFamily}-${props.color}-${props.fontWeight}-${props.fontStyle}-${props.letterSpacing || 0}-${scale}`;
 };
 
 export const useCenteredTextVectorization = (props: CenteredTextProps, scale: number = 1) => {
   // Деструктурируем props для правильной работы зависимостей
-  const { text, x, y, fontSize, fontFamily, color, fontWeight, fontStyle } = props;
+  const { text, x, y, fontSize, fontFamily, color, fontWeight, fontStyle, letterSpacing = 0 } = props;
 
   const cacheKey = useMemo(
     () => generateCacheKey(props, scale),
-    [text, x, y, fontSize, fontFamily, color, fontWeight, fontStyle, scale]
+    [text, x, y, fontSize, fontFamily, color, fontWeight, fontStyle, letterSpacing, scale]
   );
 
   const [svgContent, setSvgContent] = useState<string>('');
@@ -53,6 +54,7 @@ export const useCenteredTextVectorization = (props: CenteredTextProps, scale: nu
       x: props.x * scale,
       y: props.y * scale,
       fontSize: props.fontSize * scale,
+      letterSpacing: props.letterSpacing,
     };
 
     const loadVectorizedText = async () => {
@@ -65,7 +67,8 @@ export const useCenteredTextVectorization = (props: CenteredTextProps, scale: nu
           scaledProps.fontFamily,
           scaledProps.color,
           scaledProps.fontWeight,
-          scaledProps.fontStyle
+          scaledProps.fontStyle,
+          scaledProps.letterSpacing
         );
 
         // Кэшируем результат

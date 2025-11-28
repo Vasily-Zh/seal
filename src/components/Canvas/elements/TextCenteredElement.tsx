@@ -12,6 +12,7 @@ export const TextCenteredElement = ({ element, scale }: TextCenteredElementProps
   const fontWeight = element.bold ? 'bold' : 'normal';
   const fontStyle = element.italic ? 'italic' : 'normal';
   const isFlipped = element.flipped || false;
+  const letterSpacing = element.letterSpacing || 0;
 
   // Используем векторизацию для корректного экспорта с Google Fonts
   const centeredTextProps = {
@@ -23,6 +24,7 @@ export const TextCenteredElement = ({ element, scale }: TextCenteredElementProps
     color: element.color,
     fontWeight,
     fontStyle,
+    letterSpacing,
   };
 
   const { svgContent, loading } = useCenteredTextVectorization(centeredTextProps, scale);
