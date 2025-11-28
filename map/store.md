@@ -13,3 +13,4 @@ Zustand store для управления элементами печати с �
 - [redo](src/store/useStampStore.ts:154) - Повтор действия
 - [saveToHistory](src/store/useStampStore.ts:121) - Сохранение в историю
 - [centerElement](src/store/useStampStore.ts:181) - Центрирование элемента
+- [setDefaultFontFamily](src/store/useStampStore.ts) - Установка Roboto как дефолтного шрифта (после удаления системных шрифтов)

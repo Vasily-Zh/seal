@@ -22,7 +22,7 @@
 - [exportElementToSVG](src/utils/export.ts) - Экспорт отдельного элемента
 - [vectorizeWithPotrace](src/utils/vectorize.ts) - Векторизация через Potrace WASM
 - [isImageSuitableForPotrace](src/utils/vectorize.ts) - Проверка подходящести изображения
-- [convertTextToPath](src/utils/textToPath.ts) - Конвертация текста в SVG path
+- [convertTextToPath](src/utils/textToPath.ts) - Конвертация прямого текста в SVG path
 - [convertCurvedTextToPath](src/utils/textToPath.ts) - Конвертация кривого текста в SVG path
 - [preloadFont](src/utils/textToPath.ts) - Предзагрузка шрифта
 - [clearFontCache](src/utils/textToPath.ts) - Очистка кэша шрифтов
