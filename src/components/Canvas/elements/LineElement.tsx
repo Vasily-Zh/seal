@@ -6,6 +6,10 @@ interface LineElementProps {
   scale: number;
 }
 
+/**
+ * Компонент для отображения линии на холсте
+ * При выделении увеличивает толщину линии для лучшей видимости
+ */
 export const LineElement = ({ element, scale }: LineElementProps) => {
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const isSelected = selectedElementId === element.id;

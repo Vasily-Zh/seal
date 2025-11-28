@@ -1,4 +1,4 @@
-import { Circle, Type, Square, Orbit, Star, Search, Wand2, Minus } from 'lucide-react';
+import { Circle, Type, Square, Triangle, Orbit, Star, Search, Wand2, Minus } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
@@ -76,6 +76,23 @@ export const Toolbar = () => {
     });
   };
 
+  const handleAddTriangle = () => {
+    addElement({
+      id: `triangle-${Date.now()}`,
+      type: 'triangle',
+      x: canvasSize / 2,
+      y: canvasSize / 2,
+      size: 30,
+      stroke: DEFAULT_CONFIG.strokeColor,
+      strokeWidth: DEFAULT_CONFIG.strokeWidth,
+      visible: true,
+    });
+  };
+
+  /**
+   * Обработчик добавления новой линии на холст
+   * Создает горизонтальную линию длиной 40мм, центрированную посередине холста
+   */
   const handleAddLine = () => {
     addElement({
       id: `line-${Date.now()}`,
@@ -93,6 +110,7 @@ export const Toolbar = () => {
   const tools = [
     { icon: Circle, label: 'Добавить круг', onClick: handleAddCircle, id: 'circle' },
     { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
+    { icon: Triangle, label: 'Добавить треугольник', onClick: handleAddTriangle, id: 'triangle' },
     { icon: Minus, label: 'Добавить линию', onClick: handleAddLine, id: 'line' },
     { icon: Orbit, label: 'Добавить текст по кругу', onClick: handleAddCurvedText, id: 'curvedText' },
     { icon: Type, label: 'Добавить текст', onClick: handleAddCenteredText, id: 'text' },

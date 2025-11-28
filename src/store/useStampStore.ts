@@ -75,18 +75,6 @@ const initialElements: StampElement[] = [
     stroke: '#0000ff',
     visible: true,
   },
-  // Линия
-  {
-    id: 'line-default',
-    type: 'line',
-    x: 30,
-    y: 50,
-    x2: 70,
-    y2: 50,
-    stroke: '#0000ff',
-    strokeWidth: 1.5,
-    visible: true,
-  },
 ];
 
 export const useStampStore = create<StampStore>((set, get) => ({
@@ -224,7 +212,11 @@ export const useStampStore = create<StampStore>((set, get) => ({
     return state.historyIndex < state.history.length - 1;
   },
 
-  // Центрирование элемента
+  /**
+   * Центрирование элемента
+   * Для линии сдвигает обе точки (x, y) и (x2, y2) на одинаковое расстояние,
+   * чтобы сохранить угол наклона линии, но разместить её центр в центре холста
+   */
   centerElement: (id: string) => {
     const state = get();
     const centerX = state.canvasSize / 2;

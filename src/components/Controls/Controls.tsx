@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
 import { FontSelector } from './FontSelector';
-import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, ImageElement as ImageElementType, IconElement as IconElementType, LineElement as LineElementType } from '../../types';
+import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, TriangleElement as TriangleElementType, ImageElement as ImageElementType, IconElement as IconElementType, LineElement as LineElementType } from '../../types';
 import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
 import { LayersPanel } from './LayersPanel';
 import { exportElementToSVG } from '../../utils/export';
@@ -55,7 +55,8 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                     {element.type === 'text' && 'Добавить текст по кругу'}
                     {element.type === 'textCentered' && 'Добавить текст'}
                     {element.type === 'rectangle' && 'Добавить прямоугольник'}
-                    {element.type === 'line' && 'Добавить линию'}
+                    {element.type === 'triangle' && 'Добавить треугольник'}
+                    {element.type === 'line' && 'Добавить линию'}  {/* Компонент отображения линии */}
                     {element.type === 'image' && 'Добавить картинку'}
                     {element.type === 'icon' && 'Добавить картинку'}
                   </span>
@@ -214,7 +215,8 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                     {element.type === 'text' && 'Добавить текст по кругу'}
                     {element.type === 'textCentered' && 'Добавить текст'}
                     {element.type === 'rectangle' && 'Добавить прямоугольник'}
-                    {element.type === 'line' && 'Добавить линию'}
+                    {element.type === 'triangle' && 'Добавить треугольник'}
+                    {element.type === 'line' && 'Добавить линию'}  {/* Компонент отображения линии */}
                     {element.type === 'image' && 'Добавить картинку'}
                     {element.type === 'icon' && 'Добавить картинку'}
                   </span>
@@ -652,7 +654,7 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Ширина"
           value={rectangleElement.width}
-          min={5}
+          min={1}
           max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { width: value })}
@@ -661,7 +663,7 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Высота"
           value={rectangleElement.height}
-          min={5}
+          min={1}
           max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { height: value })}
@@ -670,6 +672,104 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Обводка"
           value={rectangleElement.strokeWidth}
+          min={0}
+          max={10}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { strokeWidth: value })}
+        />
+
+        <SliderInput
+          label="Смещение по X"
+          value={element.x}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { x: value })}
+        />
+
+        <SliderInput
+          label="Смещение по Y"
+          value={element.y}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { y: value })}
+        />
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
+
+        {/* Кнопка переключения заливки/обводки */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => {
+              if (hasFill) {
+                // Переключить на обводку
+                updateElement(element.id, { fill: undefined, stroke: '#0000ff', strokeWidth: 1.5 });
+              } else {
+                // Переключить на заливку
+                updateElement(element.id, { fill: '#0000ff', stroke: undefined, strokeWidth: undefined });
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#0000ff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+            }}
+          >
+            {hasFill ? 'Обводка' : 'Заливка'}
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  if (element.type === 'triangle') {
+    const triangleElement = element as TriangleElementType;
+    const hasFill = triangleElement.fill && triangleElement.fill !== 'none';
+
+    return (
+      <>
+        <SliderInput
+          label="Размер треугольника"
+          value={triangleElement.size}
+          min={5}
+          max={100}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { size: value })}
+        />
+
+        <SliderInput
+          label="Обводка"
+          value={triangleElement.strokeWidth}
           min={0}
           max={10}
           step={0.5}
@@ -1001,6 +1101,7 @@ function ElementSettings({ element }: { element: any }) {
     );
   }
 
+  // Обработка настроек для линии
   if (element.type === 'line') {
     const lineElement = element as LineElementType;
 
@@ -1025,6 +1126,7 @@ function ElementSettings({ element }: { element: any }) {
           max={141} // Максимальная диагональ в квадрате 100x100
           step={0.5}
           onChange={(value) => {
+            // При изменении длины сохраняем угол наклона линии
             // Вычисляем текущую длину
             const currentLength = Math.sqrt(Math.pow(lineElement.x2 - element.x, 2) + Math.pow(lineElement.y2 - element.y, 2));
             if (currentLength === 0) return;
