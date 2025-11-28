@@ -311,7 +311,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
         <SliderInput
           label="Радиус круга"
           value={circleElement.radius}
-          min={10}
+          min={1}
           max={50}
           step={0.5}
           onChange={(value) => updateElement(element.id, { radius: value })}
@@ -438,7 +438,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
         <SliderInput
           label="Размер текста"
           value={(element as TextElementType).fontSize}
-          min={2}
+          min={1}
           max={20}
           step={0.5}
           onChange={(value) => updateElement(element.id, { fontSize: value })}
@@ -561,8 +561,8 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
         <SliderInput
           label="Размер текста"
           value={(element as TextCenteredElementType).fontSize}
-          min={2}
-          max={20}
+          min={1}
+          max={30}
           step={0.5}
           onChange={(value) => updateElement(element.id, { fontSize: value })}
         />
