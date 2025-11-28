@@ -772,7 +772,7 @@ function ElementSettings({ element }: { element: CircleElementType | TextElement
           label={`Высота: ${(heightRatio * 100).toFixed(0)}%`}
           value={heightRatio}
           min={0.2}
-          max={2}
+          max={3}
           step={0.1}
           onChange={(value) => updateElement(element.id, { heightRatio: value })}
         />
