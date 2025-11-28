@@ -1,4 +1,4 @@
-import { Circle, Type, Square, Orbit, Star, Search, Wand2 } from 'lucide-react';
+import { Circle, Type, Square, Orbit, Star, Search, Wand2, Minus } from 'lucide-react';
 import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { DEFAULT_CONFIG } from '../../types';
@@ -76,9 +76,24 @@ export const Toolbar = () => {
     });
   };
 
+  const handleAddLine = () => {
+    addElement({
+      id: `line-${Date.now()}`,
+      type: 'line',
+      x: canvasSize / 2 - 20, // Начало линии
+      y: canvasSize / 2,
+      x2: canvasSize / 2 + 20, // Конец линии
+      y2: canvasSize / 2,
+      stroke: DEFAULT_CONFIG.strokeColor,
+      strokeWidth: DEFAULT_CONFIG.strokeWidth,
+      visible: true,
+    });
+  };
+
   const tools = [
     { icon: Circle, label: 'Добавить круг', onClick: handleAddCircle, id: 'circle' },
     { icon: Square, label: 'Добавить прямоугольник', onClick: handleAddRectangle, id: 'rectangle' },
+    { icon: Minus, label: 'Добавить линию', onClick: handleAddLine, id: 'line' },
     { icon: Orbit, label: 'Добавить текст по кругу', onClick: handleAddCurvedText, id: 'curvedText' },
     { icon: Type, label: 'Добавить текст', onClick: handleAddCenteredText, id: 'text' },
     { icon: Star, label: 'Добавить картинку', onClick: () => setIsIconGalleryOpen(true), id: 'icon' },

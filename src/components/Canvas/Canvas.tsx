@@ -6,6 +6,7 @@ import { TextCenteredElement } from './elements/TextCenteredElement';
 import { RectangleElement } from './elements/RectangleElement';
 import { ImageElement } from './elements/ImageElement';
 import { IconElement } from './elements/IconElement';
+import { LineElement } from './elements/LineElement';
 import { GroupElement } from './elements/GroupElement';
 
 export const Canvas = () => {
@@ -228,6 +229,8 @@ export const Canvas = () => {
                   return <ImageElement key={element.id} element={element} scale={scale} />;
                 case 'icon':
                   return <IconElement key={element.id} element={element} scale={scale} />;
+                case 'line':
+                  return <LineElement key={element.id} element={element} scale={scale} />;
                 case 'group':
                   return (
                     <GroupElement

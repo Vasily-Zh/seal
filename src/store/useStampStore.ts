@@ -15,7 +15,7 @@ const initialElements: StampElement[] = [
     stroke: '#0000ff',
     visible: true,
   },
-    // Круг внутренний
+  // Круг внутренний
   {
     id: 'circle-default-2',
     type: 'circle',
@@ -64,7 +64,7 @@ const initialElements: StampElement[] = [
     italic: false,
     visible: true,
   },
-    // Круг внутренний
+  // Круг внутренний
   {
     id: 'circle-default-3',
     type: 'circle',
@@ -75,19 +75,18 @@ const initialElements: StampElement[] = [
     stroke: '#0000ff',
     visible: true,
   },
-    // Линия 
+  // Линия
   {
-     id: 'line-default',
-     type: 'line',  
-     x: 20,
-     y: 20,
-     x2: 80,
-     y2: 80,
-     stroke: '#0000ff',
-     strokeWidth: 1.5,
-     visible: true,
-}
-    
+    id: 'line-default',
+    type: 'line',
+    x: 30,
+    y: 50,
+    x2: 70,
+    y2: 50,
+    stroke: '#0000ff',
+    strokeWidth: 1.5,
+    visible: true,
+  },
 ];
 
 export const useStampStore = create<StampStore>((set, get) => ({
@@ -232,9 +231,26 @@ export const useStampStore = create<StampStore>((set, get) => ({
     const centerY = state.canvasSize / 2;
 
     set((state) => ({
-      elements: state.elements.map((el) =>
-        el.id === id ? ({ ...el, x: centerX, y: centerY } as StampElement) : el
-      ),
+      elements: state.elements.map((el) => {
+        if (el.id === id) {
+          if (el.type === 'line') {
+            // Для линии нужно вычислить смещение и применить его к обеим точкам
+            const deltaX = centerX - el.x;
+            const deltaY = centerY - el.y;
+            return {
+              ...el,
+              x: centerX,
+              y: centerY,
+              x2: el.x2 + deltaX,
+              y2: el.y2 + deltaY,
+            } as StampElement;
+          } else {
+            // Для других элементов просто изменяем координаты
+            return { ...el, x: centerX, y: centerY } as StampElement;
+          }
+        }
+        return el;
+      }),
     }));
     get().saveToHistory();
   },
