@@ -19,11 +19,6 @@ export const ALL_FONTS: FontConfig[] = [
     category: 'sans-serif',
   },
   {
-    name: 'Lato',
-    family: 'Lato',
-    category: 'sans-serif',
-  },
-  {
     name: 'Oswald',
     family: 'Oswald',
     category: 'sans-serif',
@@ -149,18 +144,8 @@ export const ALL_FONTS: FontConfig[] = [
     category: 'sans-serif',
   },
   {
-    name: 'Days',
-    family: 'Days',
-    category: 'sans-serif',
-  },
-  {
     name: 'Arsenal',
     family: 'Arsenal',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Wix Madefor',
-    family: 'Wix Madefor',
     category: 'sans-serif',
   },
   {
@@ -181,16 +166,6 @@ export const ALL_FONTS: FontConfig[] = [
   {
     name: 'Istok Web',
     family: 'Istok Web',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Isabo',
-    family: 'Isabo',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Estebus',
-    family: 'Estebus',
     category: 'sans-serif',
   },
   {
@@ -246,16 +221,6 @@ export const ALL_FONTS: FontConfig[] = [
     category: 'serif',
   },
   {
-    name: 'Crimson Text',
-    family: 'Crimson Text',
-    category: 'serif',
-  },
-  {
-    name: 'Libre Baskerville',
-    family: 'Libre Baskerville',
-    category: 'serif',
-  },
-  {
     name: 'Lora',
     family: 'Lora',
     category: 'serif',
@@ -268,16 +233,6 @@ export const ALL_FONTS: FontConfig[] = [
   {
     name: 'Yeseva One',
     family: 'Yeseva One',
-    category: 'serif',
-  },
-  {
-    name: 'Cardo',
-    family: 'Cardo',
-    category: 'serif',
-  },
-  {
-    name: 'Neuton',
-    family: 'Neuton',
     category: 'serif',
   },
   {
@@ -417,11 +372,6 @@ export const ALL_FONTS: FontConfig[] = [
     category: 'sans-serif',
   },
   {
-    name: 'Utterson',
-    family: 'Utterson',
-    category: 'sans-serif',
-  },
-  {
     name: 'Shantell Sans',
     family: 'Shantell Sans',
     category: 'sans-serif',
@@ -435,11 +385,6 @@ export const ALL_FONTS: FontConfig[] = [
     name: 'Pangolin',
     family: 'Pangolin',
     category: 'sans-serif',
-  },
-  {
-    name: 'Kaushan Script',
-    family: 'Kaushan Script',
-    category: 'serif',
   },
 
   // Condensed шрифты
