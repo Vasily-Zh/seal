@@ -18,13 +18,24 @@ interface CurvedTextProps {
 // Кэш для векторизованных путей кругового текста
 const curvedTextCache = new Map<string, string>();
 
+// Экспорт функции очистки кэша (может быть полезна для отладки)
+export const clearCurvedTextCache = () => {
+  curvedTextCache.clear();
+};
+
 // Генерирует уникальный ключ для кэширования на основе параметров
 const generateCacheKey = (props: CurvedTextProps, scale: number): string => {
   return `${props.text}-${props.cx}-${props.cy}-${props.radius}-${props.fontSize}-${props.fontFamily}-${props.color}-${props.startAngle}-${props.isFlipped}-${props.fontWeight}-${props.fontStyle}-${scale}`;
 };
 
 export const useCurvedTextVectorization = (props: CurvedTextProps, scale: number = 1) => {
-  const cacheKey = useMemo(() => generateCacheKey(props, scale), [props, scale]);
+  // Деструктурируем props для правильной работы зависимостей
+  const { text, cx, cy, radius, fontSize, fontFamily, color, startAngle, isFlipped, fontWeight, fontStyle } = props;
+
+  const cacheKey = useMemo(
+    () => generateCacheKey(props, scale),
+    [text, cx, cy, radius, fontSize, fontFamily, color, startAngle, isFlipped, fontWeight, fontStyle, scale]
+  );
 
   const [svgContent, setSvgContent] = useState<string>('');
   const [loading, setLoading] = useState(true);

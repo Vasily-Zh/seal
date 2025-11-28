@@ -1,183 +1,8 @@
 import type { FontConfig } from '../types';
 
-// Полиграфические шрифты
-export const PRINTING_FONTS: FontConfig[] = [
-  {
-    name: 'Arial',
-    family: 'Arial, sans-serif',
-    category: 'sans-serif',
-    isPrintingFont: true,
-  },
-  {
-    name: 'Arial Narrow',
-    family: 'Arial Narrow, Arial, sans-serif',
-    category: 'sans-serif',
-    isPrintingFont: true,
-  },
-  {
-    name: 'Times New Roman',
-    family: 'Times New Roman, serif',
-    category: 'serif',
-    isPrintingFont: true,
-  },
-  {
-    name: 'Garamond',
-    family: 'Garamond, serif',
-    category: 'serif',
-    isPrintingFont: true,
-  },
-  {
-    name: 'Helvetica',
-    family: 'Helvetica, Arial, sans-serif',
-    category: 'sans-serif',
-    isPrintingFont: true,
-  },
-  {
-    name: 'Georgia',
-    family: 'Georgia, serif',
-    category: 'serif',
-    isPrintingFont: true,
-  },
-];
-
-// Дополнительные шрифты (sans-serif)
-export const ADDITIONAL_SANS_SERIF_FONTS: FontConfig[] = [
-  {
-    name: 'Calibri',
-    family: 'Calibri, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Verdana',
-    family: 'Verdana, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Tahoma',
-    family: 'Tahoma, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Franklin Gothic',
-    family: 'Franklin Gothic Medium, Franklin Gothic, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Impact',
-    family: 'Impact, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Microsoft Sans Serif',
-    family: 'Microsoft Sans Serif, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Candara',
-    family: 'Candara, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Comic Sans MS',
-    family: 'Comic Sans MS, cursive, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'DejaVu Sans',
-    family: 'DejaVu Sans, sans-serif',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Sylfaen',
-    family: 'Sylfaen, serif',
-    category: 'serif',
-  },
-];
-
-// Дополнительные serif шрифты для штемпельного дела
-export const ADDITIONAL_SERIF_FONTS: FontConfig[] = [
-  {
-    name: 'Cambria',
-    family: 'Cambria, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Baskerville',
-    family: 'Baskerville, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Bodoni',
-    family: 'Bodoni MT, Bodoni, serif',
-    category: 'serif',
-  },
-  {
-    name: 'Didot',
-    family: 'Didot, serif',
-    category: 'serif',
-  },
-];
-
-// Специальные декоративные шрифты
-export const DECORATIVE_FONTS: FontConfig[] = [
-  {
-    name: 'Monotype Corsiva',
-    family: 'Monotype Corsiva, cursive',
-    category: 'serif',
-  },
-];
-
-// Google Fonts (будут загружены динамически)
-// Все шрифты открытые и бесплатные (OFL лицензия)
-export const GOOGLE_FONTS: FontConfig[] = [
-  // Официальные/строгие Sans-Serif для штемпелей
-  {
-    name: 'Inter',
-    family: 'Inter',
-    category: 'sans-serif',
-  },
-  {
-    name: 'PT Sans',
-    family: 'PT Sans',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Fira Sans',
-    family: 'Fira Sans',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Fira Code',
-    family: 'Fira Code',
-    category: 'sans-serif',
-  },
-  {
-    name: 'IBM Plex Sans',
-    family: 'IBM Plex Sans',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Commissioner',
-    family: 'Commissioner',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Manrope',
-    family: 'Manrope',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Public Sans',
-    family: 'Public Sans',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Noto Sans',
-    family: 'Noto Sans',
-    category: 'sans-serif',
-  },
-
-  // Популярные Sans-Serif
+// Все шрифты из Google Fonts с поддержкой кириллицы (открытые, бесплатные, OFL лицензия)
+export const ALL_FONTS: FontConfig[] = [
+  // Sans-Serif шрифты
   {
     name: 'Roboto',
     family: 'Roboto',
@@ -189,23 +14,33 @@ export const GOOGLE_FONTS: FontConfig[] = [
     category: 'sans-serif',
   },
   {
-    name: 'Nunito',
-    family: 'Nunito',
+    name: 'Montserrat',
+    family: 'Montserrat',
     category: 'sans-serif',
   },
   {
-    name: 'Poppins',
-    family: 'Poppins',
+    name: 'Oswald',
+    family: 'Oswald',
     category: 'sans-serif',
   },
   {
-    name: 'Mulish',
-    family: 'Mulish',
+    name: 'Raleway',
+    family: 'Raleway',
     category: 'sans-serif',
   },
   {
-    name: 'Karla',
-    family: 'Karla',
+    name: 'Noto Sans',
+    family: 'Noto Sans',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Rubik',
+    family: 'Rubik',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Source Sans Pro',
+    family: 'Source Sans Pro',
     category: 'sans-serif',
   },
   {
@@ -214,83 +49,137 @@ export const GOOGLE_FONTS: FontConfig[] = [
     category: 'sans-serif',
   },
   {
-    name: 'Carlito',
-    family: 'Carlito',
+    name: 'Inter',
+    family: 'Inter',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Fira Sans',
+    family: 'Fira Sans',
+    category: 'sans-serif',
+  },
+  {
+    name: 'IBM Plex Sans',
+    family: 'IBM Plex Sans',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Nunito',
+    family: 'Nunito',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Exo 2',
+    family: 'Exo 2',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Manrope',
+    family: 'Manrope',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Comfortaa',
+    family: 'Comfortaa',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Arimo',
+    family: 'Arimo',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Commissioner',
+    family: 'Commissioner',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Jost',
+    family: 'Jost',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Unbounded',
+    family: 'Unbounded',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Golos Text',
+    family: 'Golos Text',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Yanone Kaffeesatz',
+    family: 'Yanone Kaffeesatz',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Philosopher',
+    family: 'Philosopher',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Poiret One',
+    family: 'Poiret One',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Tenor Sans',
+    family: 'Tenor Sans',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Prosto One',
+    family: 'Prosto One',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Cuprum',
+    family: 'Cuprum',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Forum',
+    family: 'Forum',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Arsenal',
+    family: 'Arsenal',
+    category: 'sans-serif',
+  },
+  {
+    name: 'PT Sans',
+    family: 'PT Sans',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Alegreya Sans',
+    family: 'Alegreya Sans',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Bellota Text',
+    family: 'Bellota Text',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Istok Web',
+    family: 'Istok Web',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Scada',
+    family: 'Scada',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Istok',
+    family: 'Istok',
     category: 'sans-serif',
   },
 
-  // Display/Header Sans-Serif
-  {
-    name: 'Oswald',
-    family: 'Oswald',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Bebas Neue',
-    family: 'Bebas Neue',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Anton',
-    family: 'Anton',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Archivo',
-    family: 'Archivo',
-    category: 'sans-serif',
-  },
-  {
-    name: 'League Gothic',
-    family: 'League Gothic',
-    category: 'sans-serif',
-  },
-
-  // Округлые/мягкие Sans-Serif
-  {
-    name: 'Comic Neue',
-    family: 'Comic Neue',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Baloo 2',
-    family: 'Baloo 2',
-    category: 'sans-serif',
-  },
-  {
-    name: 'Fredoka',
-    family: 'Fredoka',
-    category: 'sans-serif',
-  },
-
-  // Классические Serif для штемпелей
-  {
-    name: 'PT Serif',
-    family: 'PT Serif',
-    category: 'serif',
-  },
-  {
-    name: 'Crimson Pro',
-    family: 'Crimson Pro',
-    category: 'serif',
-  },
-  {
-    name: 'EB Garamond',
-    family: 'EB Garamond',
-    category: 'serif',
-  },
-  {
-    name: 'Cormorant Garamond',
-    family: 'Cormorant Garamond',
-    category: 'serif',
-  },
-  {
-    name: 'Libre Baskerville',
-    family: 'Libre Baskerville',
-    category: 'serif',
-  },
-
-  // Популярные Serif
+  // Serif шрифты
   {
     name: 'Merriweather',
     family: 'Merriweather',
@@ -302,13 +191,23 @@ export const GOOGLE_FONTS: FontConfig[] = [
     category: 'serif',
   },
   {
-    name: 'IBM Plex Serif',
-    family: 'IBM Plex Serif',
+    name: 'PT Serif',
+    family: 'PT Serif',
     category: 'serif',
   },
   {
-    name: 'Source Serif 4',
-    family: 'Source Serif 4',
+    name: 'Cormorant Garamond',
+    family: 'Cormorant Garamond',
+    category: 'serif',
+  },
+  {
+    name: 'Spectral',
+    family: 'Spectral',
+    category: 'serif',
+  },
+  {
+    name: 'Alegreya',
+    family: 'Alegreya',
     category: 'serif',
   },
   {
@@ -317,48 +216,204 @@ export const GOOGLE_FONTS: FontConfig[] = [
     category: 'serif',
   },
   {
-    name: 'Bodoni Moda',
-    family: 'Bodoni Moda',
+    name: 'Vollkorn',
+    family: 'Vollkorn',
     category: 'serif',
   },
   {
-    name: 'Noto Serif',
-    family: 'Noto Serif',
+    name: 'Lora',
+    family: 'Lora',
+    category: 'serif',
+  },
+  {
+    name: 'EB Garamond',
+    family: 'EB Garamond',
+    category: 'serif',
+  },
+  {
+    name: 'Yeseva One',
+    family: 'Yeseva One',
+    category: 'serif',
+  },
+  {
+    name: 'Alice',
+    family: 'Alice',
+    category: 'serif',
+  },
+  {
+    name: 'Ledger',
+    family: 'Ledger',
     category: 'serif',
   },
 
-  // Декоративные/Script (для красивых надписей)
+  // Monospace шрифты
   {
-    name: 'Great Vibes',
-    family: 'Great Vibes',
+    name: 'Roboto Mono',
+    family: 'Roboto Mono',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Source Code Pro',
+    family: 'Source Code Pro',
+    category: 'sans-serif',
+  },
+  {
+    name: 'IBM Plex Mono',
+    family: 'IBM Plex Mono',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Cousine',
+    family: 'Cousine',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Anonymous Pro',
+    family: 'Anonymous Pro',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Noto Sans Mono',
+    family: 'Noto Sans Mono',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Fira Mono',
+    family: 'Fira Mono',
+    category: 'sans-serif',
+  },
+
+  // Display & Decorative шрифты
+  {
+    name: 'Lobster',
+    family: 'Lobster',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Pacifico',
+    family: 'Pacifico',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Dela Gothic One',
+    family: 'Dela Gothic One',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Rampart One',
+    family: 'Rampart One',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Ruslan Display',
+    family: 'Ruslan Display',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Stalinist One',
+    family: 'Stalinist One',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Seymour One',
+    family: 'Seymour One',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Reggae One',
+    family: 'Reggae One',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Stick',
+    family: 'Stick',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Train One',
+    family: 'Train One',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Press Start 2P',
+    family: 'Press Start 2P',
+    category: 'sans-serif',
+  },
+  {
+    name: 'El Messiri',
+    family: 'El Messiri',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Kelly Slab',
+    family: 'Kelly Slab',
+    category: 'sans-serif',
+  },
+
+  // Handwriting шрифты
+  {
+    name: 'Caveat',
+    family: 'Caveat',
     category: 'serif',
   },
   {
-    name: 'Alex Brush',
-    family: 'Alex Brush',
+    name: 'Bad Script',
+    family: 'Bad Script',
     category: 'serif',
   },
   {
-    name: 'Parisienne',
-    family: 'Parisienne',
+    name: 'Marck Script',
+    family: 'Marck Script',
     category: 'serif',
+  },
+  {
+    name: 'Amatic SC',
+    family: 'Amatic SC',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Shantell Sans',
+    family: 'Shantell Sans',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Neucha',
+    family: 'Neucha',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Pangolin',
+    family: 'Pangolin',
+    category: 'sans-serif',
+  },
+
+  // Condensed шрифты
+  {
+    name: 'Roboto Condensed',
+    family: 'Roboto Condensed',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Fira Sans Condensed',
+    family: 'Fira Sans Condensed',
+    category: 'sans-serif',
+  },
+  {
+    name: 'PT Sans Narrow',
+    family: 'PT Sans Narrow',
+    category: 'sans-serif',
+  },
+  {
+    name: 'Ubuntu Condensed',
+    family: 'Ubuntu Condensed',
+    category: 'sans-serif',
   },
 ];
 
-// Полный список всех шрифтов в правильном порядке
-export const ALL_FONTS: FontConfig[] = [
-  ...PRINTING_FONTS, // сначала полиграфические
-  ...ADDITIONAL_SANS_SERIF_FONTS,
-  ...ADDITIONAL_SERIF_FONTS,
-  ...DECORATIVE_FONTS,
-  ...GOOGLE_FONTS,
-];
-
-// Генерация ссылки для подключения шрифтов через Google Fonts API
+// Генерация ссылки для подключения всех Google Fonts
 export const getGoogleFontsUrl = (): string => {
-  const googleFontNames = GOOGLE_FONTS.map(font => font.name);
-  const families = googleFontNames.map(font => {
-    const base = font.replace(/ /g, '+');
+  const families = ALL_FONTS.map(font => {
+    const base = font.name.replace(/ /g, '+');
     // Подключаем несколько начертаний
     return `${base}:ital,wght@0,400;0,700;1,400;1,700`;
   }).join('&family=');

@@ -15,15 +15,26 @@ const initialElements: StampElement[] = [
     stroke: '#0000ff',
     visible: true,
   },
+  // Круг внутренний
+  {
+    id: 'circle-default-2',
+    type: 'circle',
+    x: 50,
+    y: 50,
+    radius: 37,
+    strokeWidth: 1,
+    stroke: '#0000ff',
+    visible: true,
+  },
   // Текст по кругу (верхний)
   {
     id: 'text-default-1',
     type: 'text',
-    text: 'ПРИМЕР ТЕКСТА ПО КРУГУ',
+    text: 'ПРИМЕР ТЕКСТА ПО КРУГУ ПРИМЕР ТЕКСТА ПО КРУГУ',
     x: 50,
     y: 50,
-    fontSize: 6,
-    fontFamily: 'Arial, sans-serif',
+    fontSize: 5,
+    fontFamily: 'Roboto',
     curved: true,
     curveRadius: 33.5,
     startAngle: 270,
@@ -41,10 +52,10 @@ const initialElements: StampElement[] = [
     text: 'ПРИМЕР ТЕКСТА ПО КРУГУ',
     x: 50,
     y: 50,
-    fontSize: 6,
-    fontFamily: 'Arial, sans-serif',
+    fontSize: 5,
+    fontFamily: 'Roboto',
     curved: true,
-    curveRadius: 30.5,
+    curveRadius: 33.5,
     startAngle: 90,
     letterSpacing: 0,
     color: '#0000ff',
@@ -55,11 +66,11 @@ const initialElements: StampElement[] = [
   },
   // Круг внутренний
   {
-    id: 'circle-default-2',
+    id: 'circle-default-3',
     type: 'circle',
     x: 50,
     y: 50,
-    radius: 37,
+    radius: 30,
     strokeWidth: 1,
     stroke: '#0000ff',
     visible: true,
@@ -103,12 +114,10 @@ export const useStampStore = create<StampStore>((set, get) => ({
       const element = state.elements.find((el) => el.id === id);
       if (!element) return state;
 
-      // Создаём копию с новым id и небольшим смещением
+      // Создаём копию с новым id, оставляя координаты без изменений
       const duplicatedElement: StampElement = {
         ...element,
         id: `${element.type}-${Date.now()}`,
-        x: element.x + 2,
-        y: element.y + 2,
         // Если это группа, не копируем children (дублируем только простые элементы)
         ...(element.type === 'group' ? { children: [] } : {}),
       };
@@ -203,16 +212,37 @@ export const useStampStore = create<StampStore>((set, get) => ({
     return state.historyIndex < state.history.length - 1;
   },
 
-  // Центрирование элемента
+  /**
+   * Центрирование элемента
+   * Для линии сдвигает обе точки (x, y) и (x2, y2) на одинаковое расстояние,
+   * чтобы сохранить угол наклона линии, но разместить её центр в центре холста
+   */
   centerElement: (id: string) => {
     const state = get();
     const centerX = state.canvasSize / 2;
     const centerY = state.canvasSize / 2;
 
     set((state) => ({
-      elements: state.elements.map((el) =>
-        el.id === id ? ({ ...el, x: centerX, y: centerY } as StampElement) : el
-      ),
+      elements: state.elements.map((el) => {
+        if (el.id === id) {
+          if (el.type === 'line') {
+            // Для линии нужно вычислить смещение и применить его к обеим точкам
+            const deltaX = centerX - el.x;
+            const deltaY = centerY - el.y;
+            return {
+              ...el,
+              x: centerX,
+              y: centerY,
+              x2: el.x2 + deltaX,
+              y2: el.y2 + deltaY,
+            } as StampElement;
+          } else {
+            // Для других элементов просто изменяем координаты
+            return { ...el, x: centerX, y: centerY } as StampElement;
+          }
+        }
+        return el;
+      }),
     }));
     get().saveToHistory();
   },

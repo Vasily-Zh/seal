@@ -42,6 +42,7 @@ export interface TextCenteredElement extends BaseElement {
   fontSize: number;
   fontFamily: string;
   color: string;
+  letterSpacing?: number;
   bold?: boolean;
   italic?: boolean;
   flipped?: boolean; // перевернуть текст
@@ -62,6 +63,7 @@ export interface TriangleElement extends BaseElement {
   fill?: string;
   stroke: string;
   strokeWidth: number;
+  heightRatio?: number; // коэффициент высоты треугольника
 }
 
 export interface LineElement extends BaseElement {
@@ -166,7 +168,7 @@ export interface StampStore {
   clearCanvas: () => void;
 }
 
-// Конфигурация шрифтов
+// Конфигурация шрифтов Google Fonts
 export interface FontConfig {
   name: string; // базовое имя шрифта
   family: string; // базовое CSS family значение
@@ -184,5 +186,5 @@ export const DEFAULT_CONFIG = {
   strokeColor: '#0000ff',
   textColor: '#0000ff',
   iconFill: '#0000ff', // цвет заливки иконок по умолчанию
-  fontFamily: 'Arial, sans-serif', // шрифт по умолчанию
+  fontFamily: 'Roboto', // шрифт по умолчанию (Google Font)
 };

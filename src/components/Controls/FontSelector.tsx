@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { ALL_FONTS } from '../../utils/fonts';
 
 interface FontSelectorProps {
@@ -10,7 +10,10 @@ interface FontSelectorProps {
 
 export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const fontListRef = useRef<HTMLDivElement>(null);
+  const selectedFontRef = useRef<HTMLDivElement>(null);
 
   // Закрытие dropdown при клике вне компонента
   useEffect(() => {
@@ -29,16 +32,47 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
     };
   }, [isOpen]);
 
+  // Прокрутка к выбранному шрифту при открытии
+  useEffect(() => {
+    if (isOpen && !searchTerm && fontListRef.current && selectedFontRef.current) {
+      // Нужно немного подождать, чтобы элементы отрендерились
+      setTimeout(() => {
+        selectedFontRef.current?.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+          inline: 'nearest'
+        });
+      }, 10);
+    }
+  }, [isOpen, searchTerm]);
+
   // Найти текущий выбранный шрифт
   const getCurrentFontDisplay = () => {
     const font = ALL_FONTS.find(f => f.family === value);
-    return font ? font.name : 'Arial'; // fallback
+    return font ? font.name : 'Roboto'; // fallback к Google Font
   };
+
+  // Фильтрация шрифтов по поисковому запросу
+  const filteredFonts = ALL_FONTS.filter(font =>
+    font.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    font.family.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Сортировка: все шрифты по алфавиту (без перемещения выбранного наверх)
+  const sortedFonts = [...filteredFonts].sort((a, b) => {
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }); // Сортировка по алфавиту
+  });
 
   // Выбрать шрифт
   const selectFont = (fontFamily: string) => {
     onChange(fontFamily);
     setIsOpen(false);
+    setSearchTerm(''); // Очищаем поисковый запрос после выбора
+  };
+
+  // Обработчик очистки поиска
+  const clearSearch = () => {
+    setSearchTerm('');
   };
 
   return (
@@ -83,50 +117,97 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
             border: '1px solid #d1d5db',
             borderRadius: '6px',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          {ALL_FONTS.map((font) => {
-            const isSelected = font.family === value;
-
-            return (
-              <div
-                key={font.name}
-                onClick={() => selectFont(font.family)}
+          {/* Поле поиска */}
+          <div style={{
+            padding: '8px',
+            borderBottom: '1px solid #d1d5db',
+            display: 'flex',
+            alignItems: 'center',
+          }}>
+            <input
+              type="text"
+              placeholder="Поиск шрифта..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
+                fontSize: '14px',
+              }}
+              onClick={(e) => e.stopPropagation()} // Предотвращаем закрытие при клике на инпут
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearSearch();
+                }}
                 style={{
-                  padding: '8px 12px',
+                  marginLeft: '4px',
+                  padding: '4px',
+                  border: 'none',
+                  background: 'none',
                   cursor: 'pointer',
-                  fontSize: '14px',
-                  fontFamily: font.family,
-                  borderBottom: '1px solid #f3f4f6',
-                  backgroundColor: isSelected ? '#dbeafe' : (font.isPrintingFont ? '#f0f9ff' : 'white'),
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = '#eff6ff';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = font.isPrintingFont ? '#f0f9ff' : 'white';
-                  }
+                  color: '#6b7280',
                 }}
               >
-                {font.name}
-                {font.isPrintingFont && (
-                  <span
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Список шрифтов */}
+          <div ref={fontListRef} style={{ overflowY: 'auto', maxHeight: '300px' }}>
+            {sortedFonts.length > 0 ? (
+              sortedFonts.map((font) => {
+                const isSelected = font.family === value;
+
+                return (
+                  <div
+                    key={font.name}
+                    ref={isSelected && !searchTerm ? selectedFontRef : null} // Установить ref только для выбранного шрифта при отсутствии поиска
+                    onClick={() => selectFont(font.family)}
                     style={{
-                      marginLeft: '8px',
-                      fontSize: '11px',
-                      color: '#3b82f6',
-                      fontWeight: '600',
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontFamily: font.family,
+                      borderBottom: '1px solid #f3f4f6',
+                      backgroundColor: isSelected ? '#dbeafe' : 'white',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = '#eff6ff';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = 'white';
+                      }
                     }}
                   >
-                    [Полиграфия]
-                  </span>
-                )}
+                    {font.name}
+                  </div>
+                );
+              })
+            ) : (
+              <div style={{
+                padding: '12px',
+                fontSize: '14px',
+                color: '#6b7280',
+                textAlign: 'center',
+              }}>
+                Шрифт не найден
               </div>
-            );
-          })}
+            )}
+          </div>
         </div>
       )}
     </div>

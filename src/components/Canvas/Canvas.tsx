@@ -4,8 +4,10 @@ import { CircleElement } from './elements/CircleElement';
 import { TextElement } from './elements/TextElement';
 import { TextCenteredElement } from './elements/TextCenteredElement';
 import { RectangleElement } from './elements/RectangleElement';
+import { TriangleElement } from './elements/TriangleElement';
 import { ImageElement } from './elements/ImageElement';
 import { IconElement } from './elements/IconElement';
+import { LineElement } from './elements/LineElement';
 import { GroupElement } from './elements/GroupElement';
 
 export const Canvas = () => {
@@ -224,10 +226,14 @@ export const Canvas = () => {
                   return <TextCenteredElement key={element.id} element={element} scale={scale} />;
                 case 'rectangle':
                   return <RectangleElement key={element.id} element={element} scale={scale} />;
+                case 'triangle':
+                  return <TriangleElement key={element.id} element={element} scale={scale} />;
                 case 'image':
                   return <ImageElement key={element.id} element={element} scale={scale} />;
                 case 'icon':
                   return <IconElement key={element.id} element={element} scale={scale} />;
+                case 'line':
+                  return <LineElement key={element.id} element={element} scale={scale} />;
                 case 'group':
                   return (
                     <GroupElement

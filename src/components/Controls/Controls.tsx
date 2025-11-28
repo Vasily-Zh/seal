@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
 import { FontSelector } from './FontSelector';
-import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, ImageElement as ImageElementType, IconElement as IconElementType } from '../../types';
+import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, TriangleElement as TriangleElementType, ImageElement as ImageElementType, IconElement as IconElementType, LineElement as LineElementType, GroupElement as GroupElementType } from '../../types';
 import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
 import { LayersPanel } from './LayersPanel';
 import { exportElementToSVG } from '../../utils/export';
@@ -55,6 +55,8 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                     {element.type === 'text' && 'Добавить текст по кругу'}
                     {element.type === 'textCentered' && 'Добавить текст'}
                     {element.type === 'rectangle' && 'Добавить прямоугольник'}
+                    {element.type === 'triangle' && 'Добавить треугольник'}
+                    {element.type === 'line' && 'Добавить линию'}  {/* Компонент отображения линии */}
                     {element.type === 'image' && 'Добавить картинку'}
                     {element.type === 'icon' && 'Добавить картинку'}
                   </span>
@@ -213,6 +215,8 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
                     {element.type === 'text' && 'Добавить текст по кругу'}
                     {element.type === 'textCentered' && 'Добавить текст'}
                     {element.type === 'rectangle' && 'Добавить прямоугольник'}
+                    {element.type === 'triangle' && 'Добавить треугольник'}
+                    {element.type === 'line' && 'Добавить линию'}  {/* Компонент отображения линии */}
                     {element.type === 'image' && 'Добавить картинку'}
                     {element.type === 'icon' && 'Добавить картинку'}
                   </span>
@@ -293,7 +297,7 @@ export const Controls = ({ showOnlyElements = false, showOnlySettings = false }:
 };
 
 // Компонент для редактирования параметров элемента
-function ElementSettings({ element }: { element: any }) {
+function ElementSettings({ element }: { element: CircleElementType | TextElementType | TextCenteredElementType | RectangleElementType | TriangleElementType | ImageElementType | IconElementType | LineElementType | GroupElementType }) {
   const updateElement = useStampStore((state) => state.updateElement);
   const centerElement = useStampStore((state) => state.centerElement);
   const [isIconGalleryOpen, setIsIconGalleryOpen] = useState(false);
@@ -307,7 +311,7 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Радиус круга"
           value={circleElement.radius}
-          min={10}
+          min={1}
           max={50}
           step={0.5}
           onChange={(value) => updateElement(element.id, { radius: value })}
@@ -434,7 +438,7 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Размер текста"
           value={(element as TextElementType).fontSize}
-          min={2}
+          min={1}
           max={20}
           step={0.5}
           onChange={(value) => updateElement(element.id, { fontSize: value })}
@@ -557,10 +561,19 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Размер текста"
           value={(element as TextCenteredElementType).fontSize}
-          min={2}
-          max={20}
+          min={1}
+          max={30}
           step={0.5}
           onChange={(value) => updateElement(element.id, { fontSize: value })}
+        />
+
+        <SliderInput
+          label="Межбуквенный интервал"
+          value={(element as TextCenteredElementType).letterSpacing || 0}
+          min={-2}
+          max={10}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { letterSpacing: value })}
         />
 
         <SliderInput
@@ -650,7 +663,7 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Ширина"
           value={rectangleElement.width}
-          min={5}
+          min={1}
           max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { width: value })}
@@ -659,7 +672,7 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Высота"
           value={rectangleElement.height}
-          min={5}
+          min={1}
           max={100}
           step={0.5}
           onChange={(value) => updateElement(element.id, { height: value })}
@@ -668,6 +681,114 @@ function ElementSettings({ element }: { element: any }) {
         <SliderInput
           label="Обводка"
           value={rectangleElement.strokeWidth}
+          min={0}
+          max={10}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { strokeWidth: value })}
+        />
+
+        <SliderInput
+          label="Смещение по X"
+          value={element.x}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { x: value })}
+        />
+
+        <SliderInput
+          label="Смещение по Y"
+          value={element.y}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { y: value })}
+        />
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
+
+        {/* Кнопка переключения заливки/обводки */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => {
+              if (hasFill) {
+                // Переключить на обводку
+                updateElement(element.id, { fill: undefined, stroke: '#0000ff', strokeWidth: 1.5 });
+              } else {
+                // Переключить на заливку
+                updateElement(element.id, { fill: '#0000ff', stroke: undefined, strokeWidth: undefined });
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#0000ff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+            }}
+          >
+            {hasFill ? 'Обводка' : 'Заливка'}
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  if (element.type === 'triangle') {
+    const triangleElement = element as TriangleElementType;
+    const hasFill = triangleElement.fill && triangleElement.fill !== 'none';
+    const heightRatio = triangleElement.heightRatio !== undefined ? triangleElement.heightRatio : 1;
+
+    return (
+      <>
+        <SliderInput
+          label="Размер треугольника"
+          value={triangleElement.size}
+          min={5}
+          max={100}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { size: value })}
+        />
+
+        <SliderInput
+          label={`Высота: ${(heightRatio * 100).toFixed(0)}%`}
+          value={heightRatio}
+          min={0.2}
+          max={3}
+          step={0.1}
+          onChange={(value) => updateElement(element.id, { heightRatio: value })}
+        />
+
+        <SliderInput
+          label="Обводка"
+          value={triangleElement.strokeWidth}
           min={0}
           max={10}
           step={0.5}
@@ -995,6 +1116,221 @@ function ElementSettings({ element }: { element: any }) {
           onClose={() => setIsIconGalleryOpen(false)}
           selectedElementId={element.id}
         />
+      </>
+    );
+  }
+
+  // Обработка настроек для линии
+  if (element.type === 'line') {
+    const lineElement = element as LineElementType;
+
+    // Вычисляем длину линии с помощью теоремы Пифагора
+    const length = Math.sqrt(Math.pow(lineElement.x2 - element.x, 2) + Math.pow(lineElement.y2 - element.y, 2));
+
+    return (
+      <>
+        <SliderInput
+          label="Толщина линии"
+          value={lineElement.strokeWidth}
+          min={0.5}
+          max={10}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { strokeWidth: value })}
+        />
+
+        <SliderInput
+          label={`Длина линии: ${length.toFixed(2)} мм`}
+          value={length}
+          min={1}
+          max={141} // Максимальная диагональ в квадрате 100x100
+          step={0.5}
+          onChange={(value) => {
+            // При изменении длины сохраняем угол наклона линии
+            // Вычисляем текущую длину
+            const currentLength = Math.sqrt(Math.pow(lineElement.x2 - element.x, 2) + Math.pow(lineElement.y2 - element.y, 2));
+            if (currentLength === 0) return;
+
+            // Вычисляем вектор направления
+            const dirX = (lineElement.x2 - element.x) / currentLength;
+            const dirY = (lineElement.y2 - element.y) / currentLength;
+
+            // Новая длина
+            const newX2 = element.x + dirX * value;
+            const newY2 = element.y + dirY * value;
+
+            updateElement(element.id, { x2: newX2, y2: newY2 });
+          }}
+        />
+
+        <SliderInput
+          label="Начальная X координата"
+          value={element.x}
+          min={0}
+          max={100}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { x: value })}
+        />
+
+        <SliderInput
+          label="Начальная Y координата"
+          value={element.y}
+          min={0}
+          max={100}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { y: value })}
+        />
+
+        <SliderInput
+          label="Конечная X координата"
+          value={lineElement.x2}
+          min={0}
+          max={100}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { x2: value })}
+        />
+
+        <SliderInput
+          label="Конечная Y координата"
+          value={lineElement.y2}
+          min={0}
+          max={100}
+          step={0.5}
+          onChange={(value) => updateElement(element.id, { y2: value })}
+        />
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  if (element.type === 'group') {
+    const groupElement = element as GroupElementType;
+
+    return (
+      <>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
+            Название группы
+          </label>
+          <input
+            type="text"
+            value={groupElement.name}
+            onChange={(e) => updateElement(element.id, { name: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              fontSize: '14px',
+            }}
+          />
+        </div>
+
+        <SliderInput
+          label="Смещение по X"
+          value={element.x}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { x: value })}
+        />
+
+        <SliderInput
+          label="Смещение по Y"
+          value={element.y}
+          min={0}
+          max={100}
+          step={1}
+          onChange={(value) => updateElement(element.id, { y: value })}
+        />
+
+        <SliderInput
+          label="Поворот"
+          value={groupElement.rotation || 0}
+          min={0}
+          max={360}
+          step={1}
+          onChange={(value) => updateElement(element.id, { rotation: value })}
+          unit="°"
+        />
+
+        <SliderInput
+          label="Масштаб по X"
+          value={groupElement.scaleX || 1}
+          min={0.1}
+          max={5}
+          step={0.1}
+          onChange={(value) => updateElement(element.id, { scaleX: value })}
+        />
+
+        <SliderInput
+          label="Масштаб по Y"
+          value={groupElement.scaleY || 1}
+          min={0.1}
+          max={5}
+          step={0.1}
+          onChange={(value) => updateElement(element.id, { scaleY: value })}
+        />
+
+        <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={groupElement.expanded || false}
+              onChange={(e) => updateElement(element.id, { expanded: e.target.checked })}
+              style={{ cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>Развернута в панели слоёв</span>
+          </label>
+        </div>
+
+        {/* Кнопка центрирования */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => centerElement(element.id)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <Target size={16} />
+            Центрировать
+          </button>
+        </div>
       </>
     );
   }
