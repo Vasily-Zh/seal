@@ -117,3 +117,54 @@ input[type='range']::-moz-range-track {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Responsive Design for Mobile */
+@media (max-width: 768px) {
+  /* Adjust button sizes for mobile */
+  button {
+    min-height: 44px; /* Ensure touch targets are large enough */
+    padding: 8px 12px;
+  }
+
+  /* Adjust input sizes for mobile */
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  /* Improve mobile layout spacing */
+  #root {
+    height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Ensure mobile dropdowns are properly sized */
+  .mobile-dropdown {
+    width: 100%;
+    min-width: auto;
+  }
+
+  /* Adjust font sizes for better mobile readability */
+  body {
+    font-size: 14px;
+  }
+
+  h1, h2, h3, h4 {
+    line-height: 1.3;
+  }
+
+  /* Adjust spacing in mobile layouts */
+  .mobile-controls-container {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  /* Optimize for mobile touch interactions */
+  .touch-optimized {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
