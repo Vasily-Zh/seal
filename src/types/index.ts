@@ -57,7 +57,7 @@ export interface RectangleElement extends BaseElement {
   strokeWidth: number;
 }
 
-export interface TriangleElement extends BaseElement {
+export interface TriangleElementType extends BaseElement {
   type: 'triangle';
   size: number;
   fill?: string;
@@ -66,7 +66,7 @@ export interface TriangleElement extends BaseElement {
   heightRatio?: number; // коэффициент высоты треугольника
 }
 
-export interface LineElement extends BaseElement {
+export interface LineElementType extends BaseElement {
   type: 'line';
   x2: number;
   y2: number;
@@ -108,8 +108,8 @@ export type StampElement =
   | TextElement
   | TextCenteredElement
   | RectangleElement
-  | TriangleElement
-  | LineElement
+  | TriangleElementType
+  | LineElementType
   | ImageElement
   | IconElement
   | GroupElement;

@@ -1,8 +1,8 @@
-import type { LineElement } from '../../../types';
+import type { LineElementType } from '../../../types';
 import { useStampStore } from '../../../store/useStampStore';
 
 interface LineElementProps {
-  element: LineElement;
+  element: LineElementType;
   scale: number;
 }
 

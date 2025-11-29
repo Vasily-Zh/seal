@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { SliderInput } from './SliderInput';
 import { FontSelector } from './FontSelector';
-import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, TriangleElement as TriangleElementType, ImageElement as ImageElementType, IconElement as IconElementType, LineElement as LineElementType, GroupElement as GroupElementType } from '../../types';
+import type { CircleElement as CircleElementType, TextElement as TextElementType, TextCenteredElement as TextCenteredElementType, RectangleElement as RectangleElementType, TriangleElementType, ImageElement as ImageElementType, IconElement as IconElementType, LineElementType, GroupElement as GroupElementType } from '../../types';
 import { IconGalleryModal } from '../Toolbar/IconGalleryModal';
 import { LayersPanel } from './LayersPanel';
 import { exportElementToSVG } from '../../utils/export';

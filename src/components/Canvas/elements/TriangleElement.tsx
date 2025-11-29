@@ -1,8 +1,8 @@
-import type { TriangleElement } from '../../../types';
+import type { TriangleElementType } from '../../../types';
 import { useStampStore } from '../../../store/useStampStore';
 
 interface TriangleElementProps {
-  element: TriangleElement;
+  element: TriangleElementType;
   scale: number;
 }
 
