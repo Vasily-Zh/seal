@@ -1,7 +1,7 @@
 import { Undo2, Redo2, Download, Settings, Save, FolderOpen } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
 import { exportToZIP } from '../../utils/export';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminLoginModal } from '../Admin/AdminLoginModal';
 import { AdminPanel } from '../Admin/AdminPanel';
 import { isAdminLoggedIn } from '../../utils/auth';
@@ -26,6 +26,24 @@ export const Header = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+    };
+  }, []);
 
   const handleExportZIP = async () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
@@ -83,156 +101,284 @@ export const Header = () => {
   return (
     <header
       style={{
-        padding: '12px 24px',
+        padding: isMobile ? '12px 16px' : '12px 24px',
         backgroundColor: '#fff',
         borderBottom: '1px solid #e5e7eb',
         display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        gap: isMobile ? '12px' : '0',
       }}
     >
-      <div>
-        <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#111827' }}>
+      <div style={{ textAlign: 'center', width: '100%' }}>
+        <h1 style={{ fontSize: isMobile ? '18px' : '20px', fontWeight: '700', color: '#111827' }}>
           Конструктор печатей и штампов
         </h1>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-        {/* Кнопка Сохранить проект */}
-        <button
-          onClick={handleSaveProject}
-          disabled={isSaving}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #10b981',
-            borderRadius: '6px',
-            backgroundColor: '#10b981',
-            color: 'white',
-            cursor: isSaving ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            opacity: isSaving ? 0.6 : 1,
-          }}
-        >
-          <Save size={16} />
-          {isSaving ? 'Сохранение...' : currentProjectName ? 'Сохранить' : 'Сохранить проект'}
-        </button>
+      {isMobile ? (
+        // Mobile layout with compact icon-only buttons in two rows if needed
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {/* Row 1: Save and Load */}
+          <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+            <button
+              onClick={handleSaveProject}
+              disabled={isSaving}
+              style={{
+                padding: '8px',
+                border: '1px solid #10b981',
+                borderRadius: '6px',
+                backgroundColor: '#10b981',
+                color: 'white',
+                cursor: isSaving ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isSaving ? 0.6 : 1,
+              }}
+              title={isSaving ? 'Сохранение...' : currentProjectName ? 'Сохранить' : 'Сохранить проект'}
+            >
+              <Save size={16} />
+            </button>
 
-        {/* Кнопка Загрузить проект */}
-        <button
-          onClick={() => setShowProjectManager(true)}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
-            backgroundColor: '#fff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            color: '#374151',
-          }}
-        >
-          <FolderOpen size={16} />
-          Проекты
-        </button>
+            <button
+              onClick={() => setShowProjectManager(true)}
+              style={{
+                padding: '8px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: '#fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#374151',
+              }}
+              title="Проекты"
+            >
+              <FolderOpen size={16} />
+            </button>
 
-        {/* Разделитель */}
-        <div style={{ width: '1px', height: '32px', backgroundColor: '#e5e7eb' }} />
+            <button
+              onClick={handleSettingsClick}
+              style={{
+                padding: '8px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: '#fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#374151',
+              }}
+              title="Настройки"
+            >
+              <Settings size={16} />
+            </button>
+          </div>
 
-        {/* Кнопка Отмена */}
-        <button
-          onClick={undo}
-          disabled={!canUndo}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
-            backgroundColor: canUndo ? '#fff' : '#f3f4f6',
-            cursor: canUndo ? 'pointer' : 'not-allowed',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            color: canUndo ? '#374151' : '#9ca3af',
-          }}
-        >
-          <Undo2 size={16} />
-          Отменить
-        </button>
+          {/* Row 2: Undo, Redo, Download */}
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <button
+              onClick={undo}
+              disabled={!canUndo}
+              style={{
+                padding: '8px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: canUndo ? '#fff' : '#f3f4f6',
+                cursor: canUndo ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: canUndo ? '#374151' : '#9ca3af',
+              }}
+              title="Отменить"
+            >
+              <Undo2 size={16} />
+            </button>
 
-        {/* Кнопка Вернуть */}
-        <button
-          onClick={redo}
-          disabled={!canRedo}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
-            backgroundColor: canRedo ? '#fff' : '#f3f4f6',
-            cursor: canRedo ? 'pointer' : 'not-allowed',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            color: canRedo ? '#374151' : '#9ca3af',
-          }}
-        >
-          <Redo2 size={16} />
-          Вернуть
-        </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              style={{
+                padding: '8px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: canRedo ? '#fff' : '#f3f4f6',
+                cursor: canRedo ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: canRedo ? '#374151' : '#9ca3af',
+              }}
+              title="Вернуть"
+            >
+              <Redo2 size={16} />
+            </button>
 
-        {/* Кнопка Скачать */}
-        <button
-          onClick={handleExportZIP}
-          disabled={isExporting}
-          style={{
-            padding: '8px 16px',
-            border: 'none',
-            borderRadius: '6px',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            cursor: isExporting ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            opacity: isExporting ? 0.6 : 1,
-          }}
-        >
-          <Download size={16} />
-          {isExporting ? 'Скачивание...' : 'Скачать'}
-        </button>
+            <button
+              onClick={handleExportZIP}
+              disabled={isExporting}
+              style={{
+                padding: '8px',
+                border: 'none',
+                borderRadius: '6px',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                cursor: isExporting ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isExporting ? 0.6 : 1,
+              }}
+              title={isExporting ? 'Скачивание...' : 'Скачать'}
+            >
+              <Download size={16} />
+            </button>
+          </div>
+        </div>
+      ) : (
+        // Desktop layout
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {/* Кнопка Сохранить проект */}
+          <button
+            onClick={handleSaveProject}
+            disabled={isSaving}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #10b981',
+              borderRadius: '6px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '14px',
+              fontWeight: '500',
+              opacity: isSaving ? 0.6 : 1,
+            }}
+          >
+            <Save size={16} />
+            {isSaving ? 'Сохранение...' : currentProjectName ? 'Сохранить' : 'Сохранить проект'}
+          </button>
 
-        {/* Кнопка Настройки */}
-        <button
-          onClick={handleSettingsClick}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
-            backgroundColor: '#fff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            color: '#374151',
-          }}
-        >
-          <Settings size={16} />
-          Настройки
-        </button>
-      </div>
+          {/* Кнопка Загрузить проект */}
+          <button
+            onClick={() => setShowProjectManager(true)}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#374151',
+            }}
+          >
+            <FolderOpen size={16} />
+            Проекты
+          </button>
+
+          {/* Разделитель */}
+          <div style={{ width: '1px', height: '32px', backgroundColor: '#e5e7eb' }} />
+
+          {/* Кнопка Отмена */}
+          <button
+            onClick={undo}
+            disabled={!canUndo}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: canUndo ? '#fff' : '#f3f4f6',
+              cursor: canUndo ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: canUndo ? '#374151' : '#9ca3af',
+            }}
+          >
+            <Undo2 size={16} />
+            Отменить
+          </button>
+
+          {/* Кнопка Вернуть */}
+          <button
+            onClick={redo}
+            disabled={!canRedo}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: canRedo ? '#fff' : '#f3f4f6',
+              cursor: canRedo ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: canRedo ? '#374151' : '#9ca3af',
+            }}
+          >
+            <Redo2 size={16} />
+            Вернуть
+          </button>
+
+          {/* Кнопка Скачать */}
+          <button
+            onClick={handleExportZIP}
+            disabled={isExporting}
+            style={{
+              padding: '8px 16px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              cursor: isExporting ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '14px',
+              fontWeight: '500',
+              opacity: isExporting ? 0.6 : 1,
+            }}
+          >
+            <Download size={16} />
+            {isExporting ? 'Скачивание...' : 'Скачать'}
+          </button>
+
+          {/* Кнопка Настройки */}
+          <button
+            onClick={handleSettingsClick}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#374151',
+            }}
+          >
+            <Settings size={16} />
+            Настройки
+          </button>
+        </div>
+      )}
 
       {/* Admin Login Modal */}
       <AdminLoginModal
