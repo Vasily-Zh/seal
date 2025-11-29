@@ -2,11 +2,6 @@ import * as fontkit from 'fontkit';
 import svgpath from 'svgpath';
 
 /**
- * Кэш загруженных шрифтов
- */
-const fontCache = new Map<string, fontkit.Font>();
-
-/**
  * Список Google Fonts с поддержкой кириллицы
  */
 const GOOGLE_FONTS = new Set([
@@ -109,6 +104,11 @@ const GOOGLE_FONTS = new Set([
 ]);
 
 /**
+ * Кэш загруженных шрифтов - хранит массив шрифтов для разных subset'ов
+ */
+const fontCache = new Map<string, fontkit.Font[]>();
+
+/**
  * Извлекает базовое имя шрифта из CSS font-family строки
  */
 function extractFontName(fontFamily: string): string {
@@ -117,64 +117,83 @@ function extractFontName(fontFamily: string): string {
 }
 
 /**
- * Получает URL шрифта из Google Fonts CSS API
- * Запрашиваем с subset для кириллицы
+ * Получает URL'ы шрифта из Google Fonts CSS API для всех subset'ов
  */
-async function getGoogleFontUrl(
+async function getGoogleFontUrls(
   fontName: string,
   weight: string,
   style: string
-): Promise<string | null> {
+): Promise<string[]> {
   try {
     const weightNum = weight === 'bold' ? '700' : '400';
     const encodedName = encodeURIComponent(fontName);
 
-    // Добавляем subset=cyrillic,latin для поддержки кириллицы
     let cssUrl: string;
     if (style === 'italic') {
-      cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:ital,wght@1,${weightNum}&subset=cyrillic,latin&display=swap`;
+      cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:ital,wght@1,${weightNum}&display=swap`;
     } else {
-      cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:wght@${weightNum}&subset=cyrillic,latin&display=swap`;
+      cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:wght@${weightNum}&display=swap`;
     }
 
     const response = await fetch(cssUrl);
     if (!response.ok) {
       console.warn(`Google Fonts CSS request failed for ${fontName}: ${response.status}`);
-      return null;
+      return [];
     }
 
     const css = await response.text();
 
-    // Ищем URL для cyrillic subset (он идёт первым если доступен)
-    // Формат: /* cyrillic */ @font-face { ... src: url(...) }
-    const cyrillicMatch = css.match(/\/\*\s*cyrillic\s*\*\/[^}]*url\(([^)]+)\)/);
-    if (cyrillicMatch) {
-      console.log(`Found cyrillic subset for ${fontName}`);
-      return cyrillicMatch[1];
+    // Собираем URL'ы для разных subset'ов
+    const subsetUrls: { subset: string; url: string }[] = [];
+    const urlMatches = css.matchAll(/\/\*\s*([\w-]+)\s*\*\/[^}]*url\(([^)]+)\)/g);
+
+    for (const match of urlMatches) {
+      const subset = match[1];
+      const url = match[2];
+      subsetUrls.push({ subset, url });
     }
 
-    // Если кириллицы нет, берём первый доступный URL (latin)
-    const urlMatch = css.match(/url\(([^)]+)\)/);
-    if (urlMatch) {
-      console.log(`Using latin subset for ${fontName} (no cyrillic available)`);
-      return urlMatch[1];
+    // Сортируем: cyrillic первый, потом latin
+    const priorityOrder = ['cyrillic-ext', 'cyrillic', 'latin-ext', 'latin'];
+    subsetUrls.sort((a, b) => {
+      const aIndex = priorityOrder.indexOf(a.subset);
+      const bIndex = priorityOrder.indexOf(b.subset);
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
+
+    const urls = subsetUrls.map(s => s.url);
+
+    // Логируем найденные subset'ы
+    if (subsetUrls.length > 0) {
+      console.log(`Found subsets for ${fontName}: ${subsetUrls.map(s => s.subset).join(', ')}`);
     }
 
-    return null;
+    // Если не нашли по subset'ам, берём все URL'ы
+    if (urls.length === 0) {
+      const allUrls = css.matchAll(/url\(([^)]+)\)/g);
+      for (const match of allUrls) {
+        urls.push(match[1]);
+      }
+    }
+
+    return urls;
   } catch (error) {
-    console.error(`Error fetching Google Font URL for ${fontName}:`, error);
-    return null;
+    console.error(`Error fetching Google Font URLs for ${fontName}:`, error);
+    return [];
   }
 }
 
 /**
- * Загружает шрифт
+ * Загружает шрифт (все доступные subset'ы)
  */
-async function loadFont(
+async function loadFonts(
   fontFamily: string,
   fontWeight: string,
   fontStyle: string
-): Promise<fontkit.Font> {
+): Promise<fontkit.Font[]> {
   const fontName = extractFontName(fontFamily);
   const cacheKey = `${fontName}-${fontWeight}-${fontStyle}`;
 
@@ -192,31 +211,68 @@ async function loadFont(
   }
 
   try {
-    const fontUrl = await getGoogleFontUrl(targetFont, fontWeight, fontStyle);
+    const fontUrls = await getGoogleFontUrls(targetFont, fontWeight, fontStyle);
 
-    if (fontUrl) {
-      console.log(`Loading font: ${targetFont} from ${fontUrl}`);
-
-      const response = await fetch(fontUrl);
-      if (!response.ok) {
-        throw new Error(`Font download failed: ${response.status}`);
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = new Uint8Array(arrayBuffer);
-
-      const fontResult = fontkit.create(buffer as any);
-      const font = 'fonts' in fontResult ? fontResult.fonts[0] : fontResult;
-
-      fontCache.set(cacheKey, font);
-      return font;
+    if (fontUrls.length === 0) {
+      throw new Error(`Could not get font URLs for ${targetFont}`);
     }
 
-    throw new Error(`Could not get font URL for ${targetFont}`);
+    const fonts: fontkit.Font[] = [];
+
+    for (const fontUrl of fontUrls) {
+      try {
+        console.log(`Loading font subset: ${targetFont} from ${fontUrl.substring(0, 80)}...`);
+
+        const response = await fetch(fontUrl);
+        if (!response.ok) {
+          console.warn(`Font download failed: ${response.status}`);
+          continue;
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = new Uint8Array(arrayBuffer);
+
+        const fontResult = fontkit.create(buffer as any);
+        const font = 'fonts' in fontResult ? fontResult.fonts[0] : fontResult;
+
+        fonts.push(font);
+      } catch (e) {
+        console.warn(`Failed to load font subset:`, e);
+      }
+    }
+
+    if (fonts.length === 0) {
+      throw new Error(`Failed to load any font files for ${targetFont}`);
+    }
+
+    console.log(`Loaded ${fonts.length} font subset(s) for ${targetFont}`);
+    fontCache.set(cacheKey, fonts);
+    return fonts;
   } catch (error) {
     console.error(`Font loading failed for ${fontName}:`, error);
     throw new Error(`Failed to load font: ${fontFamily}`);
   }
+}
+
+/**
+ * Находит глиф в массиве шрифтов (проверяет все subset'ы)
+ */
+function findGlyph(fonts: fontkit.Font[], codePoint: number): { glyph: any; font: fontkit.Font } | null {
+  for (const font of fonts) {
+    const glyph = font.glyphForCodePoint(codePoint);
+    // Проверяем что это не .notdef глиф (id !== 0)
+    if (glyph && glyph.id !== 0) {
+      return { glyph, font };
+    }
+  }
+
+  // Если не нашли, возвращаем глиф из первого шрифта (будет .notdef)
+  if (fonts.length > 0) {
+    const glyph = fonts[0].glyphForCodePoint(codePoint);
+    return { glyph, font: fonts[0] };
+  }
+
+  return null;
 }
 
 /**
@@ -268,15 +324,21 @@ function glyphPathToSvg(glyph: any, fontSize: number, unitsPerEm: number): strin
 }
 
 /**
- * Получает данные глифа
+ * Получает данные глифа из массива шрифтов
  */
-function getGlyphData(font: fontkit.Font, char: string, fontSize: number): {
+function getGlyphData(fonts: fontkit.Font[], char: string, fontSize: number): {
   path: string;
   advance: number;
   bbox: { minX: number; minY: number; maxX: number; maxY: number } | null;
 } {
   const codePoint = char.codePointAt(0) || 0;
-  const glyph = font.glyphForCodePoint(codePoint);
+  const result = findGlyph(fonts, codePoint);
+
+  if (!result) {
+    return { path: '', advance: fontSize * 0.5, bbox: null };
+  }
+
+  const { glyph, font } = result;
   const scale = fontSize / font.unitsPerEm;
 
   const advance = (glyph.advanceWidth || 0) * scale;
@@ -311,7 +373,7 @@ export async function convertTextToPath(
   letterSpacing: number = 0
 ): Promise<string> {
   try {
-    const font = await loadFont(fontFamily, fontWeight, fontStyle);
+    const fonts = await loadFonts(fontFamily, fontWeight, fontStyle);
 
     const paths: string[] = [];
     let currentX = 0;
@@ -323,14 +385,17 @@ export async function convertTextToPath(
 
     for (const char of text) {
       if (char === ' ') {
-        const spaceGlyph = font.glyphForCodePoint(32);
-        const scale = fontSize / font.unitsPerEm;
-        const spaceWidth = (spaceGlyph.advanceWidth || fontSize * 0.25) * scale;
+        const spaceResult = findGlyph(fonts, 32);
+        let spaceWidth = fontSize * 0.25;
+        if (spaceResult) {
+          const scale = fontSize / spaceResult.font.unitsPerEm;
+          spaceWidth = (spaceResult.glyph.advanceWidth || fontSize * 0.25) * scale;
+        }
         currentX += spaceWidth + letterSpacing;
         continue;
       }
 
-      const { path, advance, bbox } = getGlyphData(font, char, fontSize);
+      const { path, advance, bbox } = getGlyphData(fonts, char, fontSize);
 
       if (path) {
         glyphsData.push({ path, x: currentX, advance });
@@ -392,9 +457,8 @@ export async function convertCurvedTextToPath(
   letterSpacing: number = 0
 ): Promise<string> {
   try {
-    const font = await loadFont(fontFamily, fontWeight, fontStyle);
+    const fonts = await loadFonts(fontFamily, fontWeight, fontStyle);
     const paths: string[] = [];
-    const scale = fontSize / font.unitsPerEm;
 
     // Собираем данные о символах
     interface CharData {
@@ -410,12 +474,16 @@ export async function convertCurvedTextToPath(
 
     for (const char of text) {
       if (char === ' ') {
-        const spaceGlyph = font.glyphForCodePoint(32);
-        const advance = (spaceGlyph.advanceWidth || fontSize * 0.25) * scale;
-        charData.push({ char, advance, isSpace: true });
-        totalWidth += advance + letterSpacing;
+        const spaceResult = findGlyph(fonts, 32);
+        let spaceWidth = fontSize * 0.25;
+        if (spaceResult) {
+          const scale = fontSize / spaceResult.font.unitsPerEm;
+          spaceWidth = (spaceResult.glyph.advanceWidth || fontSize * 0.25) * scale;
+        }
+        charData.push({ char, advance: spaceWidth, isSpace: true });
+        totalWidth += spaceWidth + letterSpacing;
       } else {
-        const { path, advance, bbox } = getGlyphData(font, char, fontSize);
+        const { path, advance, bbox } = getGlyphData(fonts, char, fontSize);
         charData.push({ char, advance, isSpace: false, path, bbox });
         totalWidth += advance + letterSpacing;
       }
@@ -427,12 +495,10 @@ export async function convertCurvedTextToPath(
     // Проверяем, не превышает ли текст длину окружности
     const circumference = 2 * Math.PI * radius;
     let actualFontSize = fontSize;
-    let actualScale = scale;
 
     if (totalWidth > circumference * 0.9) {
       const scaleFactor = (circumference * 0.9) / totalWidth;
       actualFontSize = fontSize * scaleFactor;
-      actualScale = actualFontSize / font.unitsPerEm;
 
       // Пересчитываем с новым размером
       totalWidth = 0;
@@ -440,12 +506,16 @@ export async function convertCurvedTextToPath(
 
       for (const char of text) {
         if (char === ' ') {
-          const spaceGlyph = font.glyphForCodePoint(32);
-          const advance = (spaceGlyph.advanceWidth || actualFontSize * 0.25) * actualScale;
-          charData.push({ char, advance, isSpace: true });
-          totalWidth += advance + letterSpacing;
+          const spaceResult = findGlyph(fonts, 32);
+          let spaceWidth = actualFontSize * 0.25;
+          if (spaceResult) {
+            const scale = actualFontSize / spaceResult.font.unitsPerEm;
+            spaceWidth = (spaceResult.glyph.advanceWidth || actualFontSize * 0.25) * scale;
+          }
+          charData.push({ char, advance: spaceWidth, isSpace: true });
+          totalWidth += spaceWidth + letterSpacing;
         } else {
-          const { path, advance, bbox } = getGlyphData(font, char, actualFontSize);
+          const { path, advance, bbox } = getGlyphData(fonts, char, actualFontSize);
           charData.push({ char, advance, isSpace: false, path, bbox });
           totalWidth += advance + letterSpacing;
         }
@@ -570,7 +640,7 @@ export async function preloadFont(
   fontStyle: string = 'normal'
 ): Promise<boolean> {
   try {
-    await loadFont(fontFamily, fontWeight, fontStyle);
+    await loadFonts(fontFamily, fontWeight, fontStyle);
     return true;
   } catch {
     return false;
