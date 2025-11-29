@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { CircleElement } from './elements/CircleElement';
 import { TextElement } from './elements/TextElement';
@@ -16,9 +16,27 @@ export const Canvas = () => {
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
+  // Состояние для отслеживания размера экрана
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 768);
+
+  // Обработчик изменения размера окна
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    // Добавляем обработчик события
+    window.addEventListener('resize', handleResize);
+
+    // Убираем обработчик при размонтировании компонента
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // Размер SVG в пикселях (для отображения) - адаптивный
-  const maxSvgSize = 500; // максимальный размер для превью
-  const svgSize = maxSvgSize;
+  const baseMaxSvgSize = windowWidth <= 768 ? 400 : 500; // уменьшаем размер для мобильных устройств
+  const svgSize = baseMaxSvgSize; // используем адаптивный размер
   const scale = svgSize / canvasSize;
 
   // Шаг линейки в мм
