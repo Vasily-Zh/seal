@@ -94,8 +94,8 @@ export const MainLayout = () => {
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
-              flex: 1,
-              minHeight: '300px',
+              flex: 2,
+              minHeight: 0,
               margin: '8px',
               borderRadius: '6px',
               border: '1px solid #e5e7eb'
@@ -129,7 +129,7 @@ export const MainLayout = () => {
                 Очистить
               </button>
             </div>
-            <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Canvas />
             </div>
           </div>
@@ -228,7 +228,7 @@ export const MainLayout = () => {
                 Очистить
               </button>
             </div>
-            <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Canvas />
             </div>
           </div>

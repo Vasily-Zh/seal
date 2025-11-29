@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useStampStore } from '../../store/useStampStore';
 import { CircleElement } from './elements/CircleElement';
 import { TextElement } from './elements/TextElement';
@@ -12,13 +12,40 @@ import { GroupElement } from './elements/GroupElement';
 
 export const Canvas = () => {
   const canvasRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const elements = useStampStore((state) => state.elements);
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
-  // Размер SVG в пикселях (для отображения) - адаптивный
-  const maxSvgSize = 500; // максимальный размер для превью
-  const svgSize = maxSvgSize;
+  // Адаптивный размер SVG
+  const [svgSize, setSvgSize] = useState(400);
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const { clientWidth, clientHeight } = containerRef.current;
+        const availableWidth = clientWidth - 20;
+        const availableHeight = clientHeight - 40; // место под "Размер клише"
+        const size = Math.max(Math.min(availableWidth, availableHeight), 210);
+        setSvgSize(size);
+      }
+    };
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    
+    // ResizeObserver для отслеживания изменений контейнера
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   const scale = svgSize / canvasSize;
 
   // Шаг линейки в мм
@@ -31,23 +58,30 @@ export const Canvas = () => {
       maxRadius = Math.max(maxRadius, el.radius);
     }
   });
-  const clicheSize = Math.ceil(maxRadius);
+  // const clicheSize = Math.ceil(maxRadius);
 
   return (
     <div
+      ref={containerRef}
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        width: '100%',
         height: '100%',
         backgroundColor: '#f9fafb',
-        padding: '20px',
-        position: 'relative',
+        padding: '10px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
       {/* SVG Canvas */}
-      <div style={{ position: 'relative', border: '1px solid #d1d5db', backgroundColor: 'white', maxWidth: '100%', maxHeight: '100%' }}>
+      <div style={{ 
+        border: '1px solid #d1d5db', 
+        backgroundColor: 'white',
+        flexShrink: 0,
+      }}>
         <svg
           ref={canvasRef}
           width={svgSize}
@@ -251,18 +285,7 @@ export const Canvas = () => {
         </svg>
       </div>
 
-      {/* Размер клише */}
-      <div
-        style={{
-          marginTop: '16px',
-          fontSize: '16px',
-          fontWeight: '600',
-          color: '#111827',
-          textAlign: 'center',
-        }}
-      >
-        Размер клише: <span style={{ color: '#0369a1' }}>{clicheSize} мм × {clicheSize} мм</span>
-      </div>
+
     </div>
   );
 };
