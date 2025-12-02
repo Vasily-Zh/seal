@@ -56,6 +56,7 @@ export const MainLayout = () => {
               backgroundColor: '#f9fafb',
               borderBottom: '1px solid #e5e7eb',
               flexWrap: 'wrap',
+              flex: '0 0 auto',
             }}
             className="mobile-controls-container"
           >
@@ -67,34 +68,16 @@ export const MainLayout = () => {
             </div>
           </div>
 
-          {/* Настройки элемента */}
+          {/* Превью - ПЕРВЫМ, чтобы печать была видна */}
           <div
             style={{
-              backgroundColor: '#fff',
-              padding: '16px',
               flex: '0 0 auto',
-              minHeight: '300px',
-              border: '1px solid #e5e7eb',
-              margin: '8px',
-              borderRadius: '6px',
-              overflow: 'auto',
-            }}
-          >
-            <h4 style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 12px 0', color: '#111827' }}>
-              Настройки элемента
-            </h4>
-            <Controls showOnlySettings={true} />
-          </div>
-
-          {/* Превью */}
-          <div
-            style={{
-              flex: '1 1 0',
-              minHeight: 0,
+              minHeight: '350px',
+              height: '350px',
               backgroundColor: '#f9fafb',
               display: 'flex',
               flexDirection: 'column',
-              margin: '0 8px 8px',
+              margin: '8px',
               borderRadius: '6px',
               overflow: 'hidden',
               border: '1px solid #e5e7eb',
@@ -102,12 +85,13 @@ export const MainLayout = () => {
           >
             <div
               style={{
-                padding: '12px 16px',
+                padding: '8px 16px',
                 backgroundColor: '#fff',
                 borderBottom: '1px solid #e5e7eb',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                flex: '0 0 auto',
               }}
             >
               <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#111827' }}>
@@ -139,6 +123,25 @@ export const MainLayout = () => {
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <Canvas />
             </div>
+          </div>
+
+          {/* Настройки элемента - после превью, со скроллом */}
+          <div
+            style={{
+              backgroundColor: '#fff',
+              padding: '16px',
+              flex: '1 1 auto',
+              minHeight: '150px',
+              border: '1px solid #e5e7eb',
+              margin: '0 8px 8px',
+              borderRadius: '6px',
+              overflow: 'auto',
+            }}
+          >
+            <h4 style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 12px 0', color: '#111827' }}>
+              Настройки элемента
+            </h4>
+            <Controls showOnlySettings={true} />
           </div>
         </div>
       ) : (

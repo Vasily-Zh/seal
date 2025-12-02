@@ -31,8 +31,12 @@ export const Canvas = () => {
       const w = container.clientWidth;
       const h = container.clientHeight;
 
+      // ОТЛАДКА
+      console.log('[CANVAS] Container size:', { w, h, parent: container.parentElement?.clientHeight });
+
       // Учитываем padding 10px с каждой стороны
       const size = Math.max(Math.min(w - 20, h - 20), 220);
+      console.log('[CANVAS] Calculated SVG size:', size);
       setSvgSize(size);
     };
 
