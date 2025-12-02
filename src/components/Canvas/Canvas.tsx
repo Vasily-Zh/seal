@@ -1,103 +1,97 @@
-import { useRef, useState, useEffect } from 'react';
-import { useStampStore } from '../../store/useStampStore';
-import { CircleElement } from './elements/CircleElement';
-import { TextElement } from './elements/TextElement';
-import { TextCenteredElement } from './elements/TextCenteredElement';
-import { RectangleElement } from './elements/RectangleElement';
-import { TriangleElement } from './elements/TriangleElement';
-import { ImageElement } from './elements/ImageElement';
-import { IconElement } from './elements/IconElement';
-import { LineElement } from './elements/LineElement';
-import { GroupElement } from './elements/GroupElement';
+import { useRef, useState, useEffect } from "react";
+import { useStampStore } from "../../store/useStampStore";
+import { CircleElement } from "./elements/CircleElement";
+import { TextElement } from "./elements/TextElement";
+import { TextCenteredElement } from "./elements/TextCenteredElement";
+import { RectangleElement } from "./elements/RectangleElement";
+import { TriangleElement } from "./elements/TriangleElement";
+import { ImageElement } from "./elements/ImageElement";
+import { IconElement } from "./elements/IconElement";
+import { LineElement } from "./elements/LineElement";
+import { GroupElement } from "./elements/GroupElement";
 
 export const Canvas = () => {
   const canvasRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
   const elements = useStampStore((state) => state.elements);
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
-  // Адаптивный размер SVG
   const [svgSize, setSvgSize] = useState(400);
 
+  // Убрали старый --vh фикс — он больше не нужен (MainLayout управляет высотой)
+
+  // Адаптивный размер SVG
   useEffect(() => {
     const updateSize = () => {
-      if (containerRef.current) {
-        const { clientWidth, clientHeight } = containerRef.current;
-        const availableWidth = clientWidth - 20;
-        const availableHeight = clientHeight - 40; // место под "Размер клише"
-        const size = Math.max(Math.min(availableWidth, availableHeight), 210);
-        setSvgSize(size);
-      }
+      const container = containerRef.current;
+      if (!container) return;
+
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+
+      // Учитываем padding 10px с каждой стороны
+      const size = Math.max(Math.min(w - 20, h - 20), 220);
+      setSvgSize(size);
     };
 
     updateSize();
-    window.addEventListener('resize', updateSize);
-    
-    // ResizeObserver для отслеживания изменений контейнера
-    const resizeObserver = new ResizeObserver(updateSize);
+    window.addEventListener("resize", updateSize);
+
+    const ro = new ResizeObserver(updateSize);
     if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
+      ro.observe(containerRef.current);
     }
 
     return () => {
-      window.removeEventListener('resize', updateSize);
-      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateSize);
+      ro.disconnect();
     };
   }, []);
 
   const scale = svgSize / canvasSize;
-
-  // Шаг линейки в мм
-  const rulerStep = 5; // шаг меток линейки 5мм
-
-  // Рассчитываем размер клише (диаметр самого большого круга)
-  let maxRadius = 0;
-  elements.forEach((el) => {
-    if (el.type === 'circle') {
-      maxRadius = Math.max(maxRadius, el.radius);
-    }
-  });
-  // const clicheSize = Math.ceil(maxRadius);
+  const rulerStep = 5;
 
   return (
     <div
       ref={containerRef}
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#f9fafb',
-        padding: '10px',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
+        width: "100%",
+        flex: "1",                    // Главное: занимает всё доступное место
+        minHeight: 0,                 // важно для flex
+        display: "flex",
+        alignItems: "center",         // центрируем SVG по вертикали и горизонтали
+        justifyContent: "center",
+        backgroundColor: "#f9fafb",
+        padding: "10px",
+        boxSizing: "border-box",
+        overflow: "hidden",           // чтобы не было лишних скроллов
       }}
     >
-      {/* SVG Canvas */}
-      <div style={{ 
-        border: '1px solid #d1d5db', 
-        backgroundColor: 'white',
-        flexShrink: 0,
-      }}>
+      <div
+        style={{
+          border: "1px solid #d1d5db",
+          backgroundColor: "white",
+          borderRadius: "6px",
+          flexShrink: 0,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        }}
+      >
         <svg
           ref={canvasRef}
           width={svgSize}
           height={svgSize}
           viewBox={`0 0 ${svgSize} ${svgSize}`}
-          style={{ display: 'block' }}
+          style={{ display: "block" }}
           id="stamp-canvas"
         >
-          {/* Определение паттерна сетки - 5x5мм клетки */}
           <defs>
             <pattern
               id="grid-pattern"
               width={5 * scale}
               height={5 * scale}
               patternUnits="userSpaceOnUse"
-              data-export-exclude="true"
             >
               <path
                 d={`M ${5 * scale} 0 L 0 0 0 ${5 * scale}`}
@@ -107,27 +101,23 @@ export const Canvas = () => {
               />
             </pattern>
 
-             <pattern
-                id="fine-grid-pattern"
-                width={1 * scale}
-                height={1 * scale}
-                patternUnits="userSpaceOnUse"
-                data-export-exclude="true"
-              >
-                <path
-                  d={`M ${1 * scale} 0 L 0 0 0 ${1 * scale}`}
-                  fill="none"
-                  stroke="#000000ff"
-                  strokeWidth="0.1"
-                />
-              </pattern>
-
+            <pattern
+              id="fine-grid-pattern"
+              width={1 * scale}
+              height={1 * scale}
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d={`M ${1 * scale} 0 L 0 0 0 ${1 * scale}`}
+                fill="none"
+                stroke="#000000ff"
+                strokeWidth="0.1"
+              />
+            </pattern>
           </defs>
 
-          {/* Белый фон (экспортируется) */}
           <rect width={svgSize} height={svgSize} fill="white" />
 
-          {/* Фоновая сетка (только для редактора) */}
           <rect
             width={svgSize}
             height={svgSize}
@@ -135,140 +125,72 @@ export const Canvas = () => {
             data-export-exclude="true"
           />
 
-                    <rect
+          <rect
             width={svgSize}
             height={svgSize}
             fill="url(#fine-grid-pattern)"
             data-export-exclude="true"
           />
 
-
-          {/* Линейки - только для редактора */}
+          {/* Линейки */}
           <g data-export-exclude="true">
-            {/* Метка 0 на верхней линейке */}
-            {/* <text x={0} y={12} fontSize="10" fill="#ef4444" textAnchor="start" fontWeight="bold">
-              0
-            </text> */}
-
-          {/* Верхняя линейка */}
-          {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
-            const mmValue = i * rulerStep;
-            const pos = mmValue * scale;
-            const isMajor = mmValue % 10 === 0;
-
-            if (mmValue === 0) return null; // Пропускаем 0, уже нарисовали
-
-            return (
-              <g key={`top-${i}`}>
+            {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
+              const mm = i * rulerStep;
+              if (mm === 0) return null;
+              const pos = mm * scale;
+              return (
                 <line
+                  key={i}
                   x1={pos}
                   y1={0}
                   x2={pos}
-                  y2={isMajor ? 10 : 10}
+                  y2={10}
                   stroke="#9ca3af"
                   strokeWidth="1"
                 />
-                {/* {isMajor && (
-                  <text
-                    x={pos}
-                    y={20}
-                    fontSize="10"
-                    fill="#6b7280"
-                    textAnchor="middle"
-                  >
-                    {mmValue}
-                  </text>
-                )} */}
-              </g>
-            );
-          })}
+              );
+            })}
 
-          {/* Метка canvasSize на верхней линейке справа */}
-          {/* <text
-            x={svgSize - 2}
-            y={12}
-            fontSize="10"
-            fill="#ef4444"
-            textAnchor="end"
-            fontWeight="bold"
-          >
-            {canvasSize}мм
-          </text> */}
-
-          {/* Метка 0 на левой линейке */}
-          {/* <text x={12} y={10} fontSize="10" fill="#ef4444" textAnchor="start" fontWeight="bold">
-            0
-          </text> */}
-
-          {/* Левая линейка */}
-          {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
-            const mmValue = i * rulerStep;
-            const pos = mmValue * scale;
-            const isMajor = mmValue % 10 === 0;
-
-            if (mmValue === 0) return null; // Пропускаем 0, уже нарисовали
-
-            return (
-              <g key={`left-${i}`}>
+            {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
+              const mm = i * rulerStep;
+              if (mm === 0) return null;
+              const pos = mm * scale;
+              return (
                 <line
+                  key={"h" + i}
                   x1={0}
                   y1={pos}
-                  x2={isMajor ? 10 : 10}
+                  x2={10}
                   y2={pos}
                   stroke="#9ca3af"
                   strokeWidth="1"
                 />
-                {/* {isMajor && (
-                  <text
-                    x={20}
-                    y={pos + 4}
-                    fontSize="10"
-                    fill="#6b7280"
-                    textAnchor="start"
-                  >
-                    {mmValue}
-                  </text>
-                )} */}
-              </g>
-            );
-          })}
-
-            {/* Метка canvasSize на левой линейке снизу */}
-            {/* <text
-              x={12}
-              y={svgSize - 2}
-              fontSize="10"
-              fill="#ef4444"
-              textAnchor="start"
-              fontWeight="bold"
-            >
-              {canvasSize}мм
-            </text> */}
+              );
+            })}
           </g>
 
-          {/* Рендеринг элементов */}
+          {/* Элементы макета */}
           {elements
-            // Фильтруем элементы - рендерим только те, которые не имеют parentId (не вложены в группы)
-            .filter((element) => !element.parentId)
+            .filter((e) => !e.parentId)
             .map((element) => {
               switch (element.type) {
-                case 'circle':
+                case "circle":
                   return <CircleElement key={element.id} element={element} scale={scale} />;
-                case 'text':
+                case "text":
                   return <TextElement key={element.id} element={element} scale={scale} />;
-                case 'textCentered':
+                case "textCentered":
                   return <TextCenteredElement key={element.id} element={element} scale={scale} />;
-                case 'rectangle':
+                case "rectangle":
                   return <RectangleElement key={element.id} element={element} scale={scale} />;
-                case 'triangle':
+                case "triangle":
                   return <TriangleElement key={element.id} element={element} scale={scale} />;
-                case 'image':
+                case "image":
                   return <ImageElement key={element.id} element={element} scale={scale} />;
-                case 'icon':
+                case "icon":
                   return <IconElement key={element.id} element={element} scale={scale} />;
-                case 'line':
+                case "line":
                   return <LineElement key={element.id} element={element} scale={scale} />;
-                case 'group':
+                case "group":
                   return (
                     <GroupElement
                       key={element.id}
@@ -284,8 +206,6 @@ export const Canvas = () => {
             })}
         </svg>
       </div>
-
-
     </div>
   );
 };

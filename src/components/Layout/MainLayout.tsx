@@ -18,44 +18,47 @@ export const MainLayout = () => {
     }
   };
 
-  // Determine if we're on a mobile view based on screen width
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
-    // Initial check
     checkScreenSize();
-
-    // Add event listener for window resize
     window.addEventListener('resize', checkScreenSize);
-
-    // Cleanup event listener
-    return () => {
-      window.removeEventListener('resize', checkScreenSize);
-    };
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div
+      style={{
+        height: 'auto',
+        minHeight: '100dvh', // достаточно одного — современные браузеры всё понимают
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        backgroundColor: '#f9fafb',
+      } as const}
+    >
       {/* Шапка */}
       <Header />
 
       {/* Основной контент */}
       {isMobile ? (
-        /* Mobile Layout */
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="mobile-layout">
-          {/* Mobile Toolbar and Layers as dropdowns on the same line */}
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            padding: '12px',
-            backgroundColor: '#f9fafb',
-            borderBottom: '1px solid #e5e7eb',
-            flexWrap: 'wrap'
-          }} className="mobile-controls-container">
+        /* =================== МОБИЛЬНАЯ ВЕРСИЯ =================== */
+        <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* Панель инструментов */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              padding: '12px',
+              backgroundColor: '#f9fafb',
+              borderBottom: '1px solid #e5e7eb',
+              flexWrap: 'wrap',
+            }}
+            className="mobile-controls-container"
+          >
             <div style={{ flex: 1, minWidth: '120px' }}>
               <MobileToolbar />
             </div>
@@ -64,45 +67,50 @@ export const MainLayout = () => {
             </div>
           </div>
 
-          {/* Element Settings Block - Full visibility */}
+          {/* Настройки элемента */}
           <div
             style={{
               backgroundColor: '#fff',
               padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'auto',
-              flex: 1,
+              flex: '0 0 auto',
               minHeight: '300px',
               border: '1px solid #e5e7eb',
               margin: '8px',
-              borderRadius: '6px'
+              borderRadius: '6px',
+              overflow: 'auto',
             }}
           >
-            <h4 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', marginTop: 0, color: '#111827' }}>
+            <h4 style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 12px 0', color: '#111827' }}>
               Настройки элемента
             </h4>
-            <div style={{ flex: 1, overflow: 'auto' }}>
-              <Controls showOnlySettings={true} />
-            </div>
+            <Controls showOnlySettings={true} />
           </div>
 
-          {/* Preview Block - At the bottom, adaptive */}
+          {/* Превью */}
           <div
             style={{
+              flex: '1 1 0',
+              minHeight: 0,
               backgroundColor: '#f9fafb',
               display: 'flex',
               flexDirection: 'column',
-              overflow: 'hidden',
-              flex: 2,
-              minHeight: 0,
-              margin: '8px',
+              margin: '0 8px 8px',
               borderRadius: '6px',
-              border: '1px solid #e5e7eb'
+              overflow: 'hidden',
+              border: '1px solid #e5e7eb',
             }}
           >
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: 0 }}>
+            <div
+              style={{
+                padding: '12px 16px',
+                backgroundColor: '#fff',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#111827' }}>
                 Превью
               </h3>
               <button
@@ -118,26 +126,25 @@ export const MainLayout = () => {
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s',
                 }}
-                className="touch-optimized"
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ef4444')}
-                title="Очистить макет"
+                className="touch-optimized"
               >
                 <Trash2 size={14} />
                 Очистить
               </button>
             </div>
-            <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <Canvas />
             </div>
           </div>
         </div>
       ) : (
-        /* Desktop Layout */
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          {/* Блок 1: Добавить (Toolbar) - 140px */}
+        /* =================== ДЕСКТОПНАЯ ВЕРСИЯ =================== */
+        <div style={{ flex: '1 1 auto', display: 'flex', overflow: 'hidden' }}>
+          {/* Toolbar */}
           <div
             style={{
               width: '140px',
@@ -157,33 +164,24 @@ export const MainLayout = () => {
             <Toolbar />
           </div>
 
-          {/* Блок 2: Слои - 25% */}
-          <div
-            style={{
-              width: '25%',
-              borderRight: '1px solid #e5e7eb',
-              backgroundColor: '#fff',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
+          {/* Слои */}
+          <div style={{ width: '25%', borderRight: '1px solid #e5e7eb', backgroundColor: '#fff', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <LayersPanel />
           </div>
 
-          {/* Блок 3: Настройки элемента - 25% */}
+          {/* Настройки элемента */}
           <div
             style={{
               width: '25%',
               borderRight: '1px solid #e5e7eb',
               backgroundColor: '#fff',
-              overflow: 'auto',
               padding: '16px',
+              overflow: 'auto',
               display: 'flex',
               flexDirection: 'column',
             }}
           >
-            <h4 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', marginTop: 0, color: '#111827' }}>
+            <h4 style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 12px 0', color: '#111827' }}>
               Настройки элемента
             </h4>
             <div style={{ flex: 1, overflow: 'auto' }}>
@@ -191,18 +189,19 @@ export const MainLayout = () => {
             </div>
           </div>
 
-          {/* Блок 4: Превью - треть экрана */}
-          <div
-            style={{
-              flex: 1,
-              backgroundColor: '#f9fafb',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: 0 }}>
+          {/* Превью */}
+          <div style={{ flex: 1, backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div
+              style={{
+                padding: '12px 16px',
+                backgroundColor: '#fff',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#111827' }}>
                 Превью
               </h3>
               <button
@@ -218,17 +217,16 @@ export const MainLayout = () => {
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ef4444')}
-                title="Очистить макет"
               >
                 <Trash2 size={14} />
                 Очистить
               </button>
             </div>
-            <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <Canvas />
             </div>
           </div>

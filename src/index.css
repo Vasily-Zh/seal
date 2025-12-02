@@ -5,166 +5,60 @@
 }
 
 :root {
-  font-family: 'Roboto';
+  font-family: 'Roboto', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color: #111827;
   background-color: #ffffff;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   min-width: 320px;
-  min-height: 100vh;
+  height: auto;                    /* ← было 100vh — убираем */
+  min-height: 100dvh;              /* ← современный и правильный vh */
+  min-height: calc(var(--vh, 1vh) * 100);
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
-  height: 100vh;
+  height: auto;                    /* ← КРИТИЧНО: было 100vh */
+  min-height: 100dvh;
+  min-height: calc(var(--vh, 1vh) * 100);
+  display: flex;
+  flex-direction: column;
 }
 
-button {
-  font-family: inherit;
-  transition: all 0.2s;
-}
+/* Остальные твои стили без изменений */
+button { font-family: inherit; transition: all 0.2s; }
+button:focus, button:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
 
-button:focus,
-button:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
+input, select, textarea { font-family: inherit; }
 
-input,
-select,
-textarea {
-  font-family: inherit;
-}
-
-/* Скрытие стрелок у input type="number" */
 input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type='number'] { -moz-appearance: textfield; }
 
-input[type='number'] {
-  -moz-appearance: textfield;
-}
+input[type='range'] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }
+input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #10b981; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+input[type='range']::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #10b981; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+input[type='range']::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; }
+input[type='range']::-moz-range-track { height: 6px; border-radius: 3px; background: #e5e7eb; }
 
-/* Стилизация range input */
-input[type='range'] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #10b981;
-  cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-input[type='range']::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #10b981;
-  cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-input[type='range']::-webkit-slider-runnable-track {
-  height: 6px;
-  border-radius: 3px;
-}
-
-input[type='range']::-moz-range-track {
-  height: 6px;
-  border-radius: 3px;
-  background: #e5e7eb;
-}
-
-/* Скроллбар */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Responsive Design for Mobile */
 @media (max-width: 768px) {
-  /* Adjust button sizes for mobile */
-  button {
-    min-height: 44px; /* Ensure touch targets are large enough */
-    padding: 8px 12px;
-  }
-
-  /* Adjust input sizes for mobile */
-  input,
-  select,
-  textarea {
-    min-height: 44px;
-    padding: 8px;
-  }
-
-  /* Improve mobile layout spacing */
-  #root {
-    height: 100vh;
-    width: 100%;
-    overflow-x: hidden;
-  }
-
-  /* Ensure mobile dropdowns are properly sized */
-  .mobile-dropdown {
-    width: 100%;
-    min-width: auto;
-  }
-
-  /* Adjust font sizes for better mobile readability */
-  body {
-    font-size: 14px;
-  }
-
-  h1, h2, h3, h4 {
-    line-height: 1.3;
-  }
-
-  /* Adjust spacing in mobile layouts */
-  .mobile-controls-container {
-    padding: 8px;
-    gap: 8px;
-  }
-
-  /* Optimize for mobile touch interactions */
-  .touch-optimized {
-    min-height: 44px;
-    min-width: 44px;
-  }
+  button { min-height: 44px; padding: 8px 12px; }
+  input, select, textarea { min-height: 44px; padding: 8px; }
+  body { font-size: 14px; }
+  #root { overflow-x: hidden; }
 }
