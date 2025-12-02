@@ -32,8 +32,8 @@ export const MainLayout = () => {
   return (
     <div
       style={{
-        height: 'auto',
-        minHeight: '100dvh', // достаточно одного — современные браузеры всё понимают
+        height: '100dvh', // Фиксированная высота — предотвращает бесконечный рост в iframe
+        maxHeight: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
