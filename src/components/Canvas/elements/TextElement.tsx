@@ -34,23 +34,9 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
 
     const { svgContent, loading } = useCurvedTextVectorization(curvedTextProps, scale);
 
-    if (loading) {
-      // Пока грузится, показываем временное сообщение
-      return (
-        <text
-          x={element.x * scale}
-          y={element.y * scale}
-          fill={element.color}
-          fontSize={element.fontSize * scale}
-          fontFamily={element.fontFamily}
-          fontWeight={fontWeight}
-          fontStyle={fontStyle}
-          textAnchor="middle"
-          dominantBaseline="middle"
-        >
-          [Loading...]
-        </text>
-      );
+    // Если ещё грузится или нет контента - не показываем ничего (без скачков)
+    if (loading || !svgContent) {
+      return null;
     }
 
     // Возвращаем векторизованные пути как SVG разметку
@@ -72,23 +58,9 @@ export const TextElement = ({ element, scale }: TextElementProps) => {
 
   const { svgContent: straightSvgContent, loading: straightLoading } = useCenteredTextVectorization(straightTextProps, scale);
 
-  if (straightLoading) {
-    // Пока грузится, показываем временное сообщение
-    return (
-      <text
-        x={element.x * scale}
-        y={element.y * scale}
-        fill={element.color}
-        fontSize={element.fontSize * scale}
-        fontFamily={element.fontFamily}
-        fontWeight={fontWeight}
-        fontStyle={fontStyle}
-        textAnchor="middle"
-        dominantBaseline="middle"
-      >
-        [Loading...]
-      </text>
-    );
+  // Если ещё грузится или нет контента - не показываем ничего
+  if (straightLoading || !straightSvgContent) {
+    return null;
   }
 
   // Применяем поворот если нужно

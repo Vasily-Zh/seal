@@ -18,11 +18,13 @@ export const Canvas = () => {
   const selectedElementId = useStampStore((state) => state.selectedElementId);
   const canvasSize = useStampStore((state) => state.canvasSize);
 
-  const [svgSize, setSvgSize] = useState(400);
+  // Размер SVG - начинаем с null
+  const [svgSize, setSvgSize] = useState<number | null>(null);
+  // Флаг что размер стабилизировался
+  const [sizeStable, setSizeStable] = useState(false);
+  const stabilizeTimer = useRef<number | null>(null);
 
-  // Убрали старый --vh фикс — он больше не нужен (MainLayout управляет высотой)
-
-  // Адаптивный размер SVG
+  // Адаптивный размер SVG - без анимаций
   useEffect(() => {
     const updateSize = () => {
       const container = containerRef.current;
@@ -31,16 +33,24 @@ export const Canvas = () => {
       const w = container.clientWidth;
       const h = container.clientHeight;
 
-      // ОТЛАДКА
-      console.log('[CANVAS] Container size:', { w, h, parent: container.parentElement?.clientHeight });
-
       // Учитываем padding 10px с каждой стороны
       const size = Math.max(Math.min(w - 20, h - 20), 220);
-      console.log('[CANVAS] Calculated SVG size:', size);
+      
       setSvgSize(size);
+      
+      // Сбрасываем стабильность и ждём пока размер устаканится
+      setSizeStable(false);
+      if (stabilizeTimer.current) {
+        clearTimeout(stabilizeTimer.current);
+      }
+      stabilizeTimer.current = window.setTimeout(() => {
+        setSizeStable(true);
+      }, 50); // 50ms достаточно чтобы layout устаканился
     };
 
+    // Мгновенный расчёт при монтировании
     updateSize();
+    
     window.addEventListener("resize", updateSize);
 
     const ro = new ResizeObserver(updateSize);
@@ -51,8 +61,31 @@ export const Canvas = () => {
     return () => {
       window.removeEventListener("resize", updateSize);
       ro.disconnect();
+      if (stabilizeTimer.current) {
+        clearTimeout(stabilizeTimer.current);
+      }
     };
   }, []);
+
+  // Пока размер не определён - показываем пустой контейнер
+  if (svgSize === null) {
+    return (
+      <div
+        ref={containerRef}
+        style={{
+          width: "100%",
+          flex: "1",
+          minHeight: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f9fafb",
+          padding: "10px",
+          boxSizing: "border-box",
+        }}
+      />
+    );
+  }
 
   const scale = svgSize / canvasSize;
   const rulerStep = 5;
@@ -173,8 +206,8 @@ export const Canvas = () => {
             })}
           </g>
 
-          {/* Элементы макета */}
-          {elements
+          {/* Элементы макета - рендерим только когда размер стабилизировался */}
+          {sizeStable && elements
             .filter((e) => !e.parentId)
             .map((element) => {
               switch (element.type) {
