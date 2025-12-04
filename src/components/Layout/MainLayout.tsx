@@ -5,17 +5,83 @@ import { Controls } from '../Controls/Controls';
 import { LayersPanel } from '../Controls/LayersPanel';
 import { MobileLayersPanel } from '../Controls/MobileLayersPanel';
 import { Canvas } from '../Canvas/Canvas';
+import { TemplateCategoryBar, TemplateGalleryPage, GeneratorPage } from '../Templates';
 import { useStampStore } from '../../store/useStampStore';
 import { Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import type { StampTemplate } from '../../types/templates';
+import type { StampElement } from '../../types';
+
+// Режимы отображения
+type ViewMode = 'editor' | 'gallery' | 'generator';
 
 export const MainLayout = () => {
   const clearCanvas = useStampStore((state) => state.clearCanvas);
+  const loadProjectData = useStampStore((state) => state.loadProjectData);
+  const elements = useStampStore((state) => state.elements);
+
+  // Режим отображения
+  const [viewMode, setViewMode] = useState<ViewMode>('editor');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   const handleClearCanvas = () => {
     if (window.confirm('Вы уверены, что хотите удалить все элементы с макета?')) {
       clearCanvas();
     }
+  };
+
+  // Обработчики навигации
+  const handleCategoryClick = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setViewMode('gallery');
+  };
+
+  const handleAllTemplatesClick = () => {
+    setSelectedCategoryId(null);
+    setViewMode('gallery');
+  };
+
+  const handleGeneratorClick = () => {
+    setViewMode('generator');
+  };
+
+  const handleBackToEditor = () => {
+    setViewMode('editor');
+    setSelectedCategoryId(null);
+  };
+
+  // Загрузка шаблона в редактор
+  const handleSelectTemplate = (template: StampTemplate) => {
+    if (elements.length > 0) {
+      if (!window.confirm('Текущий макет будет заменён. Продолжить?')) {
+        return;
+      }
+    }
+    
+    loadProjectData({
+      elements: template.elements,
+      canvasSize: template.canvasSize,
+      id: '',
+      name: template.name,
+    });
+    setViewMode('editor');
+  };
+
+  // Загрузка сгенерированного макета
+  const handleSelectGenerated = (newElements: StampElement[], canvasSize: number) => {
+    if (elements.length > 0) {
+      if (!window.confirm('Текущий макет будет заменён. Продолжить?')) {
+        return;
+      }
+    }
+    
+    loadProjectData({
+      elements: newElements,
+      canvasSize,
+      id: '',
+      name: 'Сгенерированный макет',
+    });
+    setViewMode('editor');
   };
 
   const [isMobile, setIsMobile] = useState(false);
@@ -43,8 +109,37 @@ export const MainLayout = () => {
       {/* Шапка */}
       <Header />
 
-      {/* Основной контент */}
-      {isMobile ? (
+      {/* Карусель категорий - только в режиме редактора */}
+      {viewMode === 'editor' && !isMobile && (
+        <TemplateCategoryBar
+          onCategoryClick={handleCategoryClick}
+          onAllTemplatesClick={handleAllTemplatesClick}
+          onGeneratorClick={handleGeneratorClick}
+        />
+      )}
+
+      {/* Режим галереи шаблонов */}
+      {viewMode === 'gallery' && (
+        <TemplateGalleryPage
+          categoryId={selectedCategoryId}
+          onBack={handleBackToEditor}
+          onSelectTemplate={handleSelectTemplate}
+        />
+      )}
+
+      {/* Режим генератора */}
+      {viewMode === 'generator' && (
+        <GeneratorPage
+          onBack={handleBackToEditor}
+          onSelectGenerated={handleSelectGenerated}
+        />
+      )}
+
+      {/* Режим редактора */}
+      {viewMode === 'editor' && (
+        <>
+          {/* Основной контент */}
+          {isMobile ? (
         /* =================== МОБИЛЬНАЯ ВЕРСИЯ =================== */
         <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Панель инструментов */}
@@ -234,6 +329,8 @@ export const MainLayout = () => {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

@@ -22,6 +22,7 @@ import * as LucideIcons from 'lucide-react';
 import * as HeroIcons from '@heroicons/react/24/solid';
 import { changeCredentials, logout, getCurrentAdminLogin } from '../../utils/auth';
 import { processSVG, readSVGFile } from '../../utils/svgValidator';
+import { AdminTemplatesTab } from './AdminTemplatesTab';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ interface AdminPanelProps {
   needsPasswordChange: boolean;
 }
 
-type Tab = 'categories' | 'settings';
+type Tab = 'categories' | 'templates' | 'settings';
 
 // Универсальный тип для отображения категорий
 interface DisplayCategory {
@@ -471,6 +472,21 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
             Категории и SVG
           </button>
           <button
+            onClick={() => setActiveTab('templates')}
+            style={{
+              padding: '12px 20px',
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: activeTab === 'templates' ? 600 : 400,
+              color: activeTab === 'templates' ? '#3b82f6' : '#666',
+              borderBottom: activeTab === 'templates' ? '2px solid #3b82f6' : '2px solid transparent',
+            }}
+          >
+            Шаблоны и генератор
+          </button>
+          <button
             onClick={() => setActiveTab('settings')}
             style={{
               padding: '12px 20px',
@@ -737,6 +753,8 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
                 )}
               </div>
             </div>
+          ) : activeTab === 'templates' ? (
+            <AdminTemplatesTab />
           ) : (
             <div style={{ padding: '30px', overflowY: 'auto' }}>
               {/* Смена креденшалов */}
