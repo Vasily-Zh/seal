@@ -175,7 +175,7 @@ const LayerItem = ({
       {/* Кнопки управления */}
       <div style={{ display: 'flex', gap: '4px' }}>
         {/* Блокировка */}
-        <button
+        {/* <button
           onClick={(e) => {
             e.stopPropagation();
             onToggleLock();
@@ -192,7 +192,7 @@ const LayerItem = ({
           title={element.locked ? 'Разблокировать' : 'Заблокировать'}
         >
           {element.locked ? <Lock size={16} /> : <Unlock size={16} />}
-        </button>
+        </button> */}
 
         {/* Дублирование */}
         <button
@@ -215,7 +215,7 @@ const LayerItem = ({
         </button>
 
         {/* Видимость */}
-        <button
+        {/* <button
           onClick={(e) => {
             e.stopPropagation();
             onToggleVisibility();
@@ -232,7 +232,7 @@ const LayerItem = ({
           title={element.visible ? 'Скрыть' : 'Показать'}
         >
           {element.visible ? <Eye size={16} /> : <EyeOff size={16} />}
-        </button>
+        </button> */}
 
         {/* Удаление */}
         <button

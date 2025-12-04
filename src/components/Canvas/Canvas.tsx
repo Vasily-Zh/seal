@@ -147,8 +147,8 @@ export const Canvas = () => {
               <path
                 d={`M ${1 * scale} 0 L 0 0 0 ${1 * scale}`}
                 fill="none"
-                stroke="#000000ff"
-                strokeWidth="0.1"
+                stroke="#ea0808"
+                strokeWidth="0.3"
               />
             </pattern>
           </defs>
@@ -169,7 +169,7 @@ export const Canvas = () => {
             data-export-exclude="true"
           />
 
-          {/* Линейки */}
+          {/* Линейки
           <g data-export-exclude="true">
             {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
               const mm = i * rulerStep;
@@ -204,7 +204,7 @@ export const Canvas = () => {
                 />
               );
             })}
-          </g>
+          </g> */}
 
           {/* Элементы макета - рендерим только когда размер стабилизировался */}
           {sizeStable && elements
