@@ -5,6 +5,7 @@ import { iconTagsMap } from '../../data/iconTags';
 import { allIcons } from '../../data/allIcons';
 import type { GeneratorBaseTemplate } from '../../types/templates';
 import type { StampElement, IconElement } from '../../types';
+import * as LucideIcons from 'lucide-react';
 
 interface GeneratorPageProps {
   onBack: () => void;
@@ -454,14 +455,15 @@ interface GeneratedCardProps {
 
 const GeneratedCard = ({ iconName, iconSource, template, onSelect }: GeneratedCardProps) => {
   // Динамический импорт иконки для превью
-  const IconComponent = useMemo(() => {
+
+  
+    const IconComponent = useMemo(() => {
     if (iconSource === 'lucide') {
-      // @ts-ignore
-      const icons = require('lucide-react');
-      return icons[iconName];
+      return LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>;
     }
     return null;
   }, [iconName, iconSource]);
+
 
   return (
     <div
