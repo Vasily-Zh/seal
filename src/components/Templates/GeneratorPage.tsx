@@ -3,7 +3,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Search, ChevronDown } from 'lucid
 import { useTemplatesStore } from '../../store/useTemplatesStore';
 import { iconTagsMap } from '../../data/iconTags';
 import { allIcons } from '../../data/allIcons';
-import { getCachedSvg } from '../../utils/extractSvgFromIcon';
+import { TemplatePreview } from './TemplatePreview';
 import type { GeneratorBaseTemplate } from '../../types/templates';
 import type { StampElement, IconElement } from '../../types';
 
@@ -458,16 +458,34 @@ interface GeneratedCardProps {
 }
 
 const GeneratedCard = ({ iconName, iconSource, template, onSelect }: GeneratedCardProps) => {
-  // Получаем SVG иконки через кеш
-  const svgContent = useMemo(() => {
-    if (iconSource === 'lucide' || iconSource === 'heroicons') {
-      return getCachedSvg(iconName, iconSource, {
-        stroke: '#0000ff',
-        strokeWidth: 1.5,
-      });
-    }
-    return null;
-  }, [iconName, iconSource]);
+  // Создаём элементы для превью: элементы шаблона + иконка
+  const previewElements = useMemo(() => {
+    if (!template) return [];
+
+    // Копируем элементы шаблона
+    const elements: StampElement[] = template.elements.map(el => ({
+      ...el,
+      id: `preview-${el.id}-${iconName}`,
+    }));
+
+    // Добавляем иконку
+    const iconElement: IconElement = {
+      id: `preview-icon-${iconName}`,
+      type: 'icon',
+      iconName,
+      iconSource,
+      x: template.iconPosition.x,
+      y: template.iconPosition.y,
+      width: template.iconPosition.size,
+      height: template.iconPosition.size,
+      visible: true,
+      stroke: '#0000ff',
+      strokeWidth: 1.5,
+    };
+
+    elements.push(iconElement);
+    return elements;
+  }, [template, iconName, iconSource]);
 
   return (
     <div
@@ -497,47 +515,32 @@ const GeneratedCard = ({ iconName, iconSource, template, onSelect }: GeneratedCa
           justifyContent: 'center',
           padding: '16px',
           borderBottom: '1px solid #e5e7eb',
-          position: 'relative',
         }}
       >
-        {/* Круг печати (упрощённый) */}
-        <div
-          style={{
-            width: '85%',
-            height: '85%',
-            borderRadius: '50%',
-            border: '3px solid #0000ff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-          }}
-        >
-          {/* Внутренний круг */}
+        {template && previewElements.length > 0 ? (
+          <TemplatePreview
+            elements={previewElements}
+            canvasSize={template.canvasSize}
+            previewSize={180}
+          />
+        ) : (
+          /* Заглушка если нет шаблона */
           <div
             style={{
-              width: '75%',
-              height: '75%',
+              width: '85%',
+              height: '85%',
               borderRadius: '50%',
-              border: '2px solid #0000ff',
+              border: '3px solid #0000ff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              color: '#9ca3af',
+              fontSize: '12px',
             }}
           >
-            {/* Иконка через SVG */}
-            {svgContent && (
-              <div
-                style={{ width: 40, height: 40 }}
-                dangerouslySetInnerHTML={{
-                  __html: svgContent
-                    .replace(/width="[^"]*"/, 'width="40"')
-                    .replace(/height="[^"]*"/, 'height="40"')
-                }}
-              />
-            )}
+            Выберите шаблон
           </div>
-        </div>
+        )}
       </div>
 
       {/* Кнопка */}
