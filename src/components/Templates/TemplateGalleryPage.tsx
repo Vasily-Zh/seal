@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTemplatesStore } from '../../store/useTemplatesStore';
 import { BUILT_IN_CATEGORIES } from '../../types/templates';
+import { TemplatePreview } from './TemplatePreview';
 import type { StampTemplate } from '../../types/templates';
 
 interface TemplateGalleryPageProps {
@@ -274,7 +275,13 @@ const TemplateCard = ({ template, onSelect }: TemplateCardProps) => {
           borderBottom: '1px solid #e5e7eb',
         }}
       >
-        {template.thumbnail ? (
+        {template.elements && template.elements.length > 0 ? (
+          <TemplatePreview
+            elements={template.elements}
+            canvasSize={template.canvasSize}
+            previewSize={180}
+          />
+        ) : template.thumbnail ? (
           <img
             src={template.thumbnail}
             alt={template.name}

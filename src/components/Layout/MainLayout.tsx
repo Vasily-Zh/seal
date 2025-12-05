@@ -98,12 +98,14 @@ export const MainLayout = () => {
   return (
     <div
       style={{
-        height: '100dvh', // Фиксированная высота — предотвращает бесконечный рост в iframe
+        height: '100dvh', // Динамическая высота viewport
         maxHeight: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
         backgroundColor: '#f9fafb',
+        // Padding снизу для панели задач Windows
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       } as const}
     >
       {/* Шапка */}

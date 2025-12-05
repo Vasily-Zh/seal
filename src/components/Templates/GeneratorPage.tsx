@@ -3,9 +3,9 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Search, ChevronDown } from 'lucid
 import { useTemplatesStore } from '../../store/useTemplatesStore';
 import { iconTagsMap } from '../../data/iconTags';
 import { allIcons } from '../../data/allIcons';
+import { getCachedSvg } from '../../utils/extractSvgFromIcon';
 import type { GeneratorBaseTemplate } from '../../types/templates';
 import type { StampElement, IconElement } from '../../types';
-import * as LucideIcons from 'lucide-react';
 
 interface GeneratorPageProps {
   onBack: () => void;
@@ -80,7 +80,7 @@ export const GeneratorPage = ({ onBack, onSelectGenerated }: GeneratorPageProps)
       id: `${el.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     }));
 
-    // Создаём иконку в центре
+    // Создаём иконку в центре - по умолчанию stroke без fill
     const iconElement: IconElement = {
       id: `icon-${Date.now()}`,
       type: 'icon',
@@ -91,7 +91,9 @@ export const GeneratorPage = ({ onBack, onSelectGenerated }: GeneratorPageProps)
       width: selectedTemplate.iconPosition.size,
       height: selectedTemplate.iconPosition.size,
       visible: true,
-      fill: '#0000ff',
+      stroke: '#0000ff',
+      strokeWidth: 1.5,
+      // fill не указываем - будет none
     };
 
     // Добавляем иконку к элементам
@@ -454,16 +456,16 @@ interface GeneratedCardProps {
 }
 
 const GeneratedCard = ({ iconName, iconSource, template, onSelect }: GeneratedCardProps) => {
-  // Динамический импорт иконки для превью
-
-  
-    const IconComponent = useMemo(() => {
-    if (iconSource === 'lucide') {
-      return LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>;
+  // Получаем SVG иконки через кеш
+  const svgContent = useMemo(() => {
+    if (iconSource === 'lucide' || iconSource === 'heroicons') {
+      return getCachedSvg(iconName, iconSource, {
+        stroke: '#0000ff',
+        strokeWidth: 1.5,
+      });
     }
     return null;
   }, [iconName, iconSource]);
-
 
   return (
     <div
@@ -521,9 +523,16 @@ const GeneratedCard = ({ iconName, iconSource, template, onSelect }: GeneratedCa
               justifyContent: 'center',
             }}
           >
-            {/* Иконка */}
-            {IconComponent && (
-              <IconComponent size={40} color="#0000ff" strokeWidth={1.5} />
+            {/* Иконка через SVG */}
+            {svgContent && (
+              <div
+                style={{ width: 40, height: 40 }}
+                dangerouslySetInnerHTML={{
+                  __html: svgContent
+                    .replace(/width="[^"]*"/, 'width="40"')
+                    .replace(/height="[^"]*"/, 'height="40"')
+                }}
+              />
             )}
           </div>
         </div>

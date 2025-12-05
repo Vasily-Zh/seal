@@ -20,22 +20,20 @@ html, body {
   margin: 0;
   padding: 0;
   min-width: 320px;
-  height: auto;                    /* ← было 100vh — убираем */
-  min-height: 100dvh;              /* ← современный и правильный vh */
-  min-height: calc(var(--vh, 1vh) * 100);
-  overflow-x: hidden;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
 #root {
   width: 100%;
-  height: auto;                    /* ← КРИТИЧНО: было 100vh */
-  min-height: 100dvh;
-  min-height: calc(var(--vh, 1vh) * 100);
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-/* Остальные твои стили без изменений */
 button { font-family: inherit; transition: all 0.2s; }
 button:focus, button:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
 

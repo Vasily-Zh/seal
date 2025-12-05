@@ -33,8 +33,9 @@ export const Canvas = () => {
       const w = container.clientWidth;
       const h = container.clientHeight;
 
-      // Учитываем padding 10px с каждой стороны
-      const size = Math.max(Math.min(w - 20, h - 20), 220);
+      // Учитываем padding 10px с каждой стороны и ограничиваем максимальный размер
+      const maxSize = Math.min(w - 20, h - 20);
+      const size = Math.max(Math.min(maxSize, 500), 220); // Максимум 500px
       
       setSvgSize(size);
       
@@ -147,8 +148,8 @@ export const Canvas = () => {
               <path
                 d={`M ${1 * scale} 0 L 0 0 0 ${1 * scale}`}
                 fill="none"
-                stroke="#ea0808"
-                strokeWidth="0.3"
+                stroke="#000000ff"
+                strokeWidth="0.1"
               />
             </pattern>
           </defs>
@@ -169,7 +170,7 @@ export const Canvas = () => {
             data-export-exclude="true"
           />
 
-          {/* Линейки
+          {/* Линейки */}
           <g data-export-exclude="true">
             {Array.from({ length: Math.floor(canvasSize / rulerStep) + 1 }).map((_, i) => {
               const mm = i * rulerStep;
@@ -204,7 +205,7 @@ export const Canvas = () => {
                 />
               );
             })}
-          </g> */}
+          </g>
 
           {/* Элементы макета - рендерим только когда размер стабилизировался */}
           {sizeStable && elements
