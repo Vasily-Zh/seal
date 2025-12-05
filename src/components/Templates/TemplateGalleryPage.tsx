@@ -73,9 +73,11 @@ export const TemplateGalleryPage = ({
     <div
       style={{
         height: '100%',
+        maxHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: '#f9fafb',
+        overflow: 'hidden',
       }}
     >
       {/* Заголовок */}
@@ -201,7 +203,7 @@ export const TemplateGalleryPage = ({
       </div>
 
       {/* Сетка шаблонов */}
-      <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px' }}>
+      <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px 80px 24px' }}>
         {templates.length === 0 ? (
           <div
             style={{

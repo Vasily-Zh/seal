@@ -1,16 +1,18 @@
 import { useMemo } from 'react';
 import type { StampElement, CircleElement as CircleType, TextElement as TextType, TextCenteredElement as TextCenteredType, IconElement as IconType } from '../../types';
 import { getCachedSvg } from '../../utils/extractSvgFromIcon';
+import { useCurvedTextVectorization } from '../../hooks/useCurvedTextVectorization';
+import { useCenteredTextVectorization } from '../../hooks/useCenteredTextVectorization';
 
 interface TemplatePreviewProps {
   elements: StampElement[];
   canvasSize: number;
-  previewSize?: number; // размер превью в пикселях
+  previewSize?: number;
 }
 
 /**
  * Компонент для рендеринга превью шаблона
- * Упрощённая версия Canvas без интерактивности
+ * Использует те же хуки векторизации что и основной Canvas
  */
 export const TemplatePreview = ({ 
   elements, 
@@ -35,7 +37,7 @@ export const TemplatePreview = ({
             case 'circle':
               return <CirclePreview key={element.id} element={element as CircleType} scale={scale} />;
             case 'text':
-              return <TextPreview key={element.id} element={element as TextType} scale={scale} canvasSize={canvasSize} />;
+              return <TextPreview key={element.id} element={element as TextType} scale={scale} />;
             case 'textCentered':
               return <TextCenteredPreview key={element.id} element={element as TextCenteredType} scale={scale} />;
             case 'icon':
@@ -66,80 +68,94 @@ const CirclePreview = ({ element, scale }: { element: CircleType; scale: number 
   );
 };
 
-// Превью текста по дуге
-const TextPreview = ({ element, scale, canvasSize }: { element: TextType; scale: number; canvasSize: number }) => {
-  const text = element.text || '';
-  const radius = element.curveRadius || canvasSize / 2 - 10;
-  const fontSize = (element.fontSize || 4) * scale;
-  const color = element.color || '#000';
-  const flipped = element.flipped || false;
-  const letterSpacing = element.letterSpacing || 0;
-  
-  // Центр
-  const cx = (element.x || canvasSize / 2) * scale;
-  const cy = (element.y || canvasSize / 2) * scale;
-  const r = radius * scale;
+// Превью текста по дуге - используем тот же хук что и основной Canvas
+const TextPreview = ({ element, scale }: { element: TextType; scale: number }) => {
+  if (!element.text) return null;
 
-  // Создаём path для текста
-  const pathId = `text-path-preview-${element.id}`;
-  
-  let pathD: string;
-  if (!flipped) {
-    // Верхняя дуга (по часовой)
-    pathD = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
-  } else {
-    // Нижняя дуга (против часовой)
-    pathD = `M ${cx + r} ${cy} A ${r} ${r} 0 0 1 ${cx - r} ${cy}`;
+  const fontWeight = element.bold ? 'bold' : 'normal';
+  const fontStyle = element.italic ? 'italic' : 'normal';
+  const isFlipped = element.flipped || false;
+  const letterSpacing = element.letterSpacing || 0;
+
+  // Для curved текста
+  if (element.curved && element.curveRadius) {
+    const curvedTextProps = {
+      text: element.text,
+      cx: element.x,
+      cy: element.y,
+      radius: element.curveRadius,
+      fontSize: element.fontSize,
+      fontFamily: element.fontFamily,
+      color: element.color,
+      startAngle: element.startAngle || 0,
+      isFlipped,
+      fontWeight,
+      fontStyle,
+      letterSpacing,
+    };
+
+    const { svgContent, loading } = useCurvedTextVectorization(curvedTextProps, scale);
+
+    if (loading || !svgContent) {
+      return null;
+    }
+
+    return <g dangerouslySetInnerHTML={{ __html: svgContent }} />;
   }
 
-  return (
-    <g>
-      <defs>
-        <path id={pathId} d={pathD} fill="none" />
-      </defs>
-      <text
-        fill={color}
-        fontSize={fontSize}
-        fontFamily={element.fontFamily || 'Roboto'}
-        fontWeight={element.bold ? 'bold' : 'normal'}
-        fontStyle={element.italic ? 'italic' : 'normal'}
-        letterSpacing={letterSpacing * scale}
-      >
-        <textPath
-          href={`#${pathId}`}
-          startOffset="50%"
-          textAnchor="middle"
-        >
-          {text}
-        </textPath>
-      </text>
-    </g>
-  );
+  // Для прямого текста - используем хук центрированного текста
+  const straightTextProps = {
+    text: element.text,
+    x: element.x,
+    y: element.y,
+    fontSize: element.fontSize,
+    fontFamily: element.fontFamily,
+    color: element.color,
+    fontWeight,
+    fontStyle,
+    letterSpacing,
+  };
+
+  const { svgContent, loading } = useCenteredTextVectorization(straightTextProps, scale);
+
+  if (loading || !svgContent) {
+    return null;
+  }
+
+  const transform = isFlipped ? `rotate(180 ${element.x * scale} ${element.y * scale})` : undefined;
+
+  return <g transform={transform} dangerouslySetInnerHTML={{ __html: svgContent }} />;
 };
 
 // Превью центрированного текста
 const TextCenteredPreview = ({ element, scale }: { element: TextCenteredType; scale: number }) => {
-  const text = element.text || '';
-  const x = (element.x || 0) * scale;
-  const y = (element.y || 0) * scale;
-  const fontSize = (element.fontSize || 4) * scale;
-  const color = element.color || '#000';
+  if (!element.text) return null;
 
-  return (
-    <text
-      x={x}
-      y={y}
-      fill={color}
-      fontSize={fontSize}
-      fontFamily={element.fontFamily || 'Roboto'}
-      fontWeight={element.bold ? 'bold' : 'normal'}
-      fontStyle={element.italic ? 'italic' : 'normal'}
-      textAnchor="middle"
-      dominantBaseline="middle"
-    >
-      {text}
-    </text>
-  );
+  const fontWeight = element.bold ? 'bold' : 'normal';
+  const fontStyle = element.italic ? 'italic' : 'normal';
+  const isFlipped = element.flipped || false;
+
+  const textProps = {
+    text: element.text,
+    x: element.x,
+    y: element.y,
+    fontSize: element.fontSize,
+    fontFamily: element.fontFamily,
+    color: element.color,
+    fontWeight,
+    fontStyle,
+    letterSpacing: element.letterSpacing || 0,
+  };
+
+  const { svgContent, loading } = useCenteredTextVectorization(textProps, scale);
+
+  if (loading || !svgContent) {
+    return null;
+  }
+
+  const transform = isFlipped ? `rotate(180 ${element.x * scale} ${element.y * scale})` : undefined;
+
+  return <g transform={transform} dangerouslySetInnerHTML={{ __html: svgContent }} />;
 };
 
 // Превью иконки
@@ -158,17 +174,15 @@ const IconPreview = ({ element, scale }: { element: IconType; scale: number }) =
     }
     
     return null;
-  }, [element]);
+  }, [element.iconName, element.iconSource, element.svgContent, element.fill, element.stroke, element.strokeWidth]);
 
   if (!svgContent) return null;
 
-  // Масштабируем SVG
   const width = element.width * scale;
   const height = element.height * scale;
   const x = (element.x - element.width / 2) * scale;
   const y = (element.y - element.height / 2) * scale;
 
-  // Заменяем размеры в SVG
   let scaledSvg = svgContent
     .replace(/width="[^"]*"/, `width="${width}"`)
     .replace(/height="[^"]*"/, `height="${height}"`);

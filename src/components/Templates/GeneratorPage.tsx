@@ -130,9 +130,11 @@ export const GeneratorPage = ({ onBack, onSelectGenerated }: GeneratorPageProps)
     <div
       style={{
         height: '100%',
+        maxHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: '#f9fafb',
+        overflow: 'hidden',
       }}
     >
       {/* Заголовок */}
@@ -406,7 +408,7 @@ export const GeneratorPage = ({ onBack, onSelectGenerated }: GeneratorPageProps)
       )}
 
       {/* Результаты */}
-      <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px' }}>
+      <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px 80px 24px' }}>
         {!searchQuery.trim() ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9ca3af' }}>
             <p style={{ fontSize: '16px', margin: '0 0 8px' }}>Введите ключевое слово для поиска</p>
