@@ -13,7 +13,13 @@ Project: React + TypeScript stamp/seal design tool (visual constructor).
 * Add/edit/remove circular/text/icon/image elements on a canvas.
 * Real-time preview and SVG rendering.
 * Undo/redo via Zustand store.
-* Export designs as PNG or SVG.
+* Export designs as PNG, SVG, or PDF.
+* Template management system with categories and custom templates.
+* Generator system for creating stamps with specific icons based on keywords.
+* Layer management with drag-and-drop functionality.
+* Advanced text and image vectorization for better export quality.
+* Full text vectorization (curved and centered) preserving fonts in exports.
+* Mobile-responsive interface with mobile-optimized controls.
 
 **Tech Stack:**
 
