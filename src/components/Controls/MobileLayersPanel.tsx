@@ -14,14 +14,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
-} from '@dnd-kit/sortable';
+} from '@dnd-kit/sortable'; 
 import { CSS } from '@dnd-kit/utilities';
 import {
-  Eye,
-  EyeOff,
   Trash2,
-  Lock,
-  Unlock,
   ChevronRight,
   ChevronDown,
   Circle,
@@ -77,8 +73,6 @@ const LayerItem = ({
   isSelected,
   isChild,
   onSelect,
-  onToggleVisibility,
-  onToggleLock,
   onDuplicate,
   onDelete,
   onToggleExpand,
