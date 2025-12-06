@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { useTemplatesStore } from '../../store/useTemplatesStore';
-import { BUILT_IN_CATEGORIES } from '../../types/templates';
 
 interface TemplateCategoryBarProps {
   onCategoryClick: (categoryId: string) => void;
@@ -29,13 +28,16 @@ export const TemplateCategoryBar = ({
   }, []);
 
   // Получаем категории из store
-  const customCategories = useTemplatesStore((state) => state.categories);
+  const categories = useTemplatesStore((state) => state.categories);
+  const loadFromServer = useTemplatesStore((state) => state.loadFromServer);
   
-  // Объединяем встроенные и пользовательские категории
-  const allCategories = [
-    ...BUILT_IN_CATEGORIES,
-    ...customCategories.filter(c => !c.isBuiltIn)
-  ].sort((a, b) => a.order - b.order);
+  // Загружаем данные при первом рендере
+  useEffect(() => {
+    loadFromServer();
+  }, []);
+  
+  // Сортируем категории
+  const allCategories = [...categories].sort((a, b) => a.order - b.order);
 
   // Проверка возможности прокрутки
   const checkScroll = () => {

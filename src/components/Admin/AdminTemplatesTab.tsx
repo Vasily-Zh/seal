@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Trash2, Plus, Save } from 'lucide-react';
 import { useTemplatesStore } from '../../store/useTemplatesStore';
 import { useStampStore } from '../../store/useStampStore';
-import { BUILT_IN_CATEGORIES } from '../../types/templates';
 
 export const AdminTemplatesTab = () => {
   const [activeSection, setActiveSection] = useState<'categories' | 'templates' | 'generator'>('categories');
@@ -32,21 +31,25 @@ export const AdminTemplatesTab = () => {
   const [iconPositionY, setIconPositionY] = useState(50);
   const [iconSize, setIconSize] = useState(15);
 
-  // Все категории (встроенные + пользовательские)
-  const allCategories = [...BUILT_IN_CATEGORIES, ...categories.filter(c => !c.isBuiltIn)];
+  // Все категории
+  const allCategories = categories;
 
   // Создание категории
-  const handleCreateCategory = () => {
+  const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) return;
-    addCategory({
-      name: newCategoryName.trim(),
-      order: allCategories.length,
-    });
-    setNewCategoryName('');
+    try {
+      await addCategory({
+        name: newCategoryName.trim(),
+        order: allCategories.length,
+      });
+      setNewCategoryName('');
+    } catch (error) {
+      alert('Ошибка при создании категории: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+    }
   };
 
   // Сохранение текущего макета как шаблон
-  const handleSaveAsTemplate = () => {
+  const handleSaveAsTemplate = async () => {
     if (!selectedCategoryForTemplate || !newTemplateName.trim()) {
       alert('Выберите категорию и введите название');
       return;
@@ -56,15 +59,19 @@ export const AdminTemplatesTab = () => {
       return;
     }
 
-    addTemplate({
-      categoryId: selectedCategoryForTemplate,
-      name: newTemplateName.trim(),
-      elements: JSON.parse(JSON.stringify(currentElements)), // Deep clone
-      canvasSize,
-    });
+    try {
+      await addTemplate({
+        categoryId: selectedCategoryForTemplate,
+        name: newTemplateName.trim(),
+        elements: JSON.parse(JSON.stringify(currentElements)), // Deep clone
+        canvasSize,
+      });
 
-    setNewTemplateName('');
-    alert('Шаблон сохранён!');
+      setNewTemplateName('');
+      alert('Шаблон сохранён!');
+    } catch (error) {
+      alert('Ошибка при сохранении шаблона: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+    }
   };
 
   // Сохранение текущего макета как базового для генератора
@@ -208,9 +215,13 @@ export const AdminTemplatesTab = () => {
                 </span>
                 {!cat.isBuiltIn && (
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (confirm(`Удалить категорию "${cat.name}"?`)) {
-                        deleteCategory(cat.id);
+                        try {
+                          await deleteCategory(cat.id);
+                        } catch (error) {
+                          alert('Ошибка при удалении: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+                        }
                       }
                     }}
                     style={{
@@ -327,9 +338,13 @@ export const AdminTemplatesTab = () => {
                       </span>
                     </div>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         if (confirm(`Удалить шаблон "${tmpl.name}"?`)) {
-                          deleteTemplate(tmpl.id);
+                          try {
+                            await deleteTemplate(tmpl.id);
+                          } catch (error) {
+                            alert('Ошибка при удалении: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+                          }
                         }
                       }}
                       style={{

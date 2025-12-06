@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTemplatesStore } from '../../store/useTemplatesStore';
-import { BUILT_IN_CATEGORIES } from '../../types/templates';
 import { TemplatePreview } from './TemplatePreview';
 import type { StampTemplate } from '../../types/templates';
 
@@ -20,9 +19,17 @@ export const TemplateGalleryPage = ({
 }: TemplateGalleryPageProps) => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Получаем шаблоны
+  // Получаем шаблоны и загрузку
   const allTemplates = useTemplatesStore((state) => state.templates);
+  const categories = useTemplatesStore((state) => state.categories);
   const getTemplatesByCategory = useTemplatesStore((state) => state.getTemplatesByCategory);
+  const loadFromServer = useTemplatesStore((state) => state.loadFromServer);
+  const isLoading = useTemplatesStore((state) => state.isLoading);
+
+  // Загружаем данные при первом рендере
+  useEffect(() => {
+    loadFromServer();
+  }, []);
 
   // Фильтруем шаблоны
   const templates = categoryId 
@@ -37,10 +44,8 @@ export const TemplateGalleryPage = ({
   // Название категории
   const getCategoryName = () => {
     if (!categoryId) return 'Все шаблоны';
-    const builtIn = BUILT_IN_CATEGORIES.find(c => c.id === categoryId);
-    if (builtIn) return builtIn.name;
-    const custom = useTemplatesStore.getState().categories.find(c => c.id === categoryId);
-    return custom?.name || 'Шаблоны';
+    const cat = categories.find(c => c.id === categoryId);
+    return cat?.name || 'Шаблоны';
   };
 
   // Генерация номеров страниц
@@ -199,12 +204,22 @@ export const TemplateGalleryPage = ({
 
       {/* Счётчик */}
       <div style={{ padding: '8px 24px', textAlign: 'center', color: '#6b7280', fontSize: '13px' }}>
-        Всего: {templates.length}
+        {isLoading ? 'Загрузка...' : `Всего: ${templates.length}`}
       </div>
 
       {/* Сетка шаблонов */}
       <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px 80px 24px' }}>
-        {templates.length === 0 ? (
+        {isLoading ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '60px 20px',
+              color: '#6b7280',
+            }}
+          >
+            <p style={{ fontSize: '16px', margin: 0 }}>Загрузка шаблонов...</p>
+          </div>
+        ) : templates.length === 0 ? (
           <div
             style={{
               textAlign: 'center',
