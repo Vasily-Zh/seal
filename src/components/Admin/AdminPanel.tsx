@@ -20,7 +20,8 @@ import {
 import { getAllCategories } from '../../data/iconCollections';
 import * as LucideIcons from 'lucide-react';
 import * as HeroIcons from '@heroicons/react/24/solid';
-import { changeCredentials, logout, getCurrentAdminLogin } from '../../utils/auth';
+import { logout } from '../../utils/auth';
+import { authApi, clearAdminToken } from '../../utils/api';
 import { processSVG, readSVGFile } from '../../utils/svgValidator';
 import { AdminTemplatesTab } from './AdminTemplatesTab';
 
@@ -316,46 +317,46 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
     setSettingsError('');
     setSettingsSuccess('');
 
-    if (!currentPassword) {
-      setSettingsError('Введите текущий пароль');
+    if (!newPassword) {
+      setSettingsError('Введите новый пароль');
       return;
     }
 
-    if (!newLogin && !newPassword) {
-      setSettingsError('Введите новый логин или новый пароль');
+    if (newPassword.length < 6) {
+      setSettingsError('Пароль должен быть не менее 6 символов');
       return;
     }
 
-    if (newPassword && newPassword !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setSettingsError('Пароли не совпадают');
       return;
     }
 
     try {
-      const result = await changeCredentials(
-        currentPassword,
-        newLogin || undefined,
-        newPassword || undefined
-      );
+      const result = await authApi.changePassword(newPassword);
 
       if (result.success) {
-        setSettingsSuccess('Креденшалы успешно обновлены');
+        setSettingsSuccess('Пароль успешно изменён. Войдите снова с новым паролем.');
         setCurrentPassword('');
         setNewLogin('');
         setNewPassword('');
         setConfirmPassword('');
         setNeedsPasswordChange(false);
+        // Очищаем токен - нужно войти заново
+        clearAdminToken();
+        setTimeout(() => onClose(), 2000);
       } else {
-        setSettingsError(result.error || 'Ошибка смены креденшалов');
+        setSettingsError('Ошибка смены пароля');
       }
     } catch (err) {
-      console.error('Change credentials error:', err);
-      setSettingsError('Произошла ошибка');
+      console.error('Change password error:', err);
+      setSettingsError('Произошла ошибка при смене пароля');
     }
   };
 
   const handleLogout = () => {
     logout();
+    clearAdminToken();
     onClose();
   };
 
@@ -379,7 +380,12 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
         justifyContent: 'center',
         zIndex: 1000,
       }}
-      onClick={onClose}
+      onClick={(e) => {
+        // Закрываем только если кликнули на сам оверлей
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
     >
       <div
         style={{
@@ -393,6 +399,8 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         }}
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseUp={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -407,7 +415,6 @@ export const AdminPanel = ({ isOpen, onClose, needsPasswordChange: initialNeedsP
           <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>Админ-панель</h2>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <span style={{ fontSize: '14px', color: '#666' }}>
-              Админ: {getCurrentAdminLogin()}
             </span>
             <button
               onClick={handleLogout}

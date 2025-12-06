@@ -75,10 +75,11 @@ export function saveAdminCredentials(credentials: AdminCredentials): void {
 }
 
 /**
- * Проверка, залогинен ли администратор (проверка флага в sessionStorage)
+ * Проверка, залогинен ли администратор
+ * Проверяет наличие токена API в localStorage
  */
 export function isAdminLoggedIn(): boolean {
-  return sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
+  return !!localStorage.getItem('admin_token');
 }
 
 /**

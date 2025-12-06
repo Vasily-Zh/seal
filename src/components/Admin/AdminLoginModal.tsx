@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { setAdminToken } from '../../utils/api';
+import { setAdminToken, clearAdminToken, hasAdminToken } from '../../utils/api';
 
 interface AdminLoginModalProps {
   isOpen: boolean;
@@ -11,6 +11,43 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(false);
+
+  // Проверяем сохранённую сессию при открытии
+  useEffect(() => {
+    if (isOpen && hasAdminToken()) {
+      checkSavedSession();
+    }
+  }, [isOpen]);
+
+  const checkSavedSession = async () => {
+    setIsCheckingSession(true);
+    const savedToken = localStorage.getItem('admin_token');
+    
+    try {
+      const response = await fetch('/api/auth.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${savedToken}`,
+        },
+        body: JSON.stringify({ action: 'check' }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // Сессия валидна, сразу входим
+        onLoginSuccess(false);
+        onClose();
+      }
+    } catch (err) {
+      // Сессия невалидна, покажем форму входа
+      console.error('Session check failed:', err);
+    } finally {
+      setIsCheckingSession(false);
+    }
+  };
 
   // Очистка формы при закрытии
   useEffect(() => {
@@ -26,24 +63,27 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
     setIsLoading(true);
 
     try {
-      // Сохраняем токен (пароль)
-      setAdminToken(password);
-      
-      // Проверяем работает ли API с этим паролем
-      // Пробуем получить категории - это проверит соединение
-      const response = await fetch('/api/categories.php', {
+      // Проверяем пароль через тестовое создание/удаление
+      // Используем специальный эндпоинт для проверки авторизации
+      const response = await fetch('/api/auth.php', {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${password}`,
         },
+        body: JSON.stringify({ action: 'check' }),
       });
       
-      if (response.ok) {
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // Пароль верный - сохраняем токен
+        setAdminToken(password);
         onLoginSuccess(false);
         onClose();
       } else {
         setError('Неверный пароль');
-        // Очищаем неверный токен
-        localStorage.removeItem('admin_token');
+        clearAdminToken();
       }
     } catch (err) {
       setError('Ошибка подключения к серверу');
@@ -54,6 +94,13 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
   };
 
   if (!isOpen) return null;
+
+  // Обработчик клика на оверлей - закрываем только если кликнули именно на оверлей
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   return (
     <div
@@ -69,7 +116,7 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
         justifyContent: 'center',
         zIndex: 1000,
       }}
-      onClick={onClose}
+      onClick={handleOverlayClick}
     >
       <div
         style={{
@@ -81,6 +128,8 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         }}
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseUp={(e) => e.stopPropagation()}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>Вход администратора</h2>
@@ -100,6 +149,11 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
           </button>
         </div>
 
+        {isCheckingSession ? (
+          <div style={{ textAlign: 'center', padding: '30px', color: '#666' }}>
+            Проверка авторизации...
+          </div>
+        ) : (
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
             <label
@@ -179,10 +233,11 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
               }}
               disabled={isLoading}
             >
-              {isLoading ? 'Вход...' : 'Войти'}
+              {isLoading ? 'Проверка...' : 'Войти'}
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
