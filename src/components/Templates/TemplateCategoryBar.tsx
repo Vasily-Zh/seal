@@ -18,6 +18,15 @@ export const TemplateCategoryBar = ({
   const carouselRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Проверка на мобильное устройство
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Получаем категории из store
   const customCategories = useTemplatesStore((state) => state.categories);
@@ -69,15 +78,22 @@ export const TemplateCategoryBar = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: '12px',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
+          gap: isMobile ? '8px' : '0',
         }}
       >
         {/* Табы */}
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: '8px',
+          flexWrap: 'wrap',
+          flex: isMobile ? '1 1 100%' : 'none',
+        }}>
           <button
             onClick={() => setActiveTab('sections')}
             style={{
-              padding: '8px 16px',
-              fontSize: '13px',
+              padding: isMobile ? '6px 12px' : '8px 16px',
+              fontSize: isMobile ? '12px' : '13px',
               fontWeight: '500',
               border: 'none',
               borderRadius: '6px',
@@ -95,8 +111,8 @@ export const TemplateCategoryBar = ({
               onAllTemplatesClick();
             }}
             style={{
-              padding: '8px 16px',
-              fontSize: '13px',
+              padding: isMobile ? '6px 12px' : '8px 16px',
+              fontSize: isMobile ? '12px' : '13px',
               fontWeight: '500',
               border: 'none',
               borderRadius: '6px',
@@ -117,8 +133,8 @@ export const TemplateCategoryBar = ({
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '10px 20px',
-            fontSize: '14px',
+            padding: isMobile ? '8px 12px' : '10px 20px',
+            fontSize: isMobile ? '12px' : '14px',
             fontWeight: '600',
             backgroundColor: '#10b981',
             color: '#fff',
@@ -127,6 +143,8 @@ export const TemplateCategoryBar = ({
             cursor: 'pointer',
             transition: 'all 0.2s',
             boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)',
+            flex: isMobile ? '1 1 100%' : 'none',
+            justifyContent: 'center',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#059669';
@@ -137,7 +155,7 @@ export const TemplateCategoryBar = ({
             e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
-          <Sparkles size={18} />
+          <Sparkles size={isMobile ? 16 : 18} />
           Генератор печатей
         </button>
       </div>
@@ -145,27 +163,29 @@ export const TemplateCategoryBar = ({
       {/* Карусель категорий */}
       {activeTab === 'sections' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Стрелка влево */}
-          <button
-            onClick={() => scroll('left')}
-            disabled={!canScrollLeft}
-            style={{
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              backgroundColor: canScrollLeft ? '#fff' : '#f9fafb',
-              cursor: canScrollLeft ? 'pointer' : 'default',
-              opacity: canScrollLeft ? 1 : 0.5,
-              transition: 'all 0.2s',
-              flexShrink: 0,
-            }}
-          >
-            <ChevronLeft size={18} color={canScrollLeft ? '#374151' : '#9ca3af'} />
-          </button>
+          {/* Стрелка влево - скрываем на мобильных */}
+          {!isMobile && (
+            <button
+              onClick={() => scroll('left')}
+              disabled={!canScrollLeft}
+              style={{
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: canScrollLeft ? '#fff' : '#f9fafb',
+                cursor: canScrollLeft ? 'pointer' : 'default',
+                opacity: canScrollLeft ? 1 : 0.5,
+                transition: 'all 0.2s',
+                flexShrink: 0,
+              }}
+            >
+              <ChevronLeft size={18} color={canScrollLeft ? '#374151' : '#9ca3af'} />
+            </button>
+          )}
 
           {/* Карусель */}
           <div
@@ -173,12 +193,13 @@ export const TemplateCategoryBar = ({
             onScroll={checkScroll}
             style={{
               display: 'flex',
-              gap: '12px',
+              gap: isMobile ? '8px' : '12px',
               overflowX: 'auto',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               flex: 1,
               padding: '4px 0',
+              WebkitOverflowScrolling: 'touch',
             }}
           >
             {allCategories.map((category) => (
@@ -186,8 +207,8 @@ export const TemplateCategoryBar = ({
                 key={category.id}
                 onClick={() => onCategoryClick(category.id)}
                 style={{
-                  padding: '10px 24px',
-                  fontSize: '13px',
+                  padding: isMobile ? '8px 16px' : '10px 24px',
+                  fontSize: isMobile ? '12px' : '13px',
                   fontWeight: '500',
                   whiteSpace: 'nowrap',
                   border: '1px solid #d1d5db',
@@ -214,27 +235,29 @@ export const TemplateCategoryBar = ({
             ))}
           </div>
 
-          {/* Стрелка вправо */}
-          <button
-            onClick={() => scroll('right')}
-            disabled={!canScrollRight}
-            style={{
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              backgroundColor: canScrollRight ? '#fff' : '#f9fafb',
-              cursor: canScrollRight ? 'pointer' : 'default',
-              opacity: canScrollRight ? 1 : 0.5,
-              transition: 'all 0.2s',
-              flexShrink: 0,
-            }}
-          >
-            <ChevronRight size={18} color={canScrollRight ? '#374151' : '#9ca3af'} />
-          </button>
+          {/* Стрелка вправо - скрываем на мобильных */}
+          {!isMobile && (
+            <button
+              onClick={() => scroll('right')}
+              disabled={!canScrollRight}
+              style={{
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: canScrollRight ? '#fff' : '#f9fafb',
+                cursor: canScrollRight ? 'pointer' : 'default',
+                opacity: canScrollRight ? 1 : 0.5,
+                transition: 'all 0.2s',
+                flexShrink: 0,
+              }}
+            >
+              <ChevronRight size={18} color={canScrollRight ? '#374151' : '#9ca3af'} />
+            </button>
+          )}
         </div>
       )}
     </div>

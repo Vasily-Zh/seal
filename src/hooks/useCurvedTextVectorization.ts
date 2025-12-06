@@ -49,6 +49,8 @@ export const useCurvedTextVectorization = (props: CurvedTextProps, scale: number
       return;
     }
 
+    // ВАЖНО: Очищаем старый контент перед загрузкой нового
+    setSvgContent('');
     setLoading(true);
 
     // Масштабируем параметры

@@ -53,16 +53,33 @@ export const exportToPNG = (svgElement: SVGSVGElement | null, filename: string =
     // Рисуем изображение
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-    // Конвертируем в PNG и скачиваем
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const pngUrl = URL.createObjectURL(blob);
+    // Проверяем iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      // На iOS используем data URL
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.href = pngUrl;
+      link.href = dataUrl;
       link.download = filename;
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(pngUrl);
-    }, 'image/png');
+      document.body.removeChild(link);
+    } else {
+      // Конвертируем в PNG и скачиваем через blob
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const pngUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(pngUrl);
+      }, 'image/png');
+    }
 
     URL.revokeObjectURL(url);
   };
@@ -113,16 +130,33 @@ export const exportToPNGTransparent = (svgElement: SVGSVGElement | null, filenam
     // Рисуем изображение
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-    // Конвертируем в PNG и скачиваем
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const pngUrl = URL.createObjectURL(blob);
+    // Проверяем iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      // На iOS используем data URL
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.href = pngUrl;
+      link.href = dataUrl;
       link.download = filename;
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(pngUrl);
-    }, 'image/png');
+      document.body.removeChild(link);
+    } else {
+      // Конвертируем в PNG и скачиваем через blob
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const pngUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(pngUrl);
+      }, 'image/png');
+    }
 
     URL.revokeObjectURL(url);
   };
@@ -148,17 +182,34 @@ export const exportToSVG = (svgElement: SVGSVGElement | null, filename: string =
   // Сериализуем SVG
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
-  // Создаем Blob
-  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
+  // Проверяем iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-  // Скачиваем
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
+  if (isIOS) {
+    // На iOS используем data URL
+    const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } else {
+    // Создаем Blob
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
 
-  URL.revokeObjectURL(url);
+    // Скачиваем
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  }
 };
 
 // Экспорт отдельного элемента в SVG
@@ -475,12 +526,43 @@ export const exportToZIP = async (svgElement: SVGSVGElement | null, filename: st
 
         // Генерируем и скачиваем ZIP
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        const zipUrl = URL.createObjectURL(zipBlob);
-        const link = document.createElement('a');
-        link.href = zipUrl;
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(zipUrl);
+        
+        // Проверяем iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        
+        if (isIOS) {
+          // На iOS Safari не поддерживает скачивание ZIP через blob
+          // Скачиваем PNG напрямую через data URL
+          const pngDataUrl = canvas.toDataURL('image/png');
+          
+          // Создаем ссылку на PNG
+          const link = document.createElement('a');
+          link.href = pngDataUrl;
+          link.download = 'stamp.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Показываем понятное сообщение
+          setTimeout(() => {
+            alert('PNG файл скачан!\n\nДля скачивания других форматов (PNG без фона, SVG, PDF) выберите их отдельно в меню "Скачать".');
+          }, 300);
+        } else {
+          const zipUrl = URL.createObjectURL(zipBlob);
+          const link = document.createElement('a');
+          link.href = zipUrl;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Очищаем URL через некоторое время
+          setTimeout(() => {
+            URL.revokeObjectURL(zipUrl);
+          }, 10000);
+        }
+        
         URL.revokeObjectURL(url);
 
         resolve();

@@ -111,8 +111,8 @@ export const MainLayout = () => {
       {/* Шапка */}
       <Header />
 
-      {/* Карусель категорий - только в режиме редактора */}
-      {viewMode === 'editor' && !isMobile && (
+      {/* Карусель категорий - показываем и на мобильных */}
+      {viewMode === 'editor' && (
         <TemplateCategoryBar
           onCategoryClick={handleCategoryClick}
           onAllTemplatesClick={handleAllTemplatesClick}
@@ -143,7 +143,13 @@ export const MainLayout = () => {
           {/* Основной контент */}
           {isMobile ? (
         /* =================== МОБИЛЬНАЯ ВЕРСИЯ =================== */
-        <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ 
+          flex: '1 1 auto', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          overflow: 'auto',
+          WebkitOverflowScrolling: 'touch',
+        }}>
           {/* Панель инструментов */}
           <div
             style={{
@@ -165,12 +171,12 @@ export const MainLayout = () => {
             </div>
           </div>
 
-          {/* Превью - ПЕРВЫМ, чтобы печать была видна */}
+          {/* Превью */}
           <div
             style={{
               flex: '0 0 auto',
-              minHeight: '350px',
-              height: '350px',
+              minHeight: '300px',
+              height: '300px',
               backgroundColor: '#f9fafb',
               display: 'flex',
               flexDirection: 'column',
@@ -222,17 +228,17 @@ export const MainLayout = () => {
             </div>
           </div>
 
-          {/* Настройки элемента - после превью, со скроллом */}
+          {/* Настройки элемента - после превью */}
           <div
             style={{
               backgroundColor: '#fff',
               padding: '16px',
-              flex: '1 1 auto',
-              minHeight: '150px',
+              flex: '0 0 auto',
+              minHeight: '250px',
               border: '1px solid #e5e7eb',
               margin: '0 8px 8px',
               borderRadius: '6px',
-              overflow: 'auto',
+              marginBottom: '20px',
             }}
           >
             <h4 style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 12px 0', color: '#111827' }}>

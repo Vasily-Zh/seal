@@ -11,24 +11,47 @@ interface FontSelectorProps {
 export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fontListRef = useRef<HTMLDivElement>(null);
   const selectedFontRef = useRef<HTMLDivElement>(null);
 
+  // Вычисление позиции dropdown
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
+
   // Закрытие dropdown при клике вне компонента
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
 
     if (isOpen) {
+      // Используем touchstart для iOS
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isOpen]);
 
@@ -42,7 +65,7 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
           block: 'nearest',
           inline: 'nearest'
         });
-      }, 10);
+      }, 50);
     }
   }, [isOpen, searchTerm]);
 
@@ -75,16 +98,22 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
     setSearchTerm('');
   };
 
+  // Обработчик открытия/закрытия
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div style={{ marginBottom: '16px' }} ref={dropdownRef}>
+    <div style={{ marginBottom: '16px', position: 'relative' }}>
       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
         {label}
       </label>
 
       {/* Кнопка выбора */}
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         style={{
           width: '100%',
           padding: '8px 12px',
@@ -97,29 +126,34 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
           alignItems: 'center',
           justifyContent: 'space-between',
           textAlign: 'left',
+          WebkitTapHighlightColor: 'transparent',
         }}
       >
         <span>{getCurrentFontDisplay()}</span>
-        <ChevronDown size={16} color="#6b7280" />
+        <ChevronDown size={16} color="#6b7280" style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
       </button>
 
-      {/* Dropdown список */}
+      {/* Dropdown список - фиксированное позиционирование для iOS */}
       {isOpen && (
         <div
+          ref={dropdownRef}
           style={{
-            position: 'absolute',
-            zIndex: 1000,
-            marginTop: '4px',
-            width: dropdownRef.current?.offsetWidth || '100%',
-            maxHeight: '400px',
-            overflowY: 'auto',
+            position: 'fixed',
+            zIndex: 9999,
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            width: dropdownPosition.width || '100%',
+            maxHeight: '50vh',
             backgroundColor: 'white',
             border: '1px solid #d1d5db',
             borderRadius: '6px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
           }}
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           {/* Поле поиска */}
           <div style={{
@@ -127,6 +161,7 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
             borderBottom: '1px solid #d1d5db',
             display: 'flex',
             alignItems: 'center',
+            flex: '0 0 auto',
           }}>
             <input
               type="text"
@@ -135,36 +170,43 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
-                padding: '6px 8px',
+                padding: '8px 12px',
                 border: '1px solid #d1d5db',
                 borderRadius: '4px',
-                fontSize: '14px',
+                fontSize: '16px', // 16px чтобы iOS не зумил
+                WebkitAppearance: 'none',
               }}
-              onClick={(e) => e.stopPropagation()} // Предотвращаем закрытие при клике на инпут
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
             />
             {searchTerm && (
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clearSearch();
-                }}
+                onClick={clearSearch}
                 style={{
                   marginLeft: '4px',
-                  padding: '4px',
+                  padding: '8px',
                   border: 'none',
                   background: 'none',
                   cursor: 'pointer',
                   color: '#6b7280',
+                  WebkitTapHighlightColor: 'transparent',
                 }}
               >
-                <X size={16} />
+                <X size={20} />
               </button>
             )}
           </div>
 
           {/* Список шрифтов */}
-          <div ref={fontListRef} style={{ overflowY: 'auto', maxHeight: '300px' }}>
+          <div 
+            ref={fontListRef} 
+            style={{ 
+              overflowY: 'auto', 
+              flex: '1 1 auto',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
             {sortedFonts.length > 0 ? (
               sortedFonts.map((font) => {
                 const isSelected = font.family === value;
@@ -172,25 +214,19 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
                 return (
                   <div
                     key={font.name}
-                    ref={isSelected && !searchTerm ? selectedFontRef : null} // Установить ref только для выбранного шрифта при отсутствии поиска
-                    onClick={() => selectFont(font.family)}
+                    ref={isSelected && !searchTerm ? selectedFontRef : null}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectFont(font.family);
+                    }}
                     style={{
-                      padding: '8px 12px',
+                      padding: '12px 16px',
                       cursor: 'pointer',
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontFamily: font.family,
                       borderBottom: '1px solid #f3f4f6',
                       backgroundColor: isSelected ? '#dbeafe' : 'white',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) {
-                        e.currentTarget.style.backgroundColor = '#eff6ff';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) {
-                        e.currentTarget.style.backgroundColor = 'white';
-                      }
+                      WebkitTapHighlightColor: 'transparent',
                     }}
                   >
                     {font.name}
@@ -199,7 +235,7 @@ export const FontSelector = ({ value, onChange, label = 'Шрифт' }: FontSele
               })
             ) : (
               <div style={{
-                padding: '12px',
+                padding: '16px',
                 fontSize: '14px',
                 color: '#6b7280',
                 textAlign: 'center',

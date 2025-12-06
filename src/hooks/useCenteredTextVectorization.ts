@@ -46,6 +46,8 @@ export const useCenteredTextVectorization = (props: CenteredTextProps, scale: nu
       return;
     }
 
+    // ВАЖНО: Очищаем старый контент перед загрузкой нового
+    setSvgContent('');
     setLoading(true);
 
     // Масштабируем параметры

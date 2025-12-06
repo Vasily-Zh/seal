@@ -211,7 +211,13 @@ async function loadFonts(
   }
 
   try {
-    const fontUrls = await getGoogleFontUrls(targetFont, fontWeight, fontStyle);
+    let fontUrls = await getGoogleFontUrls(targetFont, fontWeight, fontStyle);
+
+    // Если italic шрифт не найден, пробуем загрузить обычный
+    if (fontUrls.length === 0 && fontStyle === 'italic') {
+      console.warn(`Italic version not found for ${targetFont}, falling back to normal`);
+      fontUrls = await getGoogleFontUrls(targetFont, fontWeight, 'normal');
+    }
 
     if (fontUrls.length === 0) {
       throw new Error(`Could not get font URLs for ${targetFont}`);

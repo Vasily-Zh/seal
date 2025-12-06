@@ -308,6 +308,30 @@ export const MobileLayersPanel = () => {
     setSelectedItems(new Set());
   };
 
+  // Получаем название выбранного элемента
+  const getSelectedElementName = (): string => {
+    if (!selectedElementId) return 'Элементы';
+    const selected = elements.find(el => el.id === selectedElementId);
+    if (!selected) return 'Элементы';
+    
+    if (selected.type === 'group') {
+      return selected.name || 'Группа';
+    }
+    if (selected.type === 'text' || selected.type === 'textCentered') {
+      const text = selected.text || 'Текст';
+      return text.length > 20 ? text.substring(0, 20) + '...' : text;
+    }
+    const typeNames: Record<string, string> = {
+      circle: 'Круг',
+      rectangle: 'Прямоугольник',
+      triangle: 'Треугольник',
+      line: 'Линия',
+      image: 'Изображение',
+      icon: 'Иконка',
+    };
+    return typeNames[selected.type] || 'Элемент';
+  };
+
   return (
     <div style={{ position: 'relative', width: '100%' }} className="mobile-dropdown">
       <button
@@ -320,14 +344,21 @@ export const MobileLayersPanel = () => {
           padding: '12px 16px',
           border: '1px solid #d1d5db',
           borderRadius: '6px',
-          backgroundColor: '#e0f2fe',
+          backgroundColor: selectedElementId ? '#dbeafe' : '#e0f2fe',
           cursor: 'pointer',
           transition: 'all 0.2s',
         }}
         className="touch-optimized"
       >
-        <span style={{ fontSize: '14px', fontWeight: '500', color: '#0369a1' }}>Слои</span>
-        <ChevronDownIcon size={20} style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+        <span style={{ 
+          fontSize: '14px', 
+          fontWeight: '500', 
+          color: '#0369a1',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}>{getSelectedElementName()}</span>
+        <ChevronDownIcon size={20} style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }} />
       </button>
 
       {isOpen && (
@@ -382,7 +413,10 @@ export const MobileLayersPanel = () => {
                       element={element}
                       isSelected={selectedElementId === element.id}
                       isChild={false}
-                      onSelect={() => selectElement(element.id)}
+                      onSelect={() => {
+                        selectElement(element.id);
+                        setIsOpen(false);
+                      }}
                       onToggleVisibility={() => updateElement(element.id, { visible: !element.visible })}
                       onToggleLock={() => toggleElementLock(element.id)}
                       onDuplicate={() => duplicateElement(element.id)}
@@ -412,7 +446,10 @@ export const MobileLayersPanel = () => {
                             element={child}
                             isSelected={selectedElementId === child.id}
                             isChild={true}
-                            onSelect={() => selectElement(child.id)}
+                            onSelect={() => {
+                              selectElement(child.id);
+                              setIsOpen(false);
+                            }}
                             onToggleVisibility={() => updateElement(child.id, { visible: !child.visible })}
                             onToggleLock={() => toggleElementLock(child.id)}
                             onDuplicate={() => duplicateElement(child.id)}

@@ -310,7 +310,7 @@ export const LayersPanel = () => {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Заголовок */}
       <div style={{ padding: '16px', borderBottom: '2px solid #e5e7eb' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>Слои</h2>
+        <h2 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>Элементы</h2>
       </div>
 
       {/* Кнопки управления группами */}
