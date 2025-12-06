@@ -26,7 +26,7 @@ export interface StampTemplate {
   categoryId: string;        // ID категории
   name: string;              // "ООО Классическая"
   elements: StampElement[];  // элементы макета
-  canvasSize: number;
+  canvasSize: { width: number; height: number };
   thumbnail?: string;        // base64 превью (генерируется автоматически)
   isBuiltIn: boolean;        // встроенный шаблон
   createdAt: string;
@@ -39,7 +39,7 @@ export interface GeneratorBaseTemplate {
   name: string;              // "ООО стандартный"
   type: 'ip' | 'ooo' | 'medical' | 'selfemployed' | 'custom';
   elements: StampElement[];  // элементы макета (без центральной иконки)
-  canvasSize: number;
+  canvasSize: { width: number; height: number };
   // Позиция для вставки иконки
   iconPosition: {
     x: number;               // координата X центра иконки (в мм)

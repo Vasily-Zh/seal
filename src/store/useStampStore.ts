@@ -519,9 +519,14 @@ export const useStampStore = create<StampStore>((set, get) => ({
 
   // Управление проектами
   loadProjectData: (project) => {
+    // Конвертируем canvasSize если это объект
+    const size = typeof project.canvasSize === 'number' 
+      ? project.canvasSize 
+      : project.canvasSize.width;
+    
     set({
       elements: project.elements,
-      canvasSize: project.canvasSize,
+      canvasSize: size,
       currentProjectId: project.id,
       currentProjectName: project.name,
       selectedElementId: null,

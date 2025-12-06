@@ -163,7 +163,7 @@ export interface StampStore {
   centerElement: (id: string) => void;
 
   // Управление проектами
-  loadProjectData: (project: { elements: StampElement[]; canvasSize: number; id: string; name: string }) => void;
+  loadProjectData: (project: { elements: StampElement[]; canvasSize: number | { width: number; height: number }; id: string; name: string }) => void;
   setCurrentProject: (id: string | null, name: string | null) => void;
   clearCanvas: () => void;
 

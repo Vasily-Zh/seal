@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { login, initializeDefaultAdmin } from '../../utils/auth';
+import { setAdminToken } from '../../utils/api';
 
 interface AdminLoginModalProps {
   isOpen: boolean;
@@ -8,20 +8,13 @@ interface AdminLoginModalProps {
 }
 
 export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginModalProps) => {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Инициализация дефолтного админа при монтировании компонента
-  useEffect(() => {
-    initializeDefaultAdmin();
-  }, []);
-
   // Очистка формы при закрытии
   useEffect(() => {
     if (!isOpen) {
-      setUsername('');
       setPassword('');
       setError('');
     }
@@ -33,16 +26,27 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
     setIsLoading(true);
 
     try {
-      const result = await login(username, password);
-
-      if (result.success) {
-        onLoginSuccess(result.needsPasswordChange);
+      // Сохраняем токен (пароль)
+      setAdminToken(password);
+      
+      // Проверяем работает ли API с этим паролем
+      // Пробуем получить категории - это проверит соединение
+      const response = await fetch('/api/categories.php', {
+        headers: {
+          'Authorization': `Bearer ${password}`,
+        },
+      });
+      
+      if (response.ok) {
+        onLoginSuccess(false);
         onClose();
       } else {
-        setError(result.error || 'Ошибка входа');
+        setError('Неверный пароль');
+        // Очищаем неверный токен
+        localStorage.removeItem('admin_token');
       }
     } catch (err) {
-      setError('Произошла ошибка при входе');
+      setError('Ошибка подключения к серверу');
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
@@ -99,38 +103,6 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
             <label
-              htmlFor="login-username"
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#333',
-              }}
-            >
-              Логин
-            </label>
-            <input
-              id="login-username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px',
-                boxSizing: 'border-box',
-              }}
-              placeholder="Введите логин"
-              autoComplete="username"
-              required
-            />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label
               htmlFor="login-password"
               style={{
                 display: 'block',
@@ -140,7 +112,7 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
                 color: '#333',
               }}
             >
-              Пароль
+              Пароль администратора
             </label>
             <input
               id="login-password"
@@ -157,6 +129,7 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
               }}
               placeholder="Введите пароль"
               autoComplete="current-password"
+              autoFocus
               required
             />
           </div>
@@ -175,20 +148,6 @@ export const AdminLoginModal = ({ isOpen, onClose, onLoginSuccess }: AdminLoginM
               {error}
             </div>
           )}
-
-          <div
-            style={{
-              padding: '12px',
-              backgroundColor: '#f0f9ff',
-              borderLeft: '4px solid #3b82f6',
-              borderRadius: '4px',
-              marginBottom: '20px',
-              fontSize: '13px',
-              color: '#1e40af',
-            }}
-          >
-            <strong>По умолчанию:</strong> логин <code>admin</code>, пароль <code>admin123</code>
-          </div>
 
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
             <button

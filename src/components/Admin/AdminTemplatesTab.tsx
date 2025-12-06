@@ -64,7 +64,7 @@ export const AdminTemplatesTab = () => {
         categoryId: selectedCategoryForTemplate,
         name: newTemplateName.trim(),
         elements: JSON.parse(JSON.stringify(currentElements)), // Deep clone
-        canvasSize,
+        canvasSize: { width: canvasSize, height: canvasSize },
       });
 
       setNewTemplateName('');
@@ -89,7 +89,7 @@ export const AdminTemplatesTab = () => {
       name: newGeneratorTemplateName.trim(),
       type: generatorTemplateType,
       elements: JSON.parse(JSON.stringify(currentElements)),
-      canvasSize,
+      canvasSize: { width: canvasSize, height: canvasSize },
       iconPosition: {
         x: iconPositionX,
         y: iconPositionY,

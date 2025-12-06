@@ -9,7 +9,7 @@ import type { StampElement, IconElement } from '../../types';
 
 interface GeneratorPageProps {
   onBack: () => void;
-  onSelectGenerated: (elements: StampElement[], canvasSize: number) => void;
+  onSelectGenerated: (elements: StampElement[], canvasSize: { width: number; height: number }) => void;
 }
 
 const ITEMS_PER_PAGE = 12;

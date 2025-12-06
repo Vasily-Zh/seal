@@ -6,7 +6,7 @@ import { useCenteredTextVectorization } from '../../hooks/useCenteredTextVectori
 
 interface TemplatePreviewProps {
   elements: StampElement[];
-  canvasSize: number;
+  canvasSize: { width: number; height: number };
   previewSize?: number;
 }
 
@@ -19,7 +19,7 @@ export const TemplatePreview = ({
   canvasSize, 
   previewSize = 200 
 }: TemplatePreviewProps) => {
-  const scale = previewSize / canvasSize;
+  const scale = previewSize / canvasSize.width;
 
   return (
     <svg

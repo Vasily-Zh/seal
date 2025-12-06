@@ -5,9 +5,9 @@
  */
 
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'ВАШ_ЛОГИН_БАЗЫ');      // Например: user123_stamps
-define('DB_USER', 'ВАШ_ЛОГИН_БАЗЫ');      // Обычно совпадает с именем базы
-define('DB_PASS', 'ВАШ_ПАРОЛЬ_БАЗЫ');     // Пароль от базы
+define('DB_NAME', 'malchugan_stamps');      // Например: user123_stamps
+define('DB_USER', 'malchugan_stamps');      // Обычно совпадает с именем базы
+define('DB_PASS', 'Jjlksdf00');     // Пароль от базы
 
 // Пароль администратора для управления шаблонами
 define('ADMIN_PASSWORD', 'stamp_admin_2024');

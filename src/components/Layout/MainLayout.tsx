@@ -68,7 +68,7 @@ export const MainLayout = () => {
   };
 
   // Загрузка сгенерированного макета
-  const handleSelectGenerated = (newElements: StampElement[], canvasSize: number) => {
+  const handleSelectGenerated = (newElements: StampElement[], canvasSize: { width: number; height: number }) => {
     if (elements.length > 0) {
       if (!window.confirm('Текущий макет будет заменён. Продолжить?')) {
         return;

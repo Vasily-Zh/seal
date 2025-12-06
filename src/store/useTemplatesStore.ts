@@ -135,8 +135,6 @@ export const useTemplatesStore = create<TemplatesState>()(
       // ==================== КАТЕГОРИИ ====================
       
       addCategory: async (categoryData) => {
-        const id = generateId();
-        
         try {
           const result = await categoriesApi.create({
             name: categoryData.name,
