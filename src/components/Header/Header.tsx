@@ -1,12 +1,18 @@
 import { Undo2, Redo2, Download, Settings, Save, FolderOpen } from 'lucide-react';
 import { useStampStore } from '../../store/useStampStore';
-import { exportToZIP } from '../../utils/export';
-import { useState, useEffect } from 'react';
+import { exportToZIP, exportToPNGTransparent, exportToSVG, exportToPDF } from '../../utils/export';
+import { useState, useEffect, useRef } from 'react';
 import { AdminLoginModal } from '../Admin/AdminLoginModal';
 import { AdminPanel } from '../Admin/AdminPanel';
 import { isAdminLoggedIn } from '../../utils/auth';
 import { ProjectManager } from '../ProjectManager/ProjectManager';
 import { saveProject, generateThumbnail } from '../../utils/projectStorage';
+
+// Определение iOS
+const isIOS = () => {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
 
 export const Header = () => {
   const undo = useStampStore((state) => state.undo);
@@ -27,6 +33,9 @@ export const Header = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+  const exportButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -45,6 +54,31 @@ export const Header = () => {
     };
   }, []);
 
+  // Закрытие меню экспорта при клике вне
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      if (
+        exportMenuRef.current && 
+        !exportMenuRef.current.contains(target) &&
+        exportButtonRef.current &&
+        !exportButtonRef.current.contains(target)
+      ) {
+        setShowExportMenu(false);
+      }
+    };
+
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showExportMenu]);
+
   const handleExportZIP = async () => {
     const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
     setIsExporting(true);
@@ -55,6 +89,60 @@ export const Header = () => {
       alert('Ошибка при экспорте файлов');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  // Обработчик кнопки скачивания - на iOS показываем меню, на других скачиваем ZIP
+  const handleDownloadClick = () => {
+    if (isIOS()) {
+      setShowExportMenu(!showExportMenu);
+    } else {
+      handleExportZIP();
+    }
+  };
+
+  // Экспорт в PNG (прозрачный фон)
+  const handleExportPNG = () => {
+    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
+    setIsExporting(true);
+    setShowExportMenu(false);
+    try {
+      exportToPNGTransparent(svgElement, 'stamp.png');
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Ошибка при экспорте PNG');
+    } finally {
+      setTimeout(() => setIsExporting(false), 500);
+    }
+  };
+
+  // Экспорт в SVG
+  const handleExportSVG = () => {
+    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
+    setIsExporting(true);
+    setShowExportMenu(false);
+    try {
+      exportToSVG(svgElement);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Ошибка при экспорте SVG');
+    } finally {
+      setTimeout(() => setIsExporting(false), 500);
+    }
+  };
+
+  // Экспорт в PDF
+  const handleExportPDF = () => {
+    const svgElement = document.getElementById('stamp-canvas') as unknown as SVGSVGElement;
+    setIsExporting(true);
+    setShowExportMenu(false);
+    try {
+      exportToPDF(svgElement);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Ошибка при экспорте PDF');
+    } finally {
+      setTimeout(() => setIsExporting(false), 500);
     }
   };
 
@@ -219,25 +307,93 @@ export const Header = () => {
               <Redo2 size={16} />
             </button>
 
-            <button
-              onClick={handleExportZIP}
-              disabled={isExporting}
-              style={{
-                padding: '8px',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                cursor: isExporting ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: isExporting ? 0.6 : 1,
-              }}
-              title={isExporting ? 'Скачивание...' : 'Скачать'}
-            >
-              <Download size={16} />
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button
+                ref={exportButtonRef}
+                onClick={handleDownloadClick}
+                disabled={isExporting}
+                style={{
+                  padding: '8px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  cursor: isExporting ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: isExporting ? 0.6 : 1,
+                }}
+                title={isExporting ? 'Скачивание...' : 'Скачать'}
+              >
+                <Download size={16} />
+              </button>
+
+              {/* Выпадающее меню для iOS (мобильная версия) */}
+              {showExportMenu && (
+                <div
+                  ref={exportMenuRef}
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '4px',
+                    backgroundColor: 'white',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    zIndex: 1000,
+                    minWidth: '120px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <button
+                    onClick={handleExportPNG}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: 'none',
+                      backgroundColor: 'white',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontSize: '14px',
+                      borderBottom: '1px solid #f3f4f6',
+                    }}
+                  >
+                    PNG
+                  </button>
+                  <button
+                    onClick={handleExportSVG}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: 'none',
+                      backgroundColor: 'white',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontSize: '14px',
+                      borderBottom: '1px solid #f3f4f6',
+                    }}
+                  >
+                    SVG
+                  </button>
+                  <button
+                    onClick={handleExportPDF}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: 'none',
+                      backgroundColor: 'white',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontSize: '14px',
+                    }}
+                  >
+                    PDF
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       ) : (
@@ -334,28 +490,105 @@ export const Header = () => {
             Вернуть
           </button>
 
-          {/* Кнопка Скачать */}
-          <button
-            onClick={handleExportZIP}
-            disabled={isExporting}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              cursor: isExporting ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-              opacity: isExporting ? 0.6 : 1,
-            }}
-          >
-            <Download size={16} />
-            {isExporting ? 'Скачивание...' : 'Скачать'}
-          </button>
+          {/* Кнопка Скачать с меню для iOS */}
+          <div style={{ position: 'relative' }}>
+            <button
+              ref={exportButtonRef}
+              onClick={handleDownloadClick}
+              disabled={isExporting}
+              style={{
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '6px',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                cursor: isExporting ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                opacity: isExporting ? 0.6 : 1,
+              }}
+            >
+              <Download size={16} />
+              {isExporting ? 'Скачивание...' : 'Скачать'}
+            </button>
+
+            {/* Выпадающее меню для iOS */}
+            {showExportMenu && (
+              <div
+                ref={exportMenuRef}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '4px',
+                  backgroundColor: 'white',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  zIndex: 1000,
+                  minWidth: '150px',
+                  overflow: 'hidden',
+                }}
+              >
+                <button
+                  onClick={handleExportPNG}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: 'none',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    borderBottom: '1px solid #f3f4f6',
+                  }}
+                >
+                  PNG
+                </button>
+                <button
+                  onClick={handleExportSVG}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: 'none',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    borderBottom: '1px solid #f3f4f6',
+                  }}
+                >
+                  SVG
+                </button>
+                <button
+                  onClick={handleExportPDF}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: 'none',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  PDF
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Кнопка Настройки */}
           <button

@@ -532,22 +532,15 @@ export const exportToZIP = async (svgElement: SVGSVGElement | null, filename: st
                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         
         if (isIOS) {
-          // На iOS Safari не поддерживает скачивание ZIP через blob
-          // Скачиваем PNG напрямую через data URL
+          // На iOS эта функция не должна вызываться напрямую (используется меню)
+          // Но на всякий случай скачиваем PNG
           const pngDataUrl = canvas.toDataURL('image/png');
-          
-          // Создаем ссылку на PNG
           const link = document.createElement('a');
           link.href = pngDataUrl;
           link.download = 'stamp.png';
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          
-          // Показываем понятное сообщение
-          setTimeout(() => {
-            alert('PNG файл скачан!\n\nДля скачивания других форматов (PNG без фона, SVG, PDF) выберите их отдельно в меню "Скачать".');
-          }, 300);
         } else {
           const zipUrl = URL.createObjectURL(zipBlob);
           const link = document.createElement('a');
